@@ -50,7 +50,7 @@ Instruções para o modelo que for executar:
 
 ## Fase 1 — Coleta de notícias
 
-### [ ] T05 — Interface de collector + Google News RSS
+### [x] T05 — Interface de collector + Google News RSS
 - **Arquivos:** `src/flanews/collectors/base.py`, `src/flanews/collectors/google_news.py`, `tests/fixtures/google_news.xml`, `tests/test_google_news.py`
 - **O que fazer:**
   - `class Collector(Protocol): name: str; def collect(self, start, end) -> list[Article]`.
