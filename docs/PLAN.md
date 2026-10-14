@@ -250,3 +250,5 @@ Upload do HTML gerado como artifact do workflow (auditoria).
 | 2026-10-14 | Gemini Flash para sumarização | custo baixo, pt-BR bom |
 | 2026-10-14 | API-Football para estatísticas | cobre todas as competições do Flamengo |
 | 2026-10-14 | Resend para envio | API simples, free tier suficiente |
+| 2026-10-14 | Links do Google News decodificados via endpoint `batchexecute` (RPC `Fbv4je`) | os links `news.google.com/rss/articles/...` não redirecionam mais via HTTP; a página só traz a assinatura (`data-n-a-id/ts/sg`). Custa 2 requisições extras por artigo; em falha, mantém a URL original |
+| 2026-10-14 | `extract_content` sobrescreve `published_at` com `article:published_time`/`datePublished` da página quando tem fuso | `published_at` é obrigatório; ge e site oficial só conhecem a data (fixam 12:00) |

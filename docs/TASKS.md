@@ -75,7 +75,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** teste com fixture.
 - **Commit:** `feat: add official flamengo site collector`
 
-### [ ] T08 — Normalização, dedupe e extração de texto
+### [x] T08 — Normalização, dedupe e extração de texto
 - **Arquivos:** `src/flanews/processing/dedupe.py`, `src/flanews/processing/extract.py`, testes
 - **O que fazer:**
   - `normalize_url` (remove `utm_*`, `fbclid`, fragment; resolve redirect do Google News seguindo redirects com `httpx`, ou extrair do HTML se necessário).
