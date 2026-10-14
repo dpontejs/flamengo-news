@@ -40,7 +40,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** testes com `freezegun` para seg, sex, quarta e virada de mês.
 - **Commit:** `feat: add edition window resolution`
 
-### [ ] T04 — CI
+### [x] T04 — CI
 - **Arquivos:** `.github/workflows/ci.yml`
 - **O que fazer:** em push/PR: `astral-sh/setup-uv`, `uv sync`, `ruff check`, `ruff format --check`, `pytest`.
 - **Aceite:** YAML válido (`uv run python -c "import yaml"` não necessário; revisar manualmente).
