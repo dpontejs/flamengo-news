@@ -61,7 +61,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** teste retorna artigos esperados e filtra por data.
 - **Commit:** `feat: add google news rss collector`
 
-### [ ] T06 — Collector ge.globo
+### [x] T06 — Collector ge.globo
 - **Arquivos:** `src/flanews/collectors/ge.py`, `tests/fixtures/ge_flamengo.html`, `tests/test_ge.py`
 - **O que fazer:**
   - Baixar `https://ge.globo.com/futebol/times/flamengo/`, inspecionar HTML e extrair manchetes (título, URL, data). Se a data não estiver na listagem, aceitar o artigo e deixar o filtro de data para a etapa de extração (ou buscar `article:published_time` no `<meta>` da página).
