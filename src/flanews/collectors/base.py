@@ -34,10 +34,12 @@ def get_collectors(settings: Settings | None = None) -> list[Collector]:
     if settings is None:
         settings = get_settings()
 
+    from flanews.collectors.flamengo_oficial import FlamengoOficialCollector
     from flanews.collectors.ge import GECollector
     from flanews.collectors.google_news import GoogleNewsCollector
 
     return [
         GoogleNewsCollector(),
         GECollector(),
+        FlamengoOficialCollector(),
     ]

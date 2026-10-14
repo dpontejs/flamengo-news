@@ -69,7 +69,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** teste com fixture salva extrai ≥ 5 artigos com URL absoluta.
 - **Commit:** `feat: add ge globo collector`
 
-### [ ] T07 — Collector site oficial do Flamengo
+### [x] T07 — Collector site oficial do Flamengo
 - **Arquivos:** `src/flanews/collectors/flamengo_oficial.py`, fixture, teste
 - **O que fazer:** igual à T06 para `https://www.flamengo.com.br/noticias` (verificar URL atual).
 - **Aceite:** teste com fixture.
