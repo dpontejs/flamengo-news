@@ -30,7 +30,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** testes cobrindo leitura de env com `monkeypatch`.
 - **Commit:** `feat: add settings and core domain models`
 
-### [ ] T03 — Cálculo da edição (janela de datas)
+### [x] T03 — Cálculo da edição (janela de datas)
 - **Arquivos:** `src/flanews/edition.py`, `tests/test_edition.py`
 - **O que fazer:**
   - `resolve_edition(kind: Literal["monday","friday","auto"], now: datetime) -> Edition`.
