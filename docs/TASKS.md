@@ -22,7 +22,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** `uv run python -m flanews version` imprime a versão; `uv run pytest` passa; `uv run ruff check .` limpo.
 - **Commit:** `chore: scaffold python project with uv, ruff and pytest`
 
-### [ ] T02 — Config e modelos
+### [x] T02 — Config e modelos
 - **Arquivos:** `src/flanews/config.py`, `src/flanews/models.py`, `tests/test_config.py`
 - **O que fazer:**
   - `Settings(BaseSettings)` com todas as envs do PLAN §8; `get_settings()` com `lru_cache`. Chaves opcionais (`API_FOOTBALL_KEY`, `RESEND_API_KEY`) podem ser `None`.

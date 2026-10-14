@@ -1,0 +1,95 @@
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+class Article(BaseModel):
+    """Normalized article metadata and extracted content."""
+
+    url: str
+    title: str
+    source: str
+    published_at: datetime
+    summary_hint: str | None = None
+    content: str | None = None
+
+
+class Topic(BaseModel):
+    """Grouped news topic summarized by LLM."""
+
+    title: str
+    summary: str
+    articles: list[Article] = Field(default_factory=list)
+    importance: int = 1
+
+
+class MatchEvent(BaseModel):
+    """Event occurring during a match (goal, card, substitution)."""
+
+    minute: int
+    extra_minute: int | None = None
+    team: str
+    player: str
+    type: str
+    detail: str | None = None
+
+
+class MatchStats(BaseModel):
+    """Detailed statistics and info of a completed match."""
+
+    fixture_id: int
+    competition: str
+    date: datetime
+    home: str
+    away: str
+    home_goals: int
+    away_goals: int
+    venue: str | None = None
+    events: list[MatchEvent] = Field(default_factory=list)
+    statistics: dict[str, tuple[str, str]] = Field(default_factory=dict)
+    lineups: dict[str, list[str]] = Field(default_factory=dict)
+
+
+class NextMatch(BaseModel):
+    """Information about the upcoming match."""
+
+    opponent: str
+    competition: str
+    date: datetime
+    venue: str | None = None
+    is_home: bool = True
+
+
+class StandingRow(BaseModel):
+    """Single row in a league standing table."""
+
+    position: int
+    team: str
+    points: int
+    played: int
+    won: int
+    drawn: int
+    lost: int
+    goals_diff: int
+    is_flamengo: bool = False
+
+
+class Edition(BaseModel):
+    """Newsletter edition temporal window and description."""
+
+    kind: Literal["monday", "friday", "auto"]
+    start: datetime
+    end: datetime
+    label: str
+
+
+class Newsletter(BaseModel):
+    """Full newsletter content ready for rendering and dispatch."""
+
+    edition: Edition
+    intro: str
+    topics: list[Topic] = Field(default_factory=list)
+    last_match: MatchStats | None = None
+    next_match: NextMatch | None = None
+    standings: list[StandingRow] = Field(default_factory=list)
