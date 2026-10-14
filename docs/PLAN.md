@@ -74,12 +74,12 @@ Prioridade: **RSS primeiro, scraping só onde não há RSS**. Respeitar `robots.
 ```python
 @dataclass
 class Article:
-    url: str            # URL canônica final
+    url: str  # URL canônica final
     title: str
-    source: str         # "ge", "google_news", "flamengo_oficial"...
+    source: str  # "ge", "google_news", "flamengo_oficial"...
     published_at: datetime  # timezone-aware (America/Sao_Paulo)
     summary_hint: str | None = None  # descrição do RSS
-    content: str | None = None       # texto extraído
+    content: str | None = None  # texto extraído
 ```
 
 ### Dedupe

@@ -9,7 +9,7 @@ Instruções para o modelo que for executar:
 
 ## Fase 0 — Fundação
 
-### [ ] T01 — Scaffold do projeto
+### [x] T01 — Scaffold do projeto
 - **Arquivos:** `pyproject.toml`, `src/flanews/__init__.py`, `src/flanews/__main__.py`, `.gitignore`, `.env.example`, `README.md`, `tests/test_smoke.py`
 - **O que fazer:**
   - `uv init --package` (layout `src/`), Python 3.12, nome do pacote `flanews`.
