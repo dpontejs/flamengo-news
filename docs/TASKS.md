@@ -151,7 +151,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** teste com `Newsletter` fake gera HTML contendo placar, tópicos e links; snapshot simples opcional.
 - **Commit:** `feat: add newsletter html and text templates`
 
-### [ ] T15 — Comando `preview`
+### [x] T15 — Comando `preview`
 - **Arquivos:** `src/flanews/pipeline.py`, `src/flanews/__main__.py`
 - **O que fazer:** `build_newsletter(edition, settings) -> Newsletter` (coleta + stats + sumarização) e `preview` grava `out/preview-<data>.html` e `.txt`. Opção `--open` abre no navegador.
 - **Aceite:** gerar preview real e conferir visualmente.

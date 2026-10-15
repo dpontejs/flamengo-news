@@ -1,5 +1,7 @@
 import logging
+import webbrowser
 from datetime import datetime
+from pathlib import Path
 from typing import Annotated, Literal
 
 import typer
@@ -10,6 +12,7 @@ from flanews import __version__, pipeline
 from flanews.config import get_settings
 from flanews.edition import resolve_edition
 from flanews.models import Edition
+from flanews.render.renderer import render
 from flanews.stats.espn import ESPNStatsClient
 from flanews.stats.table import standings_window
 
@@ -108,6 +111,33 @@ def stats(
             values = (r.position, r.team, r.points, r.played, r.won, r.drawn, r.lost, r.goals_diff)
             table.add_row(*map(str, values), style=style)
         console.print(table)
+
+
+@app.command()
+def preview(
+    edition: EditionOption = "auto",
+    date: DateOption = None,
+    out: Annotated[
+        Path | None, typer.Option(help="HTML output path (default: out/preview-<date>.html)")
+    ] = None,
+    open_browser: Annotated[
+        bool, typer.Option("--open", help="Open the HTML in the browser")
+    ] = False,
+) -> None:
+    """Build the full newsletter without sending it and save HTML and text."""
+    _setup_logging()
+    resolved = _resolve(edition, date)
+    settings = get_settings()
+    newsletter = pipeline.build_newsletter(resolved, settings)
+    html, text = render(newsletter, unsubscribe_url=pipeline.unsubscribe_url(settings))
+
+    html_path = out or Path("out") / f"preview-{resolved.end:%Y-%m-%d}.html"
+    html_path.parent.mkdir(parents=True, exist_ok=True)
+    html_path.write_text(html, encoding="utf-8")
+    html_path.with_suffix(".txt").write_text(text, encoding="utf-8")
+    typer.echo(f"Preview saved to {html_path} and {html_path.with_suffix('.txt')}")
+    if open_browser:
+        webbrowser.open(html_path.resolve().as_uri())
 
 
 def _setup_logging() -> None:

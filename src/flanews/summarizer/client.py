@@ -1,11 +1,14 @@
 import logging
+import re
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 
 import httpx
 from google import genai
 from google.genai import errors, types
 from pydantic import BaseModel, ValidationError
 from tenacity import (
+    RetryCallState,
     RetryError,
     Retrying,
     retry_if_exception,
@@ -20,6 +23,8 @@ logger = logging.getLogger(__name__)
 
 MAX_ATTEMPTS = 3
 TIMEOUT_MS = 60_000
+MAX_RETRY_DELAY = 60.0
+_backoff = wait_exponential(multiplier=5, max=MAX_RETRY_DELAY)
 
 
 class LLMError(Exception):
@@ -36,10 +41,32 @@ class LLMClient(ABC):
 
 def _is_retryable(error: BaseException) -> bool:
     if isinstance(error, errors.ClientError):
-        return error.code == 429
+        # A 429 asking to wait longer than we are willing to (e.g. daily quota) is final.
+        delay = retry_delay(error)
+        return error.code == 429 and (delay is None or delay <= MAX_RETRY_DELAY)
     return isinstance(
         error, errors.ServerError | ValidationError | httpx.TransportError | ValueError
     )
+
+
+def retry_delay(error: BaseException | None) -> float | None:
+    """Seconds the API asked us to wait (RetryInfo on 429 errors), if any."""
+    if not isinstance(error, errors.APIError) or not isinstance(error.details, dict):
+        return None
+    details = error.details.get("error", {}).get("details", [])
+    for detail in details:
+        if detail.get("@type", "").endswith("RetryInfo"):
+            match = re.fullmatch(r"([\d.]+)s", str(detail.get("retryDelay", "")))
+            if match:
+                return float(match.group(1))
+    return None
+
+
+def _default_wait(state: RetryCallState) -> float:
+    requested = retry_delay(state.outcome.exception() if state.outcome else None)
+    if requested is not None:
+        return min(requested + 1, MAX_RETRY_DELAY)
+    return _backoff(state)
 
 
 class GeminiClient(LLMClient):
@@ -49,13 +76,13 @@ class GeminiClient(LLMClient):
         self,
         api_key: str,
         model: str,
-        wait: wait_base | None = None,
+        wait: wait_base | Callable[[RetryCallState], float] | None = None,
     ) -> None:
         self.model = model
         self._client = genai.Client(
             api_key=api_key, http_options=types.HttpOptions(timeout=TIMEOUT_MS)
         )
-        self._wait = wait or wait_exponential(multiplier=2, max=30)
+        self._wait = wait or _default_wait
 
     def generate_json[T: BaseModel](self, prompt: str, schema: type[T]) -> T:
         retrying = Retrying(

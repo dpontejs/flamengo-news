@@ -1,12 +1,18 @@
 import logging
+from collections.abc import Callable
+from email.utils import parseaddr
+from typing import Protocol
 
 import httpx
 
 from flanews.collectors.base import Collector, create_http_client, get_collectors
-from flanews.config import Settings
-from flanews.models import Article, Edition
+from flanews.config import Settings, get_settings
+from flanews.models import Article, Edition, MatchStats, Newsletter, NextMatch, StandingRow
 from flanews.processing.dedupe import dedupe, is_relevant
 from flanews.processing.extract import DomainRateLimiter, extract_articles
+from flanews.stats.espn import ESPNStatsClient
+from flanews.summarizer.client import LLMClient, LLMError, get_llm_client
+from flanews.summarizer.pipeline import EditionSummary, summarize_edition
 
 logger = logging.getLogger(__name__)
 
@@ -51,3 +57,57 @@ def collect_articles(
     ]
     logger.info("Collected %d articles (%d before filtering)", len(result), len(collected))
     return sorted(result, key=lambda a: a.published_at, reverse=True)
+
+
+class StatsClient(Protocol):
+    def get_last_match(self, start, end) -> MatchStats | None: ...
+    def get_next_match(self, now) -> NextMatch | None: ...
+    def get_standings(self, league: str = "bra.1") -> list[StandingRow]: ...
+
+
+def build_newsletter(
+    edition: Edition,
+    settings: Settings | None = None,
+    collect: Callable[[Edition, Settings], list[Article]] | None = None,
+    stats_client: StatsClient | None = None,
+    llm: LLMClient | None = None,
+) -> Newsletter:
+    """Collect news and stats for the edition and summarize them into a Newsletter.
+
+    Stats failures already degrade to None/[]; an LLM failure is logged and the
+    newsletter keeps the stats sections without news topics.
+    """
+    settings = settings or get_settings()
+    collect = collect or collect_articles
+    stats_client = stats_client or ESPNStatsClient(
+        team_id=settings.FLAMENGO_TEAM_ID, tz_name=settings.TIMEZONE
+    )
+
+    articles = collect(edition, settings)
+    last_match = stats_client.get_last_match(edition.start, edition.end)
+    next_match = stats_client.get_next_match(edition.end)
+    standings = stats_client.get_standings("bra.1")
+
+    try:
+        summary = summarize_edition(
+            articles, llm or get_llm_client(settings), last_match=last_match, label=edition.label
+        )
+    except LLMError as e:
+        logger.error("Summarization failed, sending stats only: %s", e)
+        summary = EditionSummary()
+
+    return Newsletter(
+        edition=edition,
+        headline=summary.headline,
+        intro=summary.intro,
+        topics=summary.topics,
+        last_match=last_match,
+        next_match=next_match,
+        standings=standings,
+    )
+
+
+def unsubscribe_url(settings: Settings) -> str:
+    """mailto: link to the sender address, used in the footer and List-Unsubscribe."""
+    _, address = parseaddr(settings.NEWSLETTER_FROM)
+    return f"mailto:{address}?subject=Descadastrar"

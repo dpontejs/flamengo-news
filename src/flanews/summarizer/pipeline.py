@@ -32,8 +32,13 @@ class GroupResponse(BaseModel):
     topics: list[GroupedTopic]
 
 
-class SummaryResponse(BaseModel):
+class TopicSummary(BaseModel):
+    topic_id: int
     summary: str
+
+
+class SummaryResponse(BaseModel):
+    summaries: list[TopicSummary]
 
 
 class IntroResponse(BaseModel):
@@ -88,12 +93,24 @@ def group_articles(articles: list[Article], llm: LLMClient) -> list[Topic]:
     return topics[:MAX_TOPICS]
 
 
-def summarize_topic(topic: Topic, llm: LLMClient) -> Topic:
+def summarize_topics(topics: list[Topic], llm: LLMClient) -> list[Topic]:
+    """Summarize all topics in a single call (keeps the edition within free-tier quotas).
+
+    `topic_id` is the 1-based topic position; a topic the model skips keeps an empty
+    summary, and unknown ids are ignored.
+    """
     prompt = render_prompt(
-        "summarize", title=topic.title, articles=topic.articles[:MAX_ARTICLES_PER_TOPIC]
+        "summarize",
+        topics=[
+            t.model_copy(update={"articles": t.articles[:MAX_ARTICLES_PER_TOPIC]}) for t in topics
+        ],
     )
     response = llm.generate_json(prompt, SummaryResponse)
-    return topic.model_copy(update={"summary": response.summary.strip()})
+    by_id = {s.topic_id: s.summary.strip() for s in response.summaries}
+    missing = [t.title for i, t in enumerate(topics, 1) if i not in by_id]
+    if missing:
+        logger.warning("No summary returned for topics: %s", missing)
+    return [t.model_copy(update={"summary": by_id.get(i, "")}) for i, t in enumerate(topics, 1)]
 
 
 def write_intro(
@@ -109,20 +126,26 @@ def summarize_edition(
     last_match: MatchStats | None = None,
     label: str = "",
 ) -> EditionSummary:
-    """Group articles into topics, summarize each one and write the opening.
+    """Group articles into topics, summarize them and write the opening (3 LLM calls).
 
-    A topic whose summary fails is skipped; a grouping failure propagates.
+    A grouping failure propagates; if the summaries or the opening fail, the topics
+    are kept and the missing text stays empty.
     """
     topics: list[Topic] = []
     if articles:
-        for topic in group_articles(articles, llm):
+        topics = group_articles(articles, llm)
+        if topics:
             try:
-                topics.append(summarize_topic(topic, llm))
+                topics = summarize_topics(topics, llm)
             except LLMError as e:
-                logger.warning("Skipping topic %r: %s", topic.title, e)
+                logger.error("Topic summaries failed, keeping titles and sources: %s", e)
 
     if not topics and last_match is None:
         return EditionSummary()
 
-    intro = write_intro(topics, last_match, llm, label)
+    try:
+        intro = write_intro(topics, last_match, llm, label)
+    except LLMError as e:
+        logger.error("Opening failed: %s", e)
+        return EditionSummary(topics=topics)
     return EditionSummary(headline=intro.headline.strip(), intro=intro.intro.strip(), topics=topics)

@@ -4,11 +4,12 @@ import httpx
 import pytest
 import respx
 from fakes import FakeLLMClient
+from google.genai import errors
 from pydantic import BaseModel
 from tenacity import wait_none
 
 from flanews.config import Settings
-from flanews.summarizer.client import GeminiClient, LLMError, get_llm_client
+from flanews.summarizer.client import GeminiClient, LLMError, get_llm_client, retry_delay
 
 GENERATE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-test:generateContent"
 
@@ -105,3 +106,40 @@ def test_fake_llm_client_records_prompts() -> None:
 
     assert result == Headline(title="OI", importance=1)
     assert fake.prompts == ["oi"]
+
+
+def quota_error(details: list[dict]) -> errors.ClientError:
+    body = {"error": {"code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED"}}
+    body["error"]["details"] = details
+    return errors.ClientError(429, body)
+
+
+def test_retry_delay_reads_retry_info_from_quota_error() -> None:
+    error = quota_error(
+        [{"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "28s"}]
+    )
+    assert retry_delay(error) == 28.0
+
+
+def test_retry_delay_is_none_without_retry_info() -> None:
+    assert retry_delay(quota_error([])) is None
+    assert retry_delay(ValueError("x")) is None
+
+
+@respx.mock
+def test_generate_json_does_not_retry_daily_quota_errors() -> None:
+    body = {
+        "error": {
+            "code": 429,
+            "message": "quota",
+            "status": "RESOURCE_EXHAUSTED",
+            "details": [
+                {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "83820s"}
+            ],
+        }
+    }
+    route = respx.post(GENERATE_URL).mock(return_value=httpx.Response(429, json=body))
+
+    with pytest.raises(LLMError):
+        make_client().generate_json("Resuma", Headline)
+    assert route.call_count == 1

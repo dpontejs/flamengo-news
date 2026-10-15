@@ -41,19 +41,28 @@ LAST_MATCH = MatchStats(
 )
 
 
-def responder(group: dict, fail_summary_for: str | None = None):
+def responder(group: dict, summary_ids: list[int] | None = None, fail: set[type] = frozenset()):
     def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema in fail:
+            raise LLMError("boom")
         if schema is GroupResponse:
             return group
         if schema is SummaryResponse:
-            if fail_summary_for and fail_summary_for in prompt:
-                raise LLMError("boom")
-            return {"summary": "Resumo do tópico."}
+            ids = summary_ids if summary_ids is not None else range(1, MAX_TOPICS + 1)
+            return {"summaries": [{"topic_id": i, "summary": f"Resumo {i}."} for i in ids]}
         if schema is IntroResponse:
             return {"headline": "Flamengo vence o Fla-Flu", "intro": "Semana boa. Líder."}
         raise AssertionError(schema)
 
     return respond
+
+
+TWO_TOPICS = {
+    "topics": [
+        {"title": "Vitória no clássico", "article_ids": [1, 2], "importance": 5},
+        {"title": "Bastidores", "article_ids": [3], "importance": 2},
+    ]
+}
 
 
 def test_summarize_edition_builds_topics_ordered_by_importance() -> None:
@@ -73,7 +82,8 @@ def test_summarize_edition_builds_topics_ordered_by_importance() -> None:
     assert [t.title for t in result.topics] == ["Vitória no clássico", "Bastidores"]
     first = result.topics[0]
     assert isinstance(first, Topic)
-    assert first.summary == "Resumo do tópico."
+    assert first.summary == "Resumo 1."
+    assert result.topics[1].summary == "Resumo 2."
     assert first.importance == 5
     assert [a.url for a in first.articles] == ["https://ge.globo.com/1", "https://ge.globo.com/2"]
     assert result.headline == "Flamengo vence o Fla-Flu"
@@ -111,22 +121,45 @@ def test_summarize_edition_limits_topics_and_clamps_importance() -> None:
     assert result.topics[0].importance == 5
 
 
-def test_summarize_edition_skips_topic_whose_summary_fails() -> None:
-    llm = FakeLLMClient(
-        responder(
-            {
-                "topics": [
-                    {"title": "Quebra", "article_ids": [1], "importance": 5},
-                    {"title": "Funciona", "article_ids": [2], "importance": 4},
-                ]
-            },
-            fail_summary_for="Quebra",
-        )
-    )
+def test_summaries_are_generated_in_a_single_batch_call() -> None:
+    llm = FakeLLMClient(responder(TWO_TOPICS))
+
+    summarize_edition(ARTICLES, llm)
+
+    assert len(llm.prompts) == 3  # group + batch summary + intro
+    summary_prompt = llm.prompts[1]
+    assert "[T1] Vitória no clássico" in summary_prompt
+    assert "[T2] Bastidores" in summary_prompt
+
+
+def test_topic_missing_from_batch_keeps_empty_summary() -> None:
+    llm = FakeLLMClient(responder(TWO_TOPICS, summary_ids=[2, 99]))
 
     result = summarize_edition(ARTICLES, llm)
 
-    assert [t.title for t in result.topics] == ["Funciona"]
+    assert [(t.title, t.summary) for t in result.topics] == [
+        ("Vitória no clássico", ""),
+        ("Bastidores", "Resumo 2."),
+    ]
+
+
+def test_batch_summary_failure_keeps_topics() -> None:
+    llm = FakeLLMClient(responder(TWO_TOPICS, fail={SummaryResponse}))
+
+    result = summarize_edition(ARTICLES, llm)
+
+    assert [t.title for t in result.topics] == ["Vitória no clássico", "Bastidores"]
+    assert all(t.summary == "" for t in result.topics)
+    assert result.headline == "Flamengo vence o Fla-Flu"
+
+
+def test_intro_failure_keeps_topics() -> None:
+    llm = FakeLLMClient(responder(TWO_TOPICS, fail={IntroResponse}))
+
+    result = summarize_edition(ARTICLES, llm, last_match=LAST_MATCH)
+
+    assert [t.summary for t in result.topics] == ["Resumo 1.", "Resumo 2."]
+    assert (result.headline, result.intro) == ("", "")
 
 
 def test_prompts_include_article_data_in_portuguese() -> None:
