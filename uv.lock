@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -500,6 +500,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "python-dateutil" },
     { name = "rapidfuzz" },
+    { name = "rich" },
     { name = "selectolax" },
     { name = "tenacity" },
     { name = "trafilatura" },
@@ -525,6 +526,7 @@ requires-dist = [
     { name = "pydantic-settings" },
     { name = "python-dateutil" },
     { name = "rapidfuzz" },
+    { name = "rich", specifier = ">=15.0.0" },
     { name = "selectolax" },
     { name = "tenacity" },
     { name = "trafilatura" },

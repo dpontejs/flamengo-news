@@ -86,7 +86,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** testes unitários para normalize/dedupe/filtro; extract testado com HTML fixture.
 - **Commit:** `feat: add article normalization, dedupe and content extraction`
 
-### [ ] T09 — Comando `collect`
+### [x] T09 — Comando `collect`
 - **Arquivos:** `src/flanews/__main__.py`, `src/flanews/pipeline.py`
 - **O que fazer:** `collect_articles(edition, settings)` roda todos os collectors (erro em um não derruba os outros), dedupe, extract. Comando `collect` imprime tabela (fonte, data, título).
 - **Aceite:** `uv run python -m flanews collect --edition monday` funciona com rede real (teste manual) e há teste do orquestrador com collectors fake.
