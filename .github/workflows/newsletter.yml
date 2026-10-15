@@ -1,0 +1,72 @@
+name: Newsletter
+
+on:
+  schedule:
+    - cron: "0 11 * * 1" # segunda 08:00 BRT
+    - cron: "0 11 * * 5" # sexta 08:00 BRT
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: "Edição"
+        type: choice
+        options: [auto, monday, friday]
+        default: auto
+      date:
+        description: "Data de referência (AAAA-MM-DD, opcional)"
+        type: string
+        required: false
+      dry_run:
+        description: "Só simular (não envia e-mail)"
+        type: boolean
+        default: true
+
+# Never let two runs send the same edition in parallel.
+concurrency:
+  group: newsletter
+  cancel-in-progress: false
+
+jobs:
+  send:
+    name: Build and send newsletter
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Build and send
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-flash-latest' }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NEWSLETTER_FROM: ${{ secrets.NEWSLETTER_FROM }}
+          NEWSLETTER_RECIPIENTS: ${{ secrets.NEWSLETTER_RECIPIENTS }}
+          # Scheduled runs send for real; manual runs default to a dry run.
+          DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || (inputs.dry_run && 'true' || 'false') }}
+          EDITION: ${{ inputs.edition || 'auto' }}
+          REFERENCE_DATE: ${{ inputs.date }}
+        run: |
+          args=(--edition "$EDITION")
+          if [ -n "$REFERENCE_DATE" ]; then args+=(--date "$REFERENCE_DATE"); fi
+          echo "DRY_RUN=$DRY_RUN edition=$EDITION date=${REFERENCE_DATE:-hoje}"
+          uv run python -m flanews run "${args[@]}"
+
+      - name: Upload rendered newsletter
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newsletter-${{ github.run_id }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 30

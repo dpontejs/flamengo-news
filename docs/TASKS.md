@@ -197,7 +197,7 @@ Instruções para o modelo que for executar:
 
 ## Fase 5 — Produção
 
-### [ ] T18 — Workflow agendado
+### [x] T18 — Workflow agendado
 - **Arquivos:** `.github/workflows/newsletter.yml`
 - **O que fazer:** cron do PLAN §10 + `workflow_dispatch` com input `edition`; secrets `GEMINI_API_KEY`, `RESEND_API_KEY`, `NEWSLETTER_FROM`, `NEWSLETTER_RECIPIENTS`; `DRY_RUN=false`; upload de `out/` como artifact.
 - **Aceite:** rodar manualmente via `workflow_dispatch` com dry-run primeiro.
