@@ -9,7 +9,7 @@ from flanews.models import MatchEvent, Newsletter, StandingRow
 from flanews.stats.table import standings_window
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
-DEFAULT_LOGO_URL = "https://flamengo.diegoponte.dev/static/logo-email.png"
+DEFAULT_LOGO_URL = "https://urubunews.diegoponte.dev/static/logo-email.png"
 WEEKDAYS = ("segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo")
 SOURCE_LABELS = {
     "ge": "ge",

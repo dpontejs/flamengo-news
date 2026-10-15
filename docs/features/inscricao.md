@@ -19,7 +19,7 @@ GitHub.
 ## Contratos
 
 App FastAPI em `flanews.web` (`uvicorn flanews.web.app:create_app --factory`), atrás do Caddy em
-`https://flamengo.diegoponte.dev` (`PUBLIC_URL`).
+`https://urubunews.diegoponte.dev` (`PUBLIC_URL`; antes `flamengo.diegoponte.dev`, que segue atendendo os links antigos).
 
 ```python
 GET  /                     -> landing page com o formulário

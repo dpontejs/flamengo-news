@@ -11,7 +11,9 @@ não parecer canal oficial do clube. O conteúdo continua sendo o Flamengo.
 
 ## Fora de escopo
 
-- Domínio, página (`flamengo.diegoponte.dev`) e remetente (`news@diegoponte.dev`) continuam iguais.
+- Remetente (`news@diegoponte.dev`) continua igual. O domínio mudou depois, em 2026-10-15: a página
+  vive em `urubunews.diegoponte.dev`; `flamengo.diegoponte.dev` só redireciona a página inicial e
+  segue atendendo os links (descadastro, confirmação, logo) dos e-mails já enviados.
 - Renomear repositório, pacote `flanews`, imagem Docker e stack do `infra`.
 - Escudos dos times no placar e na página de exemplo: são dado da partida, ficam.
 
@@ -23,7 +25,8 @@ não parecer canal oficial do clube. O conteúdo continua sendo o Flamengo.
   cinza `#6B6B6B`. Fonte de títulos na página: Oswald (Google Fonts); e-mail usa a fonte do sistema.
 - Arquivos em `src/flanews/web/static/`, servidos em `{PUBLIC_URL}/static/`:
   - `logo-email.png` (640×255, exibida a 320×127, sobre o papel; por isso o cabeçalho é claro);
-  - `icon-512.png` (ícone sozinho, transparente fora do círculo: favicon, `og:image`, avatar do Gmail).
+  - `icon-512.png` (ícone sozinho, transparente fora do círculo: favicon, avatar do Gmail);
+  - `og-image.png` (1200×630, prévia de link no LinkedIn/WhatsApp, `twitter:card=summary_large_image`).
   - Originais (Nano Banana) recortados e com paleta reduzida (31 KB e 17 KB).
 - `render(..., logo_url=...)`: o cabeçalho da newsletter usa `<img src=logo_url alt="Urubu News">`.
 - Rodapé da newsletter e da página: "Feito por um torcedor, sem ligação oficial com o clube."

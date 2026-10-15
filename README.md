@@ -9,7 +9,7 @@ Newsletter automática sobre o Flamengo (feita por um torcedor, sem ligação of
   pela IA só quando há algo relevante.
 - **Próximo jogo** e **classificação**.
 
-Quem quiser receber se inscreve em **[flamengo.diegoponte.dev](https://flamengo.diegoponte.dev)**,
+Quem quiser receber se inscreve em **[urubunews.diegoponte.dev](https://urubunews.diegoponte.dev)**,
 confirma pelo e-mail e sai com um clique.
 
 Arquitetura e decisões: [`docs/PLAN.md`](docs/PLAN.md). Backlog: [`docs/TASKS.md`](docs/TASKS.md).
@@ -50,7 +50,7 @@ cp .env.example .env   # depois preencha as chaves (veja abaixo)
 | `NEWSLETTER_FROM` | para enviar | ex.: `"Flamengo News <news@seudominio.com>"` |
 | `NEWSLETTER_RECIPIENTS` | para enviar | lista fixa, separada por vírgula (recebe sempre, mesmo com a página fora do ar) |
 | `SUBSCRIBERS_API_TOKEN` | não | liga a página de inscrição: o envio busca os inscritos na API e o rodapé ganha o link |
-| `PUBLIC_URL` | não | endereço da página de inscrição (padrão `https://flamengo.diegoponte.dev`) |
+| `PUBLIC_URL` | não | endereço da página de inscrição (padrão `https://urubunews.diegoponte.dev`) |
 | `SUBSCRIBE_SECRET` | só na VPS | assina os links de confirmação e descadastro |
 | `SUBSCRIBERS_DB` | só na VPS | caminho do SQLite (padrão `data/subscribers.db`) |
 | `DRY_RUN` | não | padrão `true`: monta tudo mas não envia |
