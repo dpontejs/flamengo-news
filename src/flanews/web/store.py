@@ -88,6 +88,12 @@ class SubscriberStore:
         )
         return RequestResult.SEND_CONFIRMATION
 
+    def forget_confirmation(self, email: str) -> None:
+        """Lift the cooldown after a confirmation e-mail failed to go out."""
+        self._run(
+            "UPDATE subscribers SET confirmation_sent_at = NULL WHERE email = ?", normalize(email)
+        )
+
     def confirm(self, email: str, now: datetime) -> bool:
         """Activate a pending sign-up. An unsubscribed address needs a new sign-up first."""
         email = normalize(email)

@@ -215,7 +215,7 @@ Instruções para o modelo que for executar:
 - **O que fazer:** `flanews.web.store` (SQLite: pending/active/unsubscribed) e `flanews.web.tokens` (HMAC para confirmar e descadastrar). Ver `docs/features/inscricao.md`.
 - **Commit:** `feat: add subscriber store and signed tokens`
 
-### [ ] T22 — App de inscrição
+### [x] T22 — App de inscrição
 - **O que fazer:** FastAPI com landing page, `/subscribe`, `/confirm`, `/unsubscribe` (com one-click), `/api/subscribers` e `/health`; e-mail de confirmação pela Resend; honeypot e limite por IP.
 - **Commit:** `feat: add subscription web app`
 

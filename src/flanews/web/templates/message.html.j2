@@ -1,0 +1,15 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ title }} · Flamengo News{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{{ title }}</h1>
+  <p class="lead">{{ text }}</p>
+  {% if unsubscribe_token %}
+  <form method="post" action="/unsubscribe?token={{ unsubscribe_token | urlencode }}">
+    <button type="submit" class="secondary">Sim, quero sair</button>
+  </form>
+  {% else %}
+  <p><a href="/">Voltar para a página inicial</a></p>
+  {% endif %}
+</section>
+{% endblock %}

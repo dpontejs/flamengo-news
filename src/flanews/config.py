@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     NEWSLETTER_RECIPIENTS: str | list[str] = ["voce@email.com"]
     TIMEZONE: str = "America/Sao_Paulo"
     DRY_RUN: bool = True
+    # Subscription page (flanews.web), served on the VPS.
+    PUBLIC_URL: str = "https://flamengo.diegoponte.dev"
+    SUBSCRIBE_SECRET: str | None = None  # signs confirmation and unsubscribe links
+    SUBSCRIBERS_API_TOKEN: str | None = None  # protects /api/subscribers (and enables it in run)
+    SUBSCRIBERS_DB: str = "data/subscribers.db"
 
     @field_validator("NEWSLETTER_RECIPIENTS")
     @classmethod

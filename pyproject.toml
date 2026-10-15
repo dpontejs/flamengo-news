@@ -5,6 +5,7 @@ description = "Newsletter com notícias e estatísticas do Flamengo"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.143.2",
     "feedparser",
     "google-genai",
     "httpx",
@@ -13,12 +14,14 @@ dependencies = [
     "pydantic",
     "pydantic-settings",
     "python-dateutil",
+    "python-multipart>=0.0.32",
     "rapidfuzz",
     "rich>=15.0.0",
     "selectolax",
     "tenacity",
     "trafilatura",
     "typer",
+    "uvicorn>=0.54.0",
 ]
 
 [dependency-groups]

@@ -1,0 +1,39 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<section class="card">
+  <h1>As notícias do Mengão na sua caixa de entrada</h1>
+  <p class="lead">Toda segunda e sexta, às 8h, um resumo do que rolou no Flamengo: as notícias
+  da semana sem repetição, a análise do último jogo, o próximo compromisso e a tabela.</p>
+
+  <form class="signup" method="post" action="/subscribe">
+    <label class="hp" aria-hidden="true">Não preencha<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+    <input type="email" name="email" required placeholder="seu@email.com" aria-label="Seu e-mail" autocomplete="email" value="{{ email or '' }}">
+    <button type="submit">Quero receber</button>
+  </form>
+  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+  <p class="muted">Grátis. Você confirma pelo e-mail e sai com um clique quando quiser.</p>
+</section>
+
+<section class="card">
+  <h2>O que vem em cada edição</h2>
+  <div class="grid">
+    <div class="item"><strong>Notícias resumidas</strong><p>O que saiu no ge, no site do clube e em outros portais, agrupado por assunto e resumido.</p></div>
+    <div class="item"><strong>Última partida</strong><p>Placar, gols, estatísticas e uma análise: forma recente, campanha e destaques.</p></div>
+    <div class="item"><strong>Próximo jogo e tabela</strong><p>Adversário, data, local e a classificação do Brasileirão.</p></div>
+    <div class="item"><strong>Saiba mais e Brasil afora</strong><p>Basquete, vôlei e futebol feminino do Fla, e o principal do futebol brasileiro.</p></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Última partida, do jeito que chega no e-mail</h2>
+  <div class="scoreboard" role="img" aria-label="Exemplo: Flamengo 1 a 0 Fluminense">
+    <div class="teams">
+      <div class="team"><img src="https://a.espncdn.com/i/teamlogos/soccer/500/819.png" alt="" width="56" height="56"><div>Flamengo</div></div>
+      <div class="score">1<span class="x">x</span>0</div>
+      <div class="team"><img src="https://a.espncdn.com/i/teamlogos/soccer/500/3445.png" alt="" width="56" height="56"><div>Fluminense</div></div>
+    </div>
+    <div class="match-info">Brasileirão · domingo, 11/10 às 17:30 · Maracanã</div>
+  </div>
+  <p class="muted sample-caption">Exemplo da edição de 12/10/2026.</p>
+</section>
+{% endblock %}
