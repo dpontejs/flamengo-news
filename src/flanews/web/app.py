@@ -31,7 +31,11 @@ logger = logging.getLogger(__name__)
 CONFIRM_MAX_AGE = timedelta(days=7)
 SIGNUPS_PER_IP = 5
 SIGNUP_WINDOW = timedelta(hours=1)
-EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+# Deliberately strict: letters, digits and the usual symbols; dot-separated domain labels.
+EMAIL_RE = re.compile(
+    r"^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$"
+)
+CONFIRMATIONS_PER_DAY = 30  # global cap: protects the Resend quota and the domain reputation
 MAX_EMAIL_LENGTH = 254
 
 WELCOME_PREFIX = "Boas-vindas! "
@@ -133,6 +137,15 @@ def create_app(
                 status=429,
             )
 
+        store.purge(now())
+        if store.confirmations_sent_since(now() - timedelta(days=1)) >= CONFIRMATIONS_PER_DAY:
+            logger.warning("Daily cap of %d confirmation e-mails reached", CONFIRMATIONS_PER_DAY)
+            return message(
+                request,
+                "Muitas inscrições hoje",
+                "Recebemos inscrições demais nas últimas horas. Tente de novo amanhã.",
+                status=429,
+            )
         if store.request(email, now()) is RequestResult.SEND_CONFIRMATION:
             try:
                 mailer.send_confirmation(email, link("/confirm", "confirm", email))

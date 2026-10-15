@@ -94,3 +94,31 @@ def test_publishing_an_edition_replaces_the_previous_one(tmp_path) -> None:
     edition = SubscriberStore(tmp_path / "subscribers.db").latest_edition()
 
     assert (edition.subject, edition.html, edition.text) == ("Nova", "<p>n</p>", "n")
+
+
+def test_confirmations_sent_since_counts_recent_requests(store: SubscriberStore) -> None:
+    store.request("old@example.com", NOW - timedelta(days=2))
+    store.request("a@example.com", NOW - timedelta(hours=3))
+    store.request("b@example.com", NOW)
+
+    assert store.confirmations_sent_since(NOW - timedelta(days=1)) == 2
+
+
+def test_purge_removes_stale_pending_and_old_unsubscribed(store: SubscriberStore) -> None:
+    old = NOW - timedelta(days=31)
+    store.request("stale@example.com", old)
+    store.request("gone@example.com", old)
+    store.confirm("gone@example.com", old)
+    store.unsubscribe("gone@example.com", old)
+    store.request("recent-out@example.com", NOW)
+    store.confirm("recent-out@example.com", NOW)
+    store.unsubscribe("recent-out@example.com", NOW)
+    store.request("fan@example.com", old)
+    store.confirm("fan@example.com", old)
+
+    removed = store.purge(NOW)
+
+    assert removed == 2
+    assert store.get("stale@example.com") is None and store.get("gone@example.com") is None
+    assert store.get("recent-out@example.com").status == "unsubscribed"
+    assert store.active() == ["fan@example.com"]

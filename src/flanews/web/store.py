@@ -8,6 +8,8 @@ from enum import Enum
 from pathlib import Path
 
 CONFIRMATION_COOLDOWN = timedelta(minutes=10)
+# Data minimization: unconfirmed sign-ups and unsubscribed addresses are deleted after this.
+RETENTION = timedelta(days=30)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS subscribers (
@@ -150,3 +152,22 @@ class SubscriberStore:
     def latest_edition(self) -> Edition | None:
         rows = self._run("SELECT subject, html, text FROM editions WHERE id = 1")
         return Edition(*rows[0]) if rows else None
+
+    def confirmations_sent_since(self, since: datetime) -> int:
+        rows = self._run(
+            "SELECT COUNT(*) FROM subscribers WHERE confirmation_sent_at >= ?", since.isoformat()
+        )
+        return rows[0][0]
+
+    def purge(self, now: datetime) -> int:
+        """Delete stale pending sign-ups and old unsubscribes; returns how many were removed."""
+        cutoff = (now - RETENTION).isoformat()
+        rows = self._run(
+            "DELETE FROM subscribers WHERE"
+            " (status = 'pending' AND COALESCE(confirmation_sent_at, created_at) < ?)"
+            " OR (status = 'unsubscribed' AND unsubscribed_at < ?)"
+            " RETURNING email",
+            cutoff,
+            cutoff,
+        )
+        return len(rows)

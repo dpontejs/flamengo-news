@@ -36,3 +36,7 @@ def test_settings_custom_env(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.DRY_RUN is False
 
     get_settings.cache_clear()
+
+
+def test_public_url_defaults_to_the_urubu_news_domain() -> None:
+    assert Settings().PUBLIC_URL == "https://urubunews.diegoponte.dev"

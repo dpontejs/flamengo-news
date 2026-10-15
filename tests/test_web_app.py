@@ -117,7 +117,21 @@ def test_subscribe_honeypot_sends_nothing(client, store, mailer) -> None:
     assert mailer.sent == []
 
 
-@pytest.mark.parametrize("email", ["", "ana", "ana@", "@example.com", "a b@example.com"])
+@pytest.mark.parametrize(
+    "email",
+    [
+        "",
+        "ana",
+        "ana@",
+        "@example.com",
+        "a b@example.com",
+        "<script>alert(1)</script>@x.com",
+        "ana@example",
+        "ana@exa_mple.com",
+        "ana@@example.com",
+        "ana@example..com",
+    ],
+)
 def test_subscribe_invalid_email_sends_nothing(client, store, mailer, email) -> None:
     response = subscribe(client, email)
 
@@ -378,7 +392,7 @@ def test_edition_failure_keeps_the_subscription(client, store, mailer) -> None:
     assert store.active() == ["ana@example.com"]
 
 
-@pytest.mark.parametrize("name", ["logo-email.png", "icon-512.png"])
+@pytest.mark.parametrize("name", ["logo-email.png", "icon-512.png", "og-image.png"])
 def test_static_logo_files_are_served(client, name) -> None:
     response = client.get(f"/static/{name}")
 
@@ -391,9 +405,41 @@ def test_page_uses_the_brand_not_the_crest(client) -> None:
     html = client.get("/").text
 
     assert "<title>Urubu News</title>" in html
-    assert '<meta property="og:image" content="https://news.test/static/icon-512.png">' in html
+    assert '<meta property="og:image" content="https://news.test/static/og-image.png">' in html
+    assert '<meta property="og:image:width" content="1200">' in html
+    assert '<meta property="og:image:height" content="630">' in html
+    assert '<meta property="og:site_name" content="Urubu News">' in html
+    assert '<meta name="twitter:card" content="summary_large_image">' in html
     assert 'rel="icon" href="/static/icon-512.png"' in html
     assert "URUBU" in html and "FLAMENGO" not in html
     assert "sem ligação oficial com o clube" in html
     # The crest only appears as match data, in the sample scoreboard.
     assert html.count("819.png") == 1
+
+
+@pytest.mark.parametrize(
+    "email", ["ped.x@duck.com", "a.b+tag@sub.example.com.br", "kyw_9@outlook.com"]
+)
+def test_subscribe_accepts_common_addresses(client, mailer, email) -> None:
+    assert subscribe(client, email).status_code == 200
+    assert mailer.sent[-1][0] == email
+
+
+def test_daily_cap_on_confirmation_emails(client, store, mailer, monkeypatch) -> None:
+    # Many IPs could otherwise use the page to e-mail random addresses and burn the quota.
+    monkeypatch.setattr("flanews.web.app.CONFIRMATIONS_PER_DAY", 3)
+    for i in range(3):
+        store.request(f"user{i}@example.com", NOW)
+
+    response = subscribe(client, "late@example.com")
+
+    assert response.status_code == 429
+    assert mailer.sent == []
+    assert store.get("late@example.com") is None
+
+
+def test_page_explains_what_is_stored(client) -> None:
+    html = client.get("/").text
+
+    assert "Privacidade" in html
+    assert "só o seu e-mail" in html
