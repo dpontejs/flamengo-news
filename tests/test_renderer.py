@@ -109,7 +109,7 @@ def test_render_html_contains_all_sections() -> None:
 
     assert "Edição de Segunda — 12/10/2026" in html
     assert "Flamengo vence o Fla-Flu e segue líder" in html
-    assert re.search(r">1</span>\s*<span[^>]*>x</span>\s*<span[^>]*>0<", html)
+    assert re.search(r">\s*1\s*</td>\s*<td[^>]*>\s*x\s*</td>\s*<td[^>]*>\s*0\s*<", html)
     assert re.search(r"65(&#39;|')\s*<strong>Jorge Carrascal</strong>", html)
     assert "Erick Pulgar" not in html
     assert "Posse de bola" in html and "56.5%" in html
@@ -231,3 +231,14 @@ def test_render_analysis_hidden_without_data() -> None:
 
     assert "Análise" not in html
     assert "Análise" not in text
+
+
+def test_render_score_uses_separate_cells_for_alignment() -> None:
+    # Spans separated by whitespace rendered as "1x0" with a misaligned "x" in Gmail.
+    html, _ = render(full_newsletter())
+
+    cells = re.findall(r"<td[^>]*>\s*(1|x|0)\s*</td>", html)
+    assert cells[:3] == ["1", "x", "0"]
+    score_cell = re.search(r"<td[^>]*>\s*x\s*</td>", html).group(0)
+    assert "vertical-align:middle" in score_cell.replace(" ", "")
+    assert "padding:0 12px" in score_cell
