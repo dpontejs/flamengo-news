@@ -1,7 +1,7 @@
 # Página de inscrição e descadastro
 
 - **Data:** 2026-10-15
-- **Status:** implementada no repo; falta o deploy na VPS (stack no `infra`)
+- **Status:** entregue (commits T21–T24; deploy em dpontejs/infra#13)
 - **ADRs:** — (decisão registrada no PLAN §12)
 
 ## Objetivo
