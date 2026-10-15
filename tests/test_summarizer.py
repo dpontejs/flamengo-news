@@ -247,3 +247,13 @@ def test_write_analysis_prompt_has_stats_events_and_form() -> None:
     ):
         assert expected in prompt or expected in prompt.lower(), expected
     assert AnalysisResponse.model_fields.keys() == {"analysis"}
+
+
+def test_group_prompt_requires_accented_titles() -> None:
+    # flash-lite stripped or replaced accents in 6/15 titles without this rule (0/17 with it).
+    llm = FakeLLMClient(responder(TWO_TOPICS))
+
+    summarize_edition(ARTICLES, llm)
+
+    assert "acentuação" in llm.prompts[0]
+    assert "nunca remova nem substitua acentos" in llm.prompts[0]

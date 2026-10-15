@@ -9,6 +9,7 @@ Regras:
 - Descarte notícias irrelevantes: que não são sobre o Flamengo, fofoca, apostas, publicidade ou repetidas sem informação nova.
 - `article_ids` deve conter apenas números da lista abaixo.
 - `title` é um título curto em pt-BR, no estilo jornalístico, para o tópico.
+- Escreva os títulos em português correto, com toda a acentuação (ã, õ, ç, á, é, í, ó, ú, â, ê, ô); nunca remova nem substitua acentos.
 - Use somente as informações fornecidas; não invente fatos.
 
 Notícias:
