@@ -13,7 +13,7 @@ Newsletter por e-mail, enviada **segunda** e **sexta** de manhã, com:
 flowchart LR
     CRON["GitHub Actions cron (seg/sex 08:00 BRT)"] --> RUN["python -m flanews run"]
     RUN --> COL["Collectors (RSS + scraping)"]
-    RUN --> STATS["Stats client (API-Football)"]
+    RUN --> STATS["Stats client (ESPN)"]
     COL --> NORM["Normalize + filtrar janela de datas + dedupe"]
     NORM --> EXT["Extrair texto (trafilatura)"]
     EXT --> SUM["Summarizer (Gemini API)"]
@@ -46,7 +46,7 @@ A "última partida" = partida finalizada mais recente do Flamengo **dentro da ja
 | Parsing HTML | `selectolax` (ou `beautifulsoup4`) | rápido |
 | Extração de artigo | `trafilatura` | extrai texto limpo de qualquer página de notícia |
 | LLM | Gemini API via `google-genai` (modelo Flash) | barato/free tier, bom em pt-BR |
-| Dados de futebol | **API-Football** (api-sports.io, free: 100 req/dia) | cobre Brasileirão, Libertadores, Copa do Brasil, estatísticas por jogo |
+| Dados de futebol | **ESPN** (API pública, sem chave) | cobre Brasileirão, Libertadores, Copa do Brasil, estatísticas por jogo |
 | Fallback dados | football-data.org (free tier tem Brasileirão `BSA`) | opcional |
 | Template | `jinja2` + `premailer` (CSS inline) | compatibilidade com clientes de e-mail |
 | Envio | **Resend** (free: 3.000/mês) — alternativa: Brevo ou SMTP Gmail | API simples |
@@ -108,12 +108,24 @@ Modelo configurável via env `GEMINI_MODEL` (padrão: um modelo Flash disponíve
 
 ---
 
-## 5. Estatísticas (API-Football)
+## 5. Estatísticas (ESPN)
 
-Base: `https://v3.football.api-sports.io`, header `x-apisports-key`.
+API pública e não documentada da ESPN, sem chave. Base `https://site.api.espn.com/apis/site/v2/sports/soccer`
+(classificação em `https://site.api.espn.com/apis/v2/sports/soccer`).
 
 | Dado | Endpoint | Observação |
 |---|---|---|
+| Jogos da temporada | `GET /{liga}/teams/{FLA_ID}/schedule?season={ANO}` | finalizado mais recente na janela |
+| Próximos jogos | `GET /{liga}/teams/{FLA_ID}/schedule?fixture=true` | o mais cedo entre as competições |
+| Estatísticas, eventos e escalações | `GET /{liga}/summary?event={id}` | `boxscore`, `keyEvents`, `rosters` |
+| Classificação | `GET /{liga}/standings` (base `apis/v2`) | em competição por grupos, só o grupo do Flamengo |
+
+IDs confirmados em 14/10/2026: Flamengo `819`; ligas `bra.1` (Brasileirão), `conmebol.libertadores`, `bra.copa_do_brazil`.
+Orçamento: ~8 requisições por edição (3 calendários + 3 próximos jogos + 1 resumo + 1 classificação).
+
+Se a API falhar, a seção de estatísticas é omitida (newsletter ainda sai).
+
+---|---|---|
 | Últimos jogos | `GET /fixtures?team={FLA_ID}&last=3` | pegar o mais recente finalizado na janela |
 | Próximo jogo | `GET /fixtures?team={FLA_ID}&next=1` | |
 | Estatísticas do jogo | `GET /fixtures/statistics?fixture={id}` | posse, chutes, escanteios, faltas, cartões |
@@ -178,7 +190,7 @@ flamengo-news/
 │   │   └── pipeline.py     # agrupar → resumir
 │   ├── prompts/*.md
 │   ├── stats/
-│   │   └── api_football.py
+│   │   └── espn.py
 │   ├── render/
 │   │   ├── renderer.py
 │   │   └── templates/newsletter.html.j2, newsletter.txt.j2
@@ -197,8 +209,7 @@ flamengo-news/
 ```
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-flash-latest
-API_FOOTBALL_KEY=
-FLAMENGO_TEAM_ID=127
+FLAMENGO_TEAM_ID=819
 RESEND_API_KEY=
 NEWSLETTER_FROM="Flamengo News <news@seudominio.com>"
 NEWSLETTER_RECIPIENTS=voce@email.com
@@ -248,7 +259,8 @@ Upload do HTML gerado como artifact do workflow (auditoria).
 |---|---|---|
 | 2026-10-14 | Pipeline stateless, sem DB na v1 | simplicidade no GitHub Actions |
 | 2026-10-14 | Gemini Flash para sumarização | custo baixo, pt-BR bom |
-| 2026-10-14 | API-Football para estatísticas | cobre todas as competições do Flamengo |
+| 2026-10-14 | ~~API-Football para estatísticas~~ (substituída, ver abaixo) | cobre todas as competições do Flamengo |
 | 2026-10-14 | Resend para envio | API simples, free tier suficiente |
 | 2026-10-14 | Links do Google News decodificados via endpoint `batchexecute` (RPC `Fbv4je`) | os links `news.google.com/rss/articles/...` não redirecionam mais via HTTP; a página só traz a assinatura (`data-n-a-id/ts/sg`). Custa 2 requisições extras por artigo; em falha, mantém a URL original |
 | 2026-10-14 | `extract_content` sobrescreve `published_at` com `article:published_time`/`datePublished` da página quando tem fuso | `published_at` é obrigatório; ge e site oficial só conhecem a data (fixam 12:00) |
+| 2026-10-14 | ESPN (API pública) no lugar da API-Football para estatísticas | o plano Free da API-Football só acessa as temporadas 2022–2024 e bloqueia `last`/`next`; a ESPN é gratuita, sem chave e traz estatísticas, eventos, escalações, próximos jogos e classificação. Risco: não é documentada; se mudar, o cliente retorna `None` e a seção some |

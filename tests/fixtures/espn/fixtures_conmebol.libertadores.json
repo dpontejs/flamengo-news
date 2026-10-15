@@ -1,0 +1,1342 @@
+{
+ "timestamp": "2026-10-15T00:22:25Z",
+ "status": "success",
+ "season": {
+  "year": 2026,
+  "type": 13922,
+  "name": "Semifinals",
+  "displayName": "2026 CONMEBOL Libertadores",
+  "half": 1
+ },
+ "team": {
+  "id": "819",
+  "abbreviation": "FLA",
+  "location": "Flamengo",
+  "name": "Flamengo",
+  "displayName": "Flamengo",
+  "clubhouse": "https://www.espn.com/soccer/club/_/id/819/flamengo",
+  "color": "C60000",
+  "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+  "seasonSummary": "2026",
+  "standingSummary": "1st in Brazilian Serie A",
+  "isNational": false,
+  "groups": {
+   "id": "1",
+   "parent": {
+    "id": "58"
+   }
+  }
+ },
+ "events": [
+  {
+   "id": "401912523",
+   "date": "2026-10-16T00:30Z",
+   "name": "Flamengo at Estudiantes de La Plata",
+   "shortName": "FLA @ EST",
+   "season": {
+    "year": 2026,
+    "displayName": "2026 CONMEBOL Libertadores"
+   },
+   "seasonType": {
+    "id": "7",
+    "type": 13922,
+    "name": "Semifinals",
+    "abbreviation": "Semifinals"
+   },
+   "timeValid": true,
+   "competitions": [
+    {
+     "id": "401912523",
+     "date": "2026-10-16T00:30Z",
+     "attendance": 0,
+     "timeValid": true,
+     "neutralSite": false,
+     "boxscoreAvailable": true,
+     "ticketsAvailable": false,
+     "leg": {
+      "value": 1,
+      "displayValue": "1st Leg"
+     },
+     "venue": {
+      "fullName": "Estadio Jorge Luis Hirschi",
+      "address": {
+       "city": "La Plata",
+       "country": "Argentina"
+      }
+     },
+     "competitors": [
+      {
+       "id": "8",
+       "type": "team",
+       "order": 0,
+       "homeAway": "home",
+       "winner": false,
+       "team": {
+        "id": "8",
+        "location": "Estudiantes de La Plata",
+        "abbreviation": "EST",
+        "displayName": "Estudiantes de La Plata",
+        "shortDisplayName": "Estudiantes",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/8.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "default"
+          ],
+          "lastUpdated": "2023-03-24T19:32Z"
+         },
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/8.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "dark"
+          ],
+          "lastUpdated": "2023-03-24T19:33Z"
+         }
+        ],
+        "links": [
+         {
+          "rel": [
+           "clubhouse",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/club/_/id/8/estudiantes-de-la-plata",
+          "text": "Clubhouse"
+         },
+         {
+          "rel": [
+           "stats",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/stats/_/id/8/estudiantes-de-la-plata",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "stats",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=stats",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "schedule",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/fixtures/_/id/8/estudiantes-de-la-plata",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "schedule",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=scores",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "results",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/results/_/id/8/estudiantes-de-la-plata",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "results",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=scores",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "standings",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/standings/_/league/conmebol.libertadores",
+          "text": "Standings"
+         },
+         {
+          "rel": [
+           "standings",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=standings",
+          "text": "Standings"
+         },
+         {
+          "rel": [
+           "squad",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/squad/_/id/8/estudiantes-de-la-plata",
+          "text": "Squad"
+         },
+         {
+          "rel": [
+           "squad",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=squad",
+          "text": "Squad"
+         }
+        ]
+       }
+      },
+      {
+       "id": "819",
+       "type": "team",
+       "order": 1,
+       "homeAway": "away",
+       "winner": false,
+       "team": {
+        "id": "819",
+        "location": "Flamengo",
+        "abbreviation": "FLA",
+        "displayName": "Flamengo",
+        "shortDisplayName": "Flamengo",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "default"
+          ],
+          "lastUpdated": "2020-02-20T17:24Z"
+         },
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/819.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "dark"
+          ],
+          "lastUpdated": "2020-02-20T17:24Z"
+         }
+        ],
+        "links": [
+         {
+          "rel": [
+           "clubhouse",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/club/_/id/819/flamengo",
+          "text": "Clubhouse"
+         },
+         {
+          "rel": [
+           "stats",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/stats/_/id/819/flamengo",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "stats",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=stats",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "schedule",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/fixtures/_/id/819/flamengo",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "schedule",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=scores",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "results",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/results/_/id/819/flamengo",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "results",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=scores",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "standings",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/standings/_/league/conmebol.libertadores",
+          "text": "Standings"
+         },
+         {
+          "rel": [
+           "standings",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=standings",
+          "text": "Standings"
+         },
+         {
+          "rel": [
+           "squad",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/squad/_/id/819/flamengo",
+          "text": "Squad"
+         },
+         {
+          "rel": [
+           "squad",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=squad",
+          "text": "Squad"
+         }
+        ]
+       }
+      }
+     ],
+     "notes": [
+      {
+       "type": "event",
+       "headline": "1st Leg"
+      }
+     ],
+     "odds": [
+      {
+       "provider": {
+        "id": "100",
+        "name": "DraftKings",
+        "priority": 1
+       },
+       "details": "FLA +115",
+       "overUnder": 1.5,
+       "spread": 0.5,
+       "awayTeamOdds": {
+        "favorite": true,
+        "underdog": false,
+        "moneyLine": 115,
+        "spreadOdds": 105.0,
+        "open": {
+         "favorite": true,
+         "pointSpread": {
+          "alternateDisplayValue": "-0.5",
+          "american": "-0.5"
+         },
+         "spread": {
+          "value": 2.1,
+          "displayValue": "11/10",
+          "alternateDisplayValue": "+110",
+          "decimal": 2.1,
+          "fraction": "11/10",
+          "american": "+110"
+         },
+         "moneyLine": {
+          "value": 2.25,
+          "displayValue": "5/4",
+          "alternateDisplayValue": "+125",
+          "decimal": 2.25,
+          "fraction": "5/4",
+          "american": "+125"
+         }
+        },
+        "current": {
+         "pointSpread": {
+          "alternateDisplayValue": "-0.5",
+          "american": "-0.5"
+         },
+         "spread": {
+          "value": 2.05,
+          "displayValue": "21/20",
+          "alternateDisplayValue": "+105",
+          "decimal": 2.05,
+          "fraction": "21/20",
+          "american": "+105"
+         },
+         "moneyLine": {
+          "value": 2.15,
+          "displayValue": "23/20",
+          "alternateDisplayValue": "+115",
+          "decimal": 2.15,
+          "fraction": "23/20",
+          "american": "+115"
+         }
+        },
+        "team": {
+         "id": "819",
+         "name": "Flamengo",
+         "abbreviation": "FLA",
+         "displayName": "Flamengo",
+         "shortDisplayName": "Flamengo"
+        }
+       },
+       "homeTeamOdds": {
+        "favorite": false,
+        "underdog": true,
+        "moneyLine": 265,
+        "spreadOdds": -150.0,
+        "open": {
+         "favorite": false,
+         "pointSpread": {
+          "alternateDisplayValue": "+0.5",
+          "american": "+0.5"
+         },
+         "spread": {
+          "value": 1.58,
+          "displayValue": "10/17",
+          "alternateDisplayValue": "-170",
+          "decimal": 1.58,
+          "fraction": "10/17",
+          "american": "-170"
+         },
+         "moneyLine": {
+          "value": 3.35,
+          "displayValue": "47/20",
+          "alternateDisplayValue": "+235",
+          "decimal": 3.35,
+          "fraction": "47/20",
+          "american": "+235"
+         }
+        },
+        "current": {
+         "pointSpread": {
+          "alternateDisplayValue": "+0.5",
+          "american": "+0.5"
+         },
+         "spread": {
+          "value": 1.66,
+          "displayValue": "4/6",
+          "alternateDisplayValue": "-150",
+          "decimal": 1.66,
+          "fraction": "4/6",
+          "american": "-150"
+         },
+         "moneyLine": {
+          "value": 3.65,
+          "displayValue": "53/20",
+          "alternateDisplayValue": "+265",
+          "decimal": 3.65,
+          "fraction": "53/20",
+          "american": "+265"
+         }
+        },
+        "team": {
+         "id": "8",
+         "name": "Estudiantes de La Plata",
+         "abbreviation": "EST",
+         "displayName": "Estudiantes de La Plata",
+         "shortDisplayName": "Estudiantes"
+        }
+       },
+       "drawOdds": {
+        "moneyLine": 205.0
+       },
+       "links": [
+        {
+         "language": "en-US",
+         "rel": [
+          "home",
+          "desktop",
+          "bets",
+          "draftkings"
+         ],
+         "href": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34722220%3Foutcomes%3D0ML86455852_1",
+         "text": "Home Bet",
+         "shortText": "Home Bet",
+         "isExternal": true,
+         "isPremium": false
+        },
+        {
+         "language": "en-US",
+         "rel": [
+          "away",
+          "desktop",
+          "bets",
+          "draftkings"
+         ],
+         "href": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34722220%3Foutcomes%3D0ML86455852_3",
+         "text": "Away Bet",
+         "shortText": "Away Bet",
+         "isExternal": true,
+         "isPremium": false
+        },
+        {
+         "language": "en-US",
+         "rel": [
+          "draw",
+          "desktop",
+          "bets",
+          "draftkings"
+         ],
+         "href": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34722220%3Foutcomes%3D0ML86455852_2",
+         "text": "Draw Bet",
+         "shortText": "Draw Bet",
+         "isExternal": true,
+         "isPremium": false
+        },
+        {
+         "language": "en-US",
+         "rel": [
+          "homeSpread",
+          "desktop",
+          "bets"
+         ],
+         "href": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34722220%3Foutcomes%3D0HC86455877P50_1",
+         "text": "Home Point Spread",
+         "shortText": "Home Point Spread",
+         "isExternal": true,
+         "isPremium": false
+        },
+        {
+         "language": "en-US",
+         "rel": [
+          "awaySpread",
+          "desktop",
+          "bets"
+         ],
+         "href": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34722220%3Foutcomes%3D0HC86455877N50_3",
+         "text": "Away Point Spread",
+         "shortText": "Away Point Spread",
+         "isExternal": true,
+         "isPremium": false
+        },
+        {
+         "language": "en-US",
+         "rel": [
+          "over",
+          "desktop",
+          "bets"
+         ],
+         "href": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34722220%3Foutcomes%3D0OU86455872O150_1",
+         "text": "Over Odds",
+         "shortText": "Over Odds",
+         "isExternal": true,
+         "isPremium": false
+        },
+        {
+         "language": "en-US",
+         "rel": [
+          "under",
+          "desktop",
+          "bets"
+         ],
+         "href": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34722220%3Foutcomes%3D0OU86455872U150_3",
+         "text": "Under Odds",
+         "shortText": "Under Odds",
+         "isExternal": true,
+         "isPremium": false
+        },
+        {
+         "language": "en-US",
+         "rel": [
+          "game",
+          "desktop",
+          "bets"
+         ],
+         "href": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34722220",
+         "text": "Game",
+         "shortText": "Game",
+         "isExternal": true,
+         "isPremium": false
+        }
+       ]
+      }
+     ],
+     "broadcasts": [
+      {
+       "type": {
+        "id": "1",
+        "shortName": "TV"
+       },
+       "media": {
+        "shortName": "beIn Sports"
+       },
+       "lang": "en",
+       "region": "us"
+      }
+     ],
+     "status": {
+      "clock": 0.0,
+      "addedClock": 0.0,
+      "displayClock": "0'",
+      "period": 0,
+      "type": {
+       "id": "1",
+       "name": "STATUS_SCHEDULED",
+       "state": "pre",
+       "completed": false,
+       "description": "Scheduled",
+       "detail": "Thu, October 15th at 8:30 PM EDT",
+       "shortDetail": "10/15 - 8:30 PM EDT"
+      }
+     }
+    }
+   ],
+   "links": [
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/match/_/gameId/401912523/flamengo-estudiantes-de-la-plata",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "mobile",
+      "event"
+     ],
+     "href": "https://m.espn.com/soccer/match?gameId=401912523&action=summary",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "sportscenter",
+      "app",
+      "event"
+     ],
+     "href": "sportscenter://x-callback-url/showGame?sportName=soccer&leagueAbbrev=conmebol.libertadores&gameId=401912523",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "videos",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/video/_/gameId/401912523",
+     "text": "Videos",
+     "shortText": "Videos",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "odds",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/odds/_/gameId/401912523",
+     "text": "Odds",
+     "shortText": "Odds",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "odds",
+      "mobile",
+      "event"
+     ],
+     "href": "https://m.espn.com/soccer/odds/_/gameId/401912523",
+     "text": "Odds",
+     "shortText": "Odds",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "livestandings",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/table/_/gameId/401912523",
+     "text": "Live Table",
+     "shortText": "Live Table",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/matchstats/_/gameId/401912523",
+     "text": "Statistics",
+     "shortText": "Statistics",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "commentary",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/commentary/_/gameId/401912523",
+     "text": "Commentary",
+     "shortText": "Commentary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "bet365",
+      "desktop",
+      "event"
+     ],
+     "href": "http://www.bet365.com/home/?affiliate=365_351846",
+     "text": "Bet 365",
+     "shortText": "Bet 365",
+     "isExternal": true,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "player-stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/player-stats/_/gameId/401912523/league/conmebol.libertadores",
+     "text": "Player Stats",
+     "shortText": "Player Stats",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "team-stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/team-stats/_/gameId/401912523/league/conmebol.libertadores",
+     "text": "Team Stats",
+     "shortText": "Team Stats",
+     "isExternal": false,
+     "isPremium": false
+    }
+   ],
+   "league": {
+    "id": "783",
+    "alternateId": "58",
+    "name": "CONMEBOL Libertadores",
+    "abbreviation": "CONMEBOL Libertadores",
+    "shortName": "CONMEBOL Libertadores",
+    "midsizeName": "CONMEBOL.LIBERTADORES",
+    "slug": "conmebol.libertadores",
+    "isTournament": true
+   }
+  },
+  {
+   "id": "401912521",
+   "date": "2026-10-23T00:30Z",
+   "name": "Estudiantes de La Plata at Flamengo",
+   "shortName": "EST @ FLA",
+   "season": {
+    "year": 2026,
+    "displayName": "2026 CONMEBOL Libertadores"
+   },
+   "seasonType": {
+    "id": "7",
+    "type": 13922,
+    "name": "Semifinals",
+    "abbreviation": "Semifinals"
+   },
+   "timeValid": true,
+   "competitions": [
+    {
+     "id": "401912521",
+     "date": "2026-10-23T00:30Z",
+     "attendance": 0,
+     "timeValid": true,
+     "neutralSite": false,
+     "boxscoreAvailable": true,
+     "ticketsAvailable": false,
+     "leg": {
+      "value": 2,
+      "displayValue": "2nd Leg"
+     },
+     "venue": {
+      "fullName": "Estadio do Maracana",
+      "address": {
+       "city": "Rio de Janeiro",
+       "country": "Brazil"
+      }
+     },
+     "competitors": [
+      {
+       "id": "819",
+       "type": "team",
+       "order": 0,
+       "homeAway": "home",
+       "winner": false,
+       "team": {
+        "id": "819",
+        "location": "Flamengo",
+        "abbreviation": "FLA",
+        "displayName": "Flamengo",
+        "shortDisplayName": "Flamengo",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "default"
+          ],
+          "lastUpdated": "2020-02-20T17:24Z"
+         },
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/819.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "dark"
+          ],
+          "lastUpdated": "2020-02-20T17:24Z"
+         }
+        ],
+        "links": [
+         {
+          "rel": [
+           "clubhouse",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/club/_/id/819/flamengo",
+          "text": "Clubhouse"
+         },
+         {
+          "rel": [
+           "stats",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/stats/_/id/819/flamengo",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "stats",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=stats",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "schedule",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/fixtures/_/id/819/flamengo",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "schedule",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=scores",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "results",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/results/_/id/819/flamengo",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "results",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=scores",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "standings",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/standings/_/league/conmebol.libertadores",
+          "text": "Standings"
+         },
+         {
+          "rel": [
+           "standings",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=standings",
+          "text": "Standings"
+         },
+         {
+          "rel": [
+           "squad",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/squad/_/id/819/flamengo",
+          "text": "Squad"
+         },
+         {
+          "rel": [
+           "squad",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=squad",
+          "text": "Squad"
+         }
+        ]
+       }
+      },
+      {
+       "id": "8",
+       "type": "team",
+       "order": 1,
+       "homeAway": "away",
+       "winner": false,
+       "team": {
+        "id": "8",
+        "location": "Estudiantes de La Plata",
+        "abbreviation": "EST",
+        "displayName": "Estudiantes de La Plata",
+        "shortDisplayName": "Estudiantes",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/8.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "default"
+          ],
+          "lastUpdated": "2023-03-24T19:32Z"
+         },
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/8.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "dark"
+          ],
+          "lastUpdated": "2023-03-24T19:33Z"
+         }
+        ],
+        "links": [
+         {
+          "rel": [
+           "clubhouse",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/club/_/id/8/estudiantes-de-la-plata",
+          "text": "Clubhouse"
+         },
+         {
+          "rel": [
+           "stats",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/stats/_/id/8/estudiantes-de-la-plata",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "stats",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=stats",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "schedule",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/fixtures/_/id/8/estudiantes-de-la-plata",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "schedule",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=scores",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "results",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/results/_/id/8/estudiantes-de-la-plata",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "results",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=scores",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "standings",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/standings/_/league/conmebol.libertadores",
+          "text": "Standings"
+         },
+         {
+          "rel": [
+           "standings",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=standings",
+          "text": "Standings"
+         },
+         {
+          "rel": [
+           "squad",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/squad/_/id/8/estudiantes-de-la-plata",
+          "text": "Squad"
+         },
+         {
+          "rel": [
+           "squad",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:8&section=squad",
+          "text": "Squad"
+         }
+        ]
+       }
+      }
+     ],
+     "notes": [
+      {
+       "type": "event",
+       "headline": "2nd Leg"
+      }
+     ],
+     "broadcasts": [
+      {
+       "type": {
+        "id": "1",
+        "shortName": "TV"
+       },
+       "media": {
+        "shortName": "beIn Sports"
+       },
+       "lang": "en",
+       "region": "us"
+      }
+     ],
+     "status": {
+      "clock": 0.0,
+      "addedClock": 0.0,
+      "displayClock": "0'",
+      "period": 0,
+      "type": {
+       "id": "1",
+       "name": "STATUS_SCHEDULED",
+       "state": "pre",
+       "completed": false,
+       "description": "Scheduled",
+       "detail": "Thu, October 22nd at 8:30 PM EDT",
+       "shortDetail": "10/22 - 8:30 PM EDT"
+      }
+     }
+    }
+   ],
+   "links": [
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/match/_/gameId/401912521/estudiantes-de-la-plata-flamengo",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "mobile",
+      "event"
+     ],
+     "href": "https://m.espn.com/soccer/match?gameId=401912521&action=summary",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "sportscenter",
+      "app",
+      "event"
+     ],
+     "href": "sportscenter://x-callback-url/showGame?sportName=soccer&leagueAbbrev=conmebol.libertadores&gameId=401912521",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "videos",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/video/_/gameId/401912521",
+     "text": "Videos",
+     "shortText": "Videos",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "odds",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/odds/_/gameId/401912521",
+     "text": "Odds",
+     "shortText": "Odds",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "odds",
+      "mobile",
+      "event"
+     ],
+     "href": "https://m.espn.com/soccer/odds/_/gameId/401912521",
+     "text": "Odds",
+     "shortText": "Odds",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "livestandings",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/table/_/gameId/401912521",
+     "text": "Live Table",
+     "shortText": "Live Table",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/matchstats/_/gameId/401912521",
+     "text": "Statistics",
+     "shortText": "Statistics",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "commentary",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/commentary/_/gameId/401912521",
+     "text": "Commentary",
+     "shortText": "Commentary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "bet365",
+      "desktop",
+      "event"
+     ],
+     "href": "http://www.bet365.com/home/?affiliate=365_351846",
+     "text": "Bet 365",
+     "shortText": "Bet 365",
+     "isExternal": true,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "player-stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/player-stats/_/gameId/401912521/league/conmebol.libertadores",
+     "text": "Player Stats",
+     "shortText": "Player Stats",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "team-stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/team-stats/_/gameId/401912521/league/conmebol.libertadores",
+     "text": "Team Stats",
+     "shortText": "Team Stats",
+     "isExternal": false,
+     "isPremium": false
+    }
+   ],
+   "league": {
+    "id": "783",
+    "alternateId": "58",
+    "name": "CONMEBOL Libertadores",
+    "abbreviation": "CONMEBOL Libertadores",
+    "shortName": "CONMEBOL Libertadores",
+    "midsizeName": "CONMEBOL.LIBERTADORES",
+    "slug": "conmebol.libertadores",
+    "isTournament": true
+   }
+  }
+ ],
+ "requestedSeason": {
+  "year": 2026,
+  "type": 13922,
+  "name": "Semifinals",
+  "displayName": "2026 CONMEBOL Libertadores"
+ }
+}

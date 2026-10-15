@@ -1,0 +1,24 @@
+{
+ "timestamp": "2026-10-15T00:22:25Z",
+ "status": "success",
+ "season": {
+  "year": 2026,
+  "type": 14066,
+  "name": "Semifinals",
+  "displayName": "2026 Copa do Brasil",
+  "half": 1
+ },
+ "team": {
+  "id": "819",
+  "abbreviation": "FLA",
+  "location": "Flamengo",
+  "name": "Flamengo",
+  "displayName": "Flamengo",
+  "clubhouse": "https://www.espn.com/soccer/club/_/id/819/flamengo",
+  "color": "C60000",
+  "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+  "seasonSummary": "2026",
+  "isNational": false
+ },
+ "events": []
+}

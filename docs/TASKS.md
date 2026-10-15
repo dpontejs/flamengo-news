@@ -25,7 +25,7 @@ Instruções para o modelo que for executar:
 ### [x] T02 — Config e modelos
 - **Arquivos:** `src/flanews/config.py`, `src/flanews/models.py`, `tests/test_config.py`
 - **O que fazer:**
-  - `Settings(BaseSettings)` com todas as envs do PLAN §8; `get_settings()` com `lru_cache`. Chaves opcionais (`API_FOOTBALL_KEY`, `RESEND_API_KEY`) podem ser `None`.
+  - `Settings(BaseSettings)` com todas as envs do PLAN §8; `get_settings()` com `lru_cache`. Chaves opcionais (`RESEND_API_KEY`) podem ser `None`.
   - `models.py` (dataclasses ou pydantic): `Article`, `Topic(title, summary, articles: list[Article], importance)`, `MatchEvent`, `MatchStats(fixture_id, competition, date, home, away, home_goals, away_goals, venue, events, statistics: dict[str, tuple[str,str]], lineups)`, `NextMatch`, `StandingRow`, `Edition(kind, start, end, label)`, `Newsletter(edition, intro, topics, last_match, next_match, standings)`.
 - **Aceite:** testes cobrindo leitura de env com `monkeypatch`.
 - **Commit:** `feat: add settings and core domain models`
@@ -119,22 +119,23 @@ Instruções para o modelo que for executar:
 
 ## Fase 3 — Estatísticas
 
-### [ ] T12 — Cliente API-Football
-- **Arquivos:** `src/flanews/stats/api_football.py`, `tests/fixtures/api_football/*.json`, `tests/test_api_football.py`
+### [x] T12 — Cliente de estatísticas (ESPN)
+> Originalmente API-Football; trocada pela ESPN porque o plano Free da API-Football não acessa a temporada atual (ver PLAN §12).
+- **Arquivos:** `src/flanews/stats/espn.py`, `tests/fixtures/espn/*.json`, `tests/test_espn.py`
 - **O que fazer:**
-  - Confirmar IDs (Flamengo, Brasileirão, Libertadores, Copa do Brasil) com `GET /teams?search=Flamengo&country=Brazil` e `GET /leagues?country=Brazil`; atualizar PLAN §5 se diferirem.
-  - `get_last_match(start, end) -> MatchStats | None` (fixtures `last=3` → filtrar finalizado `FT/AET/PEN` na janela → buscar statistics, events, lineups).
-  - `get_next_match() -> NextMatch | None`.
-  - `get_standings(league_id, season) -> list[StandingRow]` (para Libertadores, pegar só o grupo do Flamengo).
-  - Traduzir nomes das estatísticas para pt-BR (`Ball Possession` → `Posse de bola` etc.).
-  - Sem chave → retorna `None` e loga info.
-- **Aceite:** testes com JSON fixtures (salvar respostas reais uma vez) via `respx`.
-- **Commit:** `feat: add api-football stats client`
+  - Confirmar IDs (Flamengo e ligas) e atualizar PLAN §5.
+  - `get_last_match(start, end) -> MatchStats | None` (calendário da temporada nas 3 competições → finalizado mais recente na janela → `summary` com estatísticas, eventos e escalações).
+  - `get_next_match(now) -> NextMatch | None`.
+  - `get_standings(league) -> list[StandingRow]` (para Libertadores, pegar só o grupo do Flamengo).
+  - Traduzir nomes das estatísticas para pt-BR (`Possession` → `Posse de bola` etc.).
+  - Falha da API → retorna `None`/`[]` e loga warning.
+- **Aceite:** testes com JSON fixtures (respostas reais salvas) via `respx`.
+- **Commit:** `feat: add espn stats client`
 
 ### [ ] T13 — Comando `stats`
 - **Arquivos:** `src/flanews/__main__.py`
 - **O que fazer:** imprime última partida, próximo jogo e classificação da edição.
-- **Aceite:** teste manual com chave real.
+- **Aceite:** teste manual com a API real.
 - **Commit:** `feat: add stats command`
 
 ---
@@ -178,7 +179,7 @@ Instruções para o modelo que for executar:
 
 ### [ ] T18 — Workflow agendado
 - **Arquivos:** `.github/workflows/newsletter.yml`
-- **O que fazer:** cron do PLAN §10 + `workflow_dispatch` com input `edition`; secrets `GEMINI_API_KEY`, `API_FOOTBALL_KEY`, `RESEND_API_KEY`, `NEWSLETTER_FROM`, `NEWSLETTER_RECIPIENTS`; `DRY_RUN=false`; upload de `out/` como artifact.
+- **O que fazer:** cron do PLAN §10 + `workflow_dispatch` com input `edition`; secrets `GEMINI_API_KEY`, `RESEND_API_KEY`, `NEWSLETTER_FROM`, `NEWSLETTER_RECIPIENTS`; `DRY_RUN=false`; upload de `out/` como artifact.
 - **Aceite:** rodar manualmente via `workflow_dispatch` com dry-run primeiro.
 - **Commit:** `ci: add scheduled newsletter workflow`
 
@@ -187,7 +188,7 @@ Instruções para o modelo que for executar:
 - **Commit:** `feat: add structured logging and run summary`
 
 ### [ ] T20 — Documentação final
-- **O que fazer:** README com setup completo: criar chaves (Gemini AI Studio, API-Football, Resend + verificação de domínio), configurar secrets, rodar preview, ajustar prompts, adicionar nova fonte.
+- **O que fazer:** README com setup completo: criar chaves (Gemini AI Studio, Resend + verificação de domínio), configurar secrets, rodar preview, ajustar prompts, adicionar nova fonte.
 - **Commit:** `docs: document setup, secrets and usage`
 
 ---

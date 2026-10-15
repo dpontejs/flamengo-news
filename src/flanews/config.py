@@ -15,8 +15,7 @@ class Settings(BaseSettings):
 
     GEMINI_API_KEY: str | None = None
     GEMINI_MODEL: str = "gemini-flash-latest"
-    API_FOOTBALL_KEY: str | None = None
-    FLAMENGO_TEAM_ID: int = 127
+    FLAMENGO_TEAM_ID: int = 819  # ESPN team id
     RESEND_API_KEY: str | None = None
     NEWSLETTER_FROM: str = "Flamengo News <news@seudominio.com>"
     NEWSLETTER_RECIPIENTS: str | list[str] = ["voce@email.com"]

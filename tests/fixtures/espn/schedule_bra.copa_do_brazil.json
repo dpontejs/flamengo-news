@@ -1,0 +1,1101 @@
+{
+ "timestamp": "2026-10-15T00:22:12Z",
+ "status": "success",
+ "season": {
+  "year": 2026,
+  "type": 14066,
+  "name": "Semifinals",
+  "displayName": "2026 Copa do Brasil",
+  "half": 1
+ },
+ "team": {
+  "id": "819",
+  "abbreviation": "FLA",
+  "location": "Flamengo",
+  "name": "Flamengo",
+  "displayName": "Flamengo",
+  "clubhouse": "https://www.espn.com/soccer/club/_/id/819/flamengo",
+  "color": "C60000",
+  "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+  "seasonSummary": "2026",
+  "isNational": false
+ },
+ "events": [
+  {
+   "id": "401866350",
+   "date": "2026-05-15T00:30Z",
+   "name": "Flamengo at Vitória",
+   "shortName": "FLA @ VIT",
+   "season": {
+    "year": 2026,
+    "displayName": "2026 Copa do Brasil"
+   },
+   "seasonType": {
+    "id": "5",
+    "type": 14061,
+    "name": "Fifth Round",
+    "abbreviation": "Fifth Round"
+   },
+   "timeValid": true,
+   "competitions": [
+    {
+     "id": "401866350",
+     "date": "2026-05-15T00:30Z",
+     "attendance": 30482,
+     "timeValid": true,
+     "neutralSite": false,
+     "boxscoreAvailable": true,
+     "ticketsAvailable": false,
+     "leg": {
+      "value": 2,
+      "displayValue": "2nd Leg"
+     },
+     "venue": {
+      "fullName": "Estadio Manoel Barradas",
+      "address": {
+       "city": "Salvador",
+       "country": "Brazil"
+      }
+     },
+     "competitors": [
+      {
+       "id": "3457",
+       "type": "team",
+       "order": 0,
+       "homeAway": "home",
+       "winner": true,
+       "advance": true,
+       "team": {
+        "id": "3457",
+        "location": "Vitória",
+        "abbreviation": "VIT",
+        "displayName": "Vitória",
+        "shortDisplayName": "Vitória",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "default"
+          ],
+          "lastUpdated": "2019-05-08T16:07Z"
+         },
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/3457.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "dark"
+          ],
+          "lastUpdated": "2019-05-08T16:07Z"
+         }
+        ],
+        "links": [
+         {
+          "rel": [
+           "clubhouse",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/club/_/id/3457/vitoria",
+          "text": "Clubhouse"
+         },
+         {
+          "rel": [
+           "stats",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/stats/_/id/3457/vitoria",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "stats",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:3457&section=stats",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "schedule",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/fixtures/_/id/3457/vitoria",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "schedule",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:3457&section=scores",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "results",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/results/_/id/3457/vitoria",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "results",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:3457&section=scores",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "squad",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/squad/_/id/3457/vitoria",
+          "text": "Squad"
+         },
+         {
+          "rel": [
+           "squad",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:3457&section=squad",
+          "text": "Squad"
+         }
+        ]
+       },
+       "score": {
+        "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/leagues/bra.copa_do_brazil/events/401866350/competitions/401866350/competitors/3457/scores/38?lang=en&region=us",
+        "value": 2.0,
+        "displayValue": "2",
+        "winner": true,
+        "source": {
+         "id": "38",
+         "description": "SA.ENVOY"
+        },
+        "aggregateScore": 3.0
+       },
+       "record": []
+      },
+      {
+       "id": "819",
+       "type": "team",
+       "order": 1,
+       "homeAway": "away",
+       "winner": false,
+       "advance": false,
+       "team": {
+        "id": "819",
+        "location": "Flamengo",
+        "abbreviation": "FLA",
+        "displayName": "Flamengo",
+        "shortDisplayName": "Flamengo",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "default"
+          ],
+          "lastUpdated": "2020-02-20T17:24Z"
+         },
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/819.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "dark"
+          ],
+          "lastUpdated": "2020-02-20T17:24Z"
+         }
+        ],
+        "links": [
+         {
+          "rel": [
+           "clubhouse",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/club/_/id/819/flamengo",
+          "text": "Clubhouse"
+         },
+         {
+          "rel": [
+           "stats",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/stats/_/id/819/flamengo",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "stats",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=stats",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "schedule",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/fixtures/_/id/819/flamengo",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "schedule",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=scores",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "results",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/results/_/id/819/flamengo",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "results",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=scores",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "squad",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/squad/_/id/819/flamengo",
+          "text": "Squad"
+         },
+         {
+          "rel": [
+           "squad",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=squad",
+          "text": "Squad"
+         }
+        ]
+       },
+       "score": {
+        "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/leagues/bra.copa_do_brazil/events/401866350/competitions/401866350/competitors/819/scores/38?lang=en&region=us",
+        "value": 0.0,
+        "displayValue": "0",
+        "winner": false,
+        "source": {
+         "id": "38",
+         "description": "SA.ENVOY"
+        },
+        "aggregateScore": 2.0
+       },
+       "record": []
+      }
+     ],
+     "notes": [
+      {
+       "type": "event",
+       "headline": "2nd Leg - Vitória advance 3-2 on aggregate"
+      },
+      {
+       "type": "event-ingest-note",
+       "date": "2026-05-16T02:46Z",
+       "text": "Vitória advances.",
+       "source": "38"
+      }
+     ],
+     "broadcasts": [],
+     "status": {
+      "clock": 5400.0,
+      "addedClock": 480.0,
+      "displayClock": "90'+8'",
+      "period": 2,
+      "type": {
+       "id": "28",
+       "name": "STATUS_FULL_TIME",
+       "state": "post",
+       "completed": true,
+       "description": "Full Time",
+       "detail": "FT",
+       "shortDetail": "FT"
+      }
+     }
+    }
+   ],
+   "links": [
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/match/_/gameId/401866350/flamengo-vitoria",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "mobile",
+      "event"
+     ],
+     "href": "https://m.espn.com/soccer/match?gameId=401866350&action=summary",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "sportscenter",
+      "app",
+      "event"
+     ],
+     "href": "sportscenter://x-callback-url/showGame?sportName=soccer&leagueAbbrev=bra.copa_do_brazil&gameId=401866350",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "lineup",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/lineups/_/gameId/401866350",
+     "text": "Lineup",
+     "shortText": "Lineup",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "videos",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/video/_/gameId/401866350",
+     "text": "Videos",
+     "shortText": "Videos",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "lineups",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/lineups?gameId=401866350",
+     "text": "Line-Ups",
+     "shortText": "Line-Ups",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "odds",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/odds/_/gameId/401866350",
+     "text": "Odds",
+     "shortText": "Odds",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "odds",
+      "mobile",
+      "event"
+     ],
+     "href": "https://m.espn.com/soccer/odds/_/gameId/401866350",
+     "text": "Odds",
+     "shortText": "Odds",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "livestandings",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/table/_/gameId/401866350",
+     "text": "Live Table",
+     "shortText": "Live Table",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/matchstats/_/gameId/401866350",
+     "text": "Statistics",
+     "shortText": "Statistics",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "commentary",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/commentary/_/gameId/401866350",
+     "text": "Commentary",
+     "shortText": "Commentary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "bet365",
+      "desktop",
+      "event"
+     ],
+     "href": "http://www.bet365.com/home/?affiliate=365_351846",
+     "text": "Bet 365",
+     "shortText": "Bet 365",
+     "isExternal": true,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "player-stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/player-stats/_/gameId/401866350/league/bra.copa_do_brazil",
+     "text": "Player Stats",
+     "shortText": "Player Stats",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "team-stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/team-stats/_/gameId/401866350/league/bra.copa_do_brazil",
+     "text": "Team Stats",
+     "shortText": "Team Stats",
+     "isExternal": false,
+     "isPremium": false
+    }
+   ],
+   "league": {
+    "id": "8306",
+    "alternateId": "528",
+    "name": "Copa do Brasil",
+    "abbreviation": "Copa do Brazil",
+    "shortName": "Copa Do Brazil",
+    "midsizeName": "BRA.COPA_DO_BRAZIL",
+    "slug": "bra.copa_do_brazil",
+    "isTournament": true
+   }
+  },
+  {
+   "id": "401866344",
+   "date": "2026-04-23T00:30Z",
+   "name": "Vitória at Flamengo",
+   "shortName": "VIT @ FLA",
+   "season": {
+    "year": 2026,
+    "displayName": "2026 Copa do Brasil"
+   },
+   "seasonType": {
+    "id": "5",
+    "type": 14061,
+    "name": "Fifth Round",
+    "abbreviation": "Fifth Round"
+   },
+   "timeValid": true,
+   "competitions": [
+    {
+     "id": "401866344",
+     "date": "2026-04-23T00:30Z",
+     "attendance": 44292,
+     "timeValid": true,
+     "neutralSite": false,
+     "boxscoreAvailable": true,
+     "ticketsAvailable": false,
+     "leg": {
+      "value": 1,
+      "displayValue": "1st Leg"
+     },
+     "venue": {
+      "fullName": "Estadio do Maracana",
+      "address": {
+       "city": "Rio de Janeiro",
+       "country": "Brazil"
+      }
+     },
+     "competitors": [
+      {
+       "id": "819",
+       "type": "team",
+       "order": 0,
+       "homeAway": "home",
+       "winner": true,
+       "team": {
+        "id": "819",
+        "location": "Flamengo",
+        "abbreviation": "FLA",
+        "displayName": "Flamengo",
+        "shortDisplayName": "Flamengo",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "default"
+          ],
+          "lastUpdated": "2020-02-20T17:24Z"
+         },
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/819.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "dark"
+          ],
+          "lastUpdated": "2020-02-20T17:24Z"
+         }
+        ],
+        "links": [
+         {
+          "rel": [
+           "clubhouse",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/club/_/id/819/flamengo",
+          "text": "Clubhouse"
+         },
+         {
+          "rel": [
+           "stats",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/stats/_/id/819/flamengo",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "stats",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=stats",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "schedule",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/fixtures/_/id/819/flamengo",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "schedule",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=scores",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "results",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/results/_/id/819/flamengo",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "results",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=scores",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "squad",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/squad/_/id/819/flamengo",
+          "text": "Squad"
+         },
+         {
+          "rel": [
+           "squad",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:819&section=squad",
+          "text": "Squad"
+         }
+        ]
+       },
+       "score": {
+        "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/leagues/bra.copa_do_brazil/events/401866344/competitions/401866344/competitors/819/scores/38?lang=en&region=us",
+        "value": 2.0,
+        "displayValue": "2",
+        "winner": true,
+        "source": {
+         "id": "38",
+         "description": "SA.ENVOY"
+        }
+       },
+       "record": []
+      },
+      {
+       "id": "3457",
+       "type": "team",
+       "order": 1,
+       "homeAway": "away",
+       "winner": false,
+       "team": {
+        "id": "3457",
+        "location": "Vitória",
+        "abbreviation": "VIT",
+        "displayName": "Vitória",
+        "shortDisplayName": "Vitória",
+        "logos": [
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "default"
+          ],
+          "lastUpdated": "2019-05-08T16:07Z"
+         },
+         {
+          "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/3457.png",
+          "width": 500,
+          "height": 500,
+          "alt": "",
+          "rel": [
+           "full",
+           "dark"
+          ],
+          "lastUpdated": "2019-05-08T16:07Z"
+         }
+        ],
+        "links": [
+         {
+          "rel": [
+           "clubhouse",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/club/_/id/3457/vitoria",
+          "text": "Clubhouse"
+         },
+         {
+          "rel": [
+           "stats",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/stats/_/id/3457/vitoria",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "stats",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:3457&section=stats",
+          "text": "Stats"
+         },
+         {
+          "rel": [
+           "schedule",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/fixtures/_/id/3457/vitoria",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "schedule",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:3457&section=scores",
+          "text": "Fixtures"
+         },
+         {
+          "rel": [
+           "results",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/results/_/id/3457/vitoria",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "results",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:3457&section=scores",
+          "text": "Results"
+         },
+         {
+          "rel": [
+           "squad",
+           "desktop",
+           "team"
+          ],
+          "href": "https://www.espn.com/soccer/team/squad/_/id/3457/vitoria",
+          "text": "Squad"
+         },
+         {
+          "rel": [
+           "squad",
+           "sportscenter",
+           "app",
+           "team"
+          ],
+          "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~t:3457&section=squad",
+          "text": "Squad"
+         }
+        ]
+       },
+       "score": {
+        "$ref": "http://sports.core.api.espn.pvt/v2/sports/soccer/leagues/bra.copa_do_brazil/events/401866344/competitions/401866344/competitors/3457/scores/38?lang=en&region=us",
+        "value": 1.0,
+        "displayValue": "1",
+        "winner": false,
+        "source": {
+         "id": "38",
+         "description": "SA.ENVOY"
+        }
+       },
+       "record": []
+      }
+     ],
+     "notes": [
+      {
+       "type": "event",
+       "headline": "1st Leg"
+      }
+     ],
+     "broadcasts": [],
+     "status": {
+      "clock": 5400.0,
+      "addedClock": 540.0,
+      "displayClock": "90'+9'",
+      "period": 2,
+      "type": {
+       "id": "28",
+       "name": "STATUS_FULL_TIME",
+       "state": "post",
+       "completed": true,
+       "description": "Full Time",
+       "detail": "FT",
+       "shortDetail": "FT"
+      }
+     }
+    }
+   ],
+   "links": [
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/match/_/gameId/401866344/vitoria-flamengo",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "mobile",
+      "event"
+     ],
+     "href": "https://m.espn.com/soccer/match?gameId=401866344&action=summary",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "summary",
+      "sportscenter",
+      "app",
+      "event"
+     ],
+     "href": "sportscenter://x-callback-url/showGame?sportName=soccer&leagueAbbrev=bra.copa_do_brazil&gameId=401866344",
+     "text": "Summary",
+     "shortText": "Summary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "lineup",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/lineups/_/gameId/401866344",
+     "text": "Lineup",
+     "shortText": "Lineup",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "videos",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/video/_/gameId/401866344",
+     "text": "Videos",
+     "shortText": "Videos",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "lineups",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/lineups?gameId=401866344",
+     "text": "Line-Ups",
+     "shortText": "Line-Ups",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "odds",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/odds/_/gameId/401866344",
+     "text": "Odds",
+     "shortText": "Odds",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "odds",
+      "mobile",
+      "event"
+     ],
+     "href": "https://m.espn.com/soccer/odds/_/gameId/401866344",
+     "text": "Odds",
+     "shortText": "Odds",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "livestandings",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/table/_/gameId/401866344",
+     "text": "Live Table",
+     "shortText": "Live Table",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/matchstats/_/gameId/401866344",
+     "text": "Statistics",
+     "shortText": "Statistics",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "commentary",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/commentary/_/gameId/401866344",
+     "text": "Commentary",
+     "shortText": "Commentary",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "bet365",
+      "desktop",
+      "event"
+     ],
+     "href": "http://www.bet365.com/home/?affiliate=365_351846",
+     "text": "Bet 365",
+     "shortText": "Bet 365",
+     "isExternal": true,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "player-stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/player-stats/_/gameId/401866344/league/bra.copa_do_brazil",
+     "text": "Player Stats",
+     "shortText": "Player Stats",
+     "isExternal": false,
+     "isPremium": false
+    },
+    {
+     "language": "en-US",
+     "rel": [
+      "team-stats",
+      "desktop",
+      "event"
+     ],
+     "href": "https://www.espn.com/soccer/team-stats/_/gameId/401866344/league/bra.copa_do_brazil",
+     "text": "Team Stats",
+     "shortText": "Team Stats",
+     "isExternal": false,
+     "isPremium": false
+    }
+   ],
+   "league": {
+    "id": "8306",
+    "alternateId": "528",
+    "name": "Copa do Brasil",
+    "abbreviation": "Copa do Brazil",
+    "shortName": "Copa Do Brazil",
+    "midsizeName": "BRA.COPA_DO_BRAZIL",
+    "slug": "bra.copa_do_brazil",
+    "isTournament": true
+   }
+  }
+ ],
+ "requestedSeason": {
+  "year": 2026,
+  "type": 14061,
+  "name": "Fifth Round",
+  "displayName": "2026 Copa do Brasil"
+ }
+}

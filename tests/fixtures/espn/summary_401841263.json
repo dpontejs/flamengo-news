@@ -1,0 +1,2496 @@
+{
+ "boxscore": {
+  "teams": [
+   {
+    "team": {
+     "id": "819",
+     "uid": "s:600~t:819",
+     "slug": "bra.flamengo",
+     "location": "Flamengo",
+     "name": "Flamengo",
+     "abbreviation": "FLA",
+     "displayName": "Flamengo",
+     "shortDisplayName": "Flamengo",
+     "color": "C60000",
+     "alternateColor": "000000",
+     "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+     "uniform": {
+      "type": "home",
+      "color": "ff0000",
+      "alternateColor": "000000"
+     }
+    },
+    "statistics": [
+     {
+      "name": "foulsCommitted",
+      "displayValue": "21",
+      "label": "Fouls"
+     },
+     {
+      "name": "yellowCards",
+      "displayValue": "3",
+      "label": "Yellow Cards"
+     },
+     {
+      "name": "redCards",
+      "displayValue": "0",
+      "label": "Red Cards"
+     },
+     {
+      "name": "offsides",
+      "displayValue": "0",
+      "label": "Offsides"
+     },
+     {
+      "name": "wonCorners",
+      "displayValue": "4",
+      "label": "Corner Kicks"
+     },
+     {
+      "name": "saves",
+      "displayValue": "4",
+      "label": "Saves"
+     },
+     {
+      "name": "possessionPct",
+      "displayValue": "43.5",
+      "label": "Possession"
+     },
+     {
+      "name": "totalShots",
+      "displayValue": "17",
+      "label": "SHOTS"
+     },
+     {
+      "name": "shotsOnTarget",
+      "displayValue": "6",
+      "label": "ON GOAL"
+     },
+     {
+      "name": "shotPct",
+      "displayValue": "0.4",
+      "label": "On Target %"
+     },
+     {
+      "name": "penaltyKickGoals",
+      "displayValue": "0",
+      "label": "Penalty Goals"
+     },
+     {
+      "name": "penaltyKickShots",
+      "displayValue": "0",
+      "label": "Penalty Kicks Taken"
+     },
+     {
+      "name": "accuratePasses",
+      "displayValue": "379",
+      "label": "Accurate Passes"
+     },
+     {
+      "name": "totalPasses",
+      "displayValue": "426",
+      "label": "Passes"
+     },
+     {
+      "name": "passPct",
+      "displayValue": "0.9",
+      "label": "Pass Completion %"
+     },
+     {
+      "name": "accurateCrosses",
+      "displayValue": "2",
+      "label": "Accurate Crosses"
+     },
+     {
+      "name": "totalCrosses",
+      "displayValue": "15",
+      "label": "Crosses"
+     },
+     {
+      "name": "crossPct",
+      "displayValue": "0.1",
+      "label": "Cross %"
+     },
+     {
+      "name": "totalLongBalls",
+      "displayValue": "36",
+      "label": "Long Balls"
+     },
+     {
+      "name": "accurateLongBalls",
+      "displayValue": "20",
+      "label": "Accurate Long Balls"
+     },
+     {
+      "name": "longballPct",
+      "displayValue": "0.6",
+      "label": "Long Balls %"
+     },
+     {
+      "name": "blockedShots",
+      "displayValue": "4",
+      "label": "Blocked Shots"
+     },
+     {
+      "name": "effectiveTackles",
+      "displayValue": "16",
+      "label": "Effective Tackles"
+     },
+     {
+      "name": "totalTackles",
+      "displayValue": "18",
+      "label": "Tackles"
+     },
+     {
+      "name": "tacklePct",
+      "displayValue": "0.9",
+      "label": "Tackle %"
+     },
+     {
+      "name": "interceptions",
+      "displayValue": "10",
+      "label": "Interceptions"
+     },
+     {
+      "name": "effectiveClearance",
+      "displayValue": "14",
+      "label": "Effective Clearances"
+     },
+     {
+      "name": "totalClearance",
+      "displayValue": "14",
+      "label": "Clearances"
+     }
+    ],
+    "displayOrder": 1,
+    "homeAway": "home"
+   },
+   {
+    "team": {
+     "id": "3445",
+     "uid": "s:600~t:3445",
+     "slug": "bra.fluminense_fc",
+     "location": "Fluminense",
+     "name": "Fluminense",
+     "abbreviation": "FLU",
+     "displayName": "Fluminense",
+     "shortDisplayName": "Fluminense",
+     "color": "7E0202",
+     "alternateColor": "417505",
+     "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3445.png",
+     "uniform": {
+      "type": "home",
+      "color": "006600",
+      "alternateColor": "cc0000"
+     }
+    },
+    "statistics": [
+     {
+      "name": "foulsCommitted",
+      "displayValue": "18",
+      "label": "Fouls"
+     },
+     {
+      "name": "yellowCards",
+      "displayValue": "4",
+      "label": "Yellow Cards"
+     },
+     {
+      "name": "redCards",
+      "displayValue": "0",
+      "label": "Red Cards"
+     },
+     {
+      "name": "offsides",
+      "displayValue": "0",
+      "label": "Offsides"
+     },
+     {
+      "name": "wonCorners",
+      "displayValue": "2",
+      "label": "Corner Kicks"
+     },
+     {
+      "name": "saves",
+      "displayValue": "5",
+      "label": "Saves"
+     },
+     {
+      "name": "possessionPct",
+      "displayValue": "56.5",
+      "label": "Possession"
+     },
+     {
+      "name": "totalShots",
+      "displayValue": "12",
+      "label": "SHOTS"
+     },
+     {
+      "name": "shotsOnTarget",
+      "displayValue": "4",
+      "label": "ON GOAL"
+     },
+     {
+      "name": "shotPct",
+      "displayValue": "0.3",
+      "label": "On Target %"
+     },
+     {
+      "name": "penaltyKickGoals",
+      "displayValue": "0",
+      "label": "Penalty Goals"
+     },
+     {
+      "name": "penaltyKickShots",
+      "displayValue": "0",
+      "label": "Penalty Kicks Taken"
+     },
+     {
+      "name": "accuratePasses",
+      "displayValue": "498",
+      "label": "Accurate Passes"
+     },
+     {
+      "name": "totalPasses",
+      "displayValue": "558",
+      "label": "Passes"
+     },
+     {
+      "name": "passPct",
+      "displayValue": "0.9",
+      "label": "Pass Completion %"
+     },
+     {
+      "name": "accurateCrosses",
+      "displayValue": "5",
+      "label": "Accurate Crosses"
+     },
+     {
+      "name": "totalCrosses",
+      "displayValue": "15",
+      "label": "Crosses"
+     },
+     {
+      "name": "crossPct",
+      "displayValue": "0.3",
+      "label": "Cross %"
+     },
+     {
+      "name": "totalLongBalls",
+      "displayValue": "31",
+      "label": "Long Balls"
+     },
+     {
+      "name": "accurateLongBalls",
+      "displayValue": "13",
+      "label": "Accurate Long Balls"
+     },
+     {
+      "name": "longballPct",
+      "displayValue": "0.4",
+      "label": "Long Balls %"
+     },
+     {
+      "name": "blockedShots",
+      "displayValue": "4",
+      "label": "Blocked Shots"
+     },
+     {
+      "name": "effectiveTackles",
+      "displayValue": "13",
+      "label": "Effective Tackles"
+     },
+     {
+      "name": "totalTackles",
+      "displayValue": "20",
+      "label": "Tackles"
+     },
+     {
+      "name": "tacklePct",
+      "displayValue": "0.7",
+      "label": "Tackle %"
+     },
+     {
+      "name": "interceptions",
+      "displayValue": "8",
+      "label": "Interceptions"
+     },
+     {
+      "name": "effectiveClearance",
+      "displayValue": "14",
+      "label": "Effective Clearances"
+     },
+     {
+      "name": "totalClearance",
+      "displayValue": "14",
+      "label": "Clearances"
+     }
+    ],
+    "displayOrder": 2,
+    "homeAway": "away"
+   }
+  ]
+ },
+ "keyEvents": [
+  {
+   "id": "53514317",
+   "type": {
+    "id": "80",
+    "text": "Kickoff",
+    "type": "kickoff"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 0.0,
+    "displayValue": ""
+   },
+   "scoringPlay": false,
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T20:30:10Z",
+   "shootout": false
+  },
+  {
+   "id": "53518974",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Erick Pulgar (Flamengo) is shown the yellow card for a bad foul.",
+   "shortText": "Erick Pulgar Yellow Card",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1827.0,
+    "displayValue": "31'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "202533",
+      "displayName": "Erick Pulgar"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:00:37Z",
+   "shootout": false
+  },
+  {
+   "id": "53519072",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "text": "Delay in match because of an injury Rodrigo Castillo (Fluminense).",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1877.0,
+    "displayValue": "32'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:01:27Z",
+   "shootout": false
+  },
+  {
+   "id": "53519073",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1877.0,
+    "displayValue": "32'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:01:28Z",
+   "shootout": false
+  },
+  {
+   "id": "53519229",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "text": "Delay over. They are ready to continue.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1958.0,
+    "displayValue": "33'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:02:48Z",
+   "shootout": false
+  },
+  {
+   "id": "53519230",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1958.0,
+    "displayValue": "33'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:02:49Z",
+   "shootout": false
+  },
+  {
+   "id": "53520117",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Lucho Acosta (Fluminense) is shown the yellow card for a bad foul.",
+   "shortText": "Luciano Acosta Yellow Card",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2327.0,
+    "displayValue": "39'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "199958",
+      "displayName": "Luciano Acosta"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:08:57Z",
+   "shootout": false
+  },
+  {
+   "id": "53521521",
+   "type": {
+    "id": "81",
+    "text": "Halftime",
+    "type": "halftime"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2700.0,
+    "displayValue": "45'+6'"
+   },
+   "scoringPlay": false,
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:21:08Z",
+   "shootout": false
+  },
+  {
+   "id": "53522816",
+   "type": {
+    "id": "82",
+    "text": "Start 2nd Half",
+    "type": "start-2nd-half"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 2700.0,
+    "displayValue": "45'"
+   },
+   "scoringPlay": false,
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:37:34Z",
+   "shootout": false
+  },
+  {
+   "id": "53523387",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Saúl (Flamengo) is shown the yellow card for a bad foul.",
+   "shortText": "Saúl Ñíguez Yellow Card",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 2926.0,
+    "displayValue": "49'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "172269",
+      "displayName": "Saúl Ñíguez"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:41:20Z",
+   "shootout": false
+  },
+  {
+   "id": "53524463",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Agustín Canobbio (Fluminense) is shown the yellow card for a bad foul.",
+   "shortText": "Agustín Canobbio Yellow Card",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3376.0,
+    "displayValue": "57'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "241466",
+      "displayName": "Agustín Canobbio"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:48:50Z",
+   "shootout": false
+  },
+  {
+   "id": "53524812",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Fluminense. Ganso replaces Lucho Acosta.",
+   "shortText": "Ganso Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3560.0,
+    "displayValue": "60'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "175902",
+      "displayName": "Ganso"
+     }
+    },
+    {
+     "athlete": {
+      "id": "199958",
+      "displayName": "Luciano Acosta"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:51:54Z",
+   "shootout": false
+  },
+  {
+   "id": "53524814",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Fluminense. Kevin Serna replaces Yeferson Soteldo.",
+   "shortText": "Kevin Serna Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3567.0,
+    "displayValue": "60'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "287633",
+      "displayName": "Kevin Serna"
+     }
+    },
+    {
+     "athlete": {
+      "id": "194039",
+      "displayName": "Yeferson Soteldo"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:52:02Z",
+   "shootout": false
+  },
+  {
+   "id": "53525314",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Flamengo. Bruno Henrique replaces Pedro.",
+   "shortText": "Bruno Henrique Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3818.0,
+    "displayValue": "64'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "201683",
+      "displayName": "Bruno Henrique"
+     }
+    },
+    {
+     "athlete": {
+      "id": "235017",
+      "displayName": "Pedro"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:56:12Z",
+   "shootout": false
+  },
+  {
+   "id": "53525315",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Flamengo. Joaquín Freitas replaces Saúl.",
+   "shortText": "Joaquin Freitas Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3820.0,
+    "displayValue": "64'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "414769",
+      "displayName": "Joaquin Freitas"
+     }
+    },
+    {
+     "athlete": {
+      "id": "172269",
+      "displayName": "Saúl Ñíguez"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:56:14Z",
+   "shootout": false
+  },
+  {
+   "id": "53525306",
+   "type": {
+    "id": "70",
+    "text": "Goal",
+    "type": "goal"
+   },
+   "text": "Goal! Flamengo 1, Fluminense 0. Jorge Carrascal (Flamengo) right footed shot from the centre of the box to the centre of the goal. Assisted by Lucas Paquetá.",
+   "shortText": "Jorge Carrascal Goal",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 3881.0,
+    "displayValue": "65'"
+   },
+   "scoringPlay": true,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "208700",
+      "displayName": "Jorge Carrascal"
+     }
+    },
+    {
+     "athlete": {
+      "id": "234715",
+      "displayName": "Lucas Paquetá"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T21:57:15Z",
+   "shootout": false,
+   "goalPositionY": 51.6,
+   "fieldPositionX": 92.7,
+   "fieldPositionY": 42.5,
+   "fieldPosition2X": 100.0,
+   "fieldPosition2Y": 51.6
+  },
+  {
+   "id": "53525680",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Fluminense. Hulk replaces Rodrigo Castillo.",
+   "shortText": "Hulk Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4113.0,
+    "displayValue": "69'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "124068",
+      "displayName": "Hulk"
+     }
+    },
+    {
+     "athlete": {
+      "id": "116395",
+      "displayName": "Rodrigo Castillo"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:01:07Z",
+   "shootout": false
+  },
+  {
+   "id": "53525681",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Fluminense. Jefferson Savarino replaces Agustín Canobbio.",
+   "shortText": "Jefferson Savarino Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4115.0,
+    "displayValue": "69'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "177219",
+      "displayName": "Jefferson Savarino"
+     }
+    },
+    {
+     "athlete": {
+      "id": "241466",
+      "displayName": "Agustín Canobbio"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:01:10Z",
+   "shootout": false
+  },
+  {
+   "id": "53526575",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Fluminense. Wesley Natã replaces Martinelli.",
+   "shortText": "Wesley Natã Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4630.0,
+    "displayValue": "78'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "403159",
+      "displayName": "Wesley Natã"
+     }
+    },
+    {
+     "athlete": {
+      "id": "307946",
+      "displayName": "Martinelli"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:09:45Z",
+   "shootout": false
+  },
+  {
+   "id": "53526576",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Flamengo. Nicolás de la Cruz replaces Samuel Lino.",
+   "shortText": "Nicolás de la Cruz Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4692.0,
+    "displayValue": "79'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "251889",
+      "displayName": "Nicolás de la Cruz"
+     }
+    },
+    {
+     "athlete": {
+      "id": "253937",
+      "displayName": "Samuel Lino"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:10:46Z",
+   "shootout": false
+  },
+  {
+   "id": "53526577",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Flamengo. Gonzalo Plata replaces Lucas Paquetá.",
+   "shortText": "Gonzalo Plata Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4701.0,
+    "displayValue": "79'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "277352",
+      "displayName": "Gonzalo Plata"
+     }
+    },
+    {
+     "athlete": {
+      "id": "234715",
+      "displayName": "Lucas Paquetá"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:10:55Z",
+   "shootout": false
+  },
+  {
+   "id": "53527016",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Ignácio (Fluminense) is shown the yellow card for a bad foul.",
+   "shortText": "Ignácio Yellow Card",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 4956.0,
+    "displayValue": "83'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "281559",
+      "displayName": "Ignácio"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:15:10Z",
+   "shootout": false
+  },
+  {
+   "id": "53527480",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Guilherme Arana (Fluminense) is shown the yellow card.",
+   "shortText": "Guilherme Arana Yellow Card",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5183.0,
+    "displayValue": "87'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "207269",
+      "displayName": "Guilherme Arana"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:18:57Z",
+   "shootout": false
+  },
+  {
+   "id": "53527908",
+   "type": {
+    "id": "76",
+    "text": "Substitution",
+    "type": "substitution"
+   },
+   "text": "Substitution, Flamengo. Danilo replaces Jorge Carrascal.",
+   "shortText": "Danilo Substitution",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5373.0,
+    "displayValue": "90'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "170369",
+      "displayName": "Danilo"
+     }
+    },
+    {
+     "athlete": {
+      "id": "208700",
+      "displayName": "Jorge Carrascal"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:22:07Z",
+   "shootout": false
+  },
+  {
+   "id": "53528078",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "text": "Delay in match because of an injury Danilo (Flamengo).",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400.0,
+    "displayValue": "90'+2'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:24:31Z",
+   "shootout": false
+  },
+  {
+   "id": "53528079",
+   "type": {
+    "id": "129",
+    "text": "Start Delay",
+    "type": "start-delay"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400.0,
+    "displayValue": "90'+2'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:24:31Z",
+   "shootout": false
+  },
+  {
+   "id": "53528081",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "text": "Delay over. They are ready to continue.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400.0,
+    "displayValue": "90'+4'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:25:49Z",
+   "shootout": false
+  },
+  {
+   "id": "53528080",
+   "type": {
+    "id": "130",
+    "text": "End Delay",
+    "type": "end-delay"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400.0,
+    "displayValue": "90'+4'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "3445",
+    "displayName": "Fluminense"
+   },
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:25:50Z",
+   "shootout": false
+  },
+  {
+   "id": "53528217",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card",
+    "type": "yellow-card"
+   },
+   "text": "Joaquín Freitas (Flamengo) is shown the yellow card.",
+   "shortText": "Joaquin Freitas Yellow Card",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400.0,
+    "displayValue": "90'+5'"
+   },
+   "scoringPlay": false,
+   "team": {
+    "id": "819",
+    "displayName": "Flamengo"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "414769",
+      "displayName": "Joaquin Freitas"
+     }
+    }
+   ],
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:27:01Z",
+   "shootout": false
+  },
+  {
+   "id": "53528561",
+   "type": {
+    "id": "83",
+    "text": "End Regular Time",
+    "type": "end-regular-time"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "value": 5400.0,
+    "displayValue": "90'+10'"
+   },
+   "scoringPlay": false,
+   "source": {
+    "id": "38",
+    "description": "SA.ENVOY"
+   },
+   "wallclock": "2026-10-11T22:31:58Z",
+   "shootout": false
+  }
+ ],
+ "rosters": [
+  {
+   "homeAway": "home",
+   "winner": true,
+   "team": {
+    "id": "819",
+    "abbreviation": "FLA",
+    "displayName": "Flamengo",
+    "color": "C60000",
+    "alternateColor": "000000",
+    "logos": [
+     {
+      "href": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+      "width": 500,
+      "height": 500,
+      "alt": "",
+      "rel": [
+       "full",
+       "default"
+      ],
+      "lastUpdated": "2020-02-20T17:24Z"
+     },
+     {
+      "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/819.png",
+      "width": 500,
+      "height": 500,
+      "alt": "",
+      "rel": [
+       "full",
+       "dark"
+      ],
+      "lastUpdated": "2020-02-20T17:24Z"
+     }
+    ]
+   },
+   "roster": [
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Agustín Rossi"
+     },
+     "position": {
+      "name": "Goalkeeper",
+      "displayName": "Goalkeeper",
+      "abbreviation": "G"
+     },
+     "jersey": "1"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Léo Pereira"
+     },
+     "position": {
+      "name": "Center Left Defender",
+      "displayName": "Center Left Defender",
+      "abbreviation": "CD-L"
+     },
+     "jersey": "4"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Léo Ortiz"
+     },
+     "position": {
+      "name": "Center Right Defender",
+      "displayName": "Center Right Defender",
+      "abbreviation": "CD-R"
+     },
+     "jersey": "3"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Alex Sandro"
+     },
+     "position": {
+      "name": "Left Back",
+      "displayName": "Left Back",
+      "abbreviation": "LB"
+     },
+     "jersey": "26"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Guillermo Varela"
+     },
+     "position": {
+      "name": "Right Back",
+      "displayName": "Right Back",
+      "abbreviation": "RB"
+     },
+     "jersey": "2"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Lucas Paquetá"
+     },
+     "position": {
+      "name": "Attacking Midfielder",
+      "displayName": "Attacking Midfielder",
+      "abbreviation": "AM"
+     },
+     "jersey": "11"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Saúl Ñíguez"
+     },
+     "position": {
+      "name": "Left Midfielder",
+      "displayName": "Left Midfielder",
+      "abbreviation": "LM"
+     },
+     "jersey": "8"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Erick Pulgar"
+     },
+     "position": {
+      "name": "Right Midfielder",
+      "displayName": "Right Midfielder",
+      "abbreviation": "RM"
+     },
+     "jersey": "5"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Pedro"
+     },
+     "position": {
+      "name": "Forward",
+      "displayName": "Forward",
+      "abbreviation": "F"
+     },
+     "jersey": "9"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Samuel Lino"
+     },
+     "position": {
+      "name": "Attacking Midfielder Left",
+      "displayName": "Attacking Midfielder Left",
+      "abbreviation": "AM-L"
+     },
+     "jersey": "16"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Jorge Carrascal"
+     },
+     "position": {
+      "name": "Attacking Midfielder Right",
+      "displayName": "Attacking Midfielder Right",
+      "abbreviation": "AM-R"
+     },
+     "jersey": "15"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Dyogo Alves"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "49"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Bruno Henrique"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "27"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Andrew"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "42"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Johnny Góes"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "77"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Gonzalo Plata"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "19"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Nicolás de la Cruz"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "18"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Vitão"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "44"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Luiz Araújo"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "7"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Emerson Royal"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "22"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Danilo"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "13"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Joaquin Freitas"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "30"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Anthony Valencia"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "14"
+    }
+   ],
+   "uniform": {
+    "type": "home",
+    "color": "ff0000",
+    "alternateColor": "000000"
+   },
+   "formation": "4-2-3-1"
+  },
+  {
+   "homeAway": "away",
+   "winner": false,
+   "team": {
+    "id": "3445",
+    "abbreviation": "FLU",
+    "displayName": "Fluminense",
+    "color": "7E0202",
+    "alternateColor": "417505",
+    "logos": [
+     {
+      "href": "https://a.espncdn.com/i/teamlogos/soccer/500/3445.png",
+      "width": 500,
+      "height": 500,
+      "alt": "",
+      "rel": [
+       "full",
+       "default"
+      ],
+      "lastUpdated": "2023-03-24T19:32Z"
+     },
+     {
+      "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/3445.png",
+      "width": 500,
+      "height": 500,
+      "alt": "",
+      "rel": [
+       "full",
+       "dark"
+      ],
+      "lastUpdated": "2023-03-24T19:33Z"
+     }
+    ]
+   },
+   "roster": [
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Fábio"
+     },
+     "position": {
+      "name": "Goalkeeper",
+      "displayName": "Goalkeeper",
+      "abbreviation": "G"
+     },
+     "jersey": "1"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Julian Millan"
+     },
+     "position": {
+      "name": "Center Left Defender",
+      "displayName": "Center Left Defender",
+      "abbreviation": "CD-L"
+     },
+     "jersey": "29"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Ignácio"
+     },
+     "position": {
+      "name": "Center Right Defender",
+      "displayName": "Center Right Defender",
+      "abbreviation": "CD-R"
+     },
+     "jersey": "4"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Guilherme Arana"
+     },
+     "position": {
+      "name": "Left Back",
+      "displayName": "Left Back",
+      "abbreviation": "LB"
+     },
+     "jersey": "13"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Samuel Xavier"
+     },
+     "position": {
+      "name": "Right Back",
+      "displayName": "Right Back",
+      "abbreviation": "RB"
+     },
+     "jersey": "2"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Luciano Acosta"
+     },
+     "position": {
+      "name": "Attacking Midfielder",
+      "displayName": "Attacking Midfielder",
+      "abbreviation": "AM"
+     },
+     "jersey": "32"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Martinelli"
+     },
+     "position": {
+      "name": "Left Midfielder",
+      "displayName": "Left Midfielder",
+      "abbreviation": "LM"
+     },
+     "jersey": "8"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Nonato"
+     },
+     "position": {
+      "name": "Right Midfielder",
+      "displayName": "Right Midfielder",
+      "abbreviation": "RM"
+     },
+     "jersey": "16"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Rodrigo Castillo"
+     },
+     "position": {
+      "name": "Forward",
+      "displayName": "Forward",
+      "abbreviation": "F"
+     },
+     "jersey": "19"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Yeferson Soteldo"
+     },
+     "position": {
+      "name": "Attacking Midfielder Left",
+      "displayName": "Attacking Midfielder Left",
+      "abbreviation": "AM-L"
+     },
+     "jersey": "30"
+    },
+    {
+     "starter": true,
+     "athlete": {
+      "displayName": "Agustín Canobbio"
+     },
+     "position": {
+      "name": "Attacking Midfielder Right",
+      "displayName": "Attacking Midfielder Right",
+      "abbreviation": "AM-R"
+     },
+     "jersey": "17"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Hércules"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "35"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Ganso"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "10"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Wesley Natã"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "34"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Igor Rabello"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "21"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Otávio"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "94"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Thiago Silva"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "3"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Vitor Eudes"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "98"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Jefferson Savarino"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "11"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Juan Freytes"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "22"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Guga"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "23"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Kevin Serna"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "90"
+    },
+    {
+     "starter": false,
+     "athlete": {
+      "displayName": "Hulk"
+     },
+     "position": {
+      "name": "Substitute",
+      "displayName": "Substitute",
+      "abbreviation": "SUB"
+     },
+     "jersey": "7"
+    }
+   ],
+   "uniform": {
+    "type": "home",
+    "color": "006600",
+    "alternateColor": "cc0000"
+   },
+   "formation": "4-2-3-1"
+  }
+ ],
+ "gameInfo": {
+  "venue": {
+   "id": "5120",
+   "guid": "510bb63a-a8c2-321e-8f34-f4dd1cfe6459",
+   "fullName": "Estadio do Maracana",
+   "shortName": "Estadio do Maracana",
+   "address": {
+    "city": "Rio de Janeiro",
+    "country": "Brazil"
+   },
+   "images": []
+  },
+  "attendance": 0
+ },
+ "header": {
+  "id": "401841263",
+  "uid": "s:600~l:630~e:401841263",
+  "season": {
+   "year": 2026,
+   "current": true,
+   "type": 13907,
+   "name": "2026 Brasileiro Serie A "
+  },
+  "timeValid": true,
+  "competitions": [
+   {
+    "id": "401841263",
+    "uid": "s:600~l:630~e:401841263~c:401841263",
+    "date": "2026-10-11T20:30Z",
+    "neutralSite": false,
+    "conferenceCompetition": false,
+    "boxscoreAvailable": true,
+    "commentaryAvailable": true,
+    "liveAvailable": false,
+    "onWatchESPN": false,
+    "recent": false,
+    "wallclockAvailable": true,
+    "boxscoreSource": "full",
+    "playByPlaySource": "full",
+    "competitors": [
+     {
+      "id": "819",
+      "uid": "s:600~t:819",
+      "order": 0,
+      "homeAway": "home",
+      "winner": true,
+      "team": {
+       "id": "819",
+       "guid": "f930b3df-19b3-baf7-98f7-bc1aff043be6",
+       "uid": "s:600~t:819",
+       "location": "Flamengo",
+       "name": "Flamengo",
+       "abbreviation": "FLA",
+       "displayName": "Flamengo",
+       "shortDisplayName": "Flamengo",
+       "color": "C60000",
+       "alternateColor": "000000",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "default"
+         ],
+         "lastUpdated": "2020-02-20T17:24Z"
+        },
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/819.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "dark"
+         ],
+         "lastUpdated": "2020-02-20T17:24Z"
+        }
+       ],
+       "groups": {
+        "name": "2026"
+       },
+       "links": [
+        {
+         "rel": [
+          "clubhouse",
+          "desktop",
+          "team"
+         ],
+         "href": "https://www.espn.com/soccer/club/_/id/819/flamengo",
+         "text": "Clubhouse"
+        }
+       ],
+       "form": "DDWDW"
+      },
+      "score": "1",
+      "linescores": [
+       {
+        "displayValue": "0"
+       },
+       {
+        "displayValue": "1"
+       }
+      ],
+      "record": [
+       {
+        "type": "total",
+        "summary": "19-7-4",
+        "displayValue": "19-7-4"
+       },
+       {
+        "type": "points",
+        "summary": "64",
+        "displayValue": "64"
+       }
+      ],
+      "possession": false
+     },
+     {
+      "id": "3445",
+      "uid": "s:600~t:3445",
+      "order": 1,
+      "homeAway": "away",
+      "winner": false,
+      "team": {
+       "id": "3445",
+       "guid": "acb7d1db-7b6f-a634-fbe9-802ab673179c",
+       "uid": "s:600~t:3445",
+       "location": "Fluminense",
+       "name": "Fluminense",
+       "abbreviation": "FLU",
+       "displayName": "Fluminense",
+       "shortDisplayName": "Fluminense",
+       "color": "7E0202",
+       "alternateColor": "417505",
+       "logos": [
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500/3445.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "default"
+         ],
+         "lastUpdated": "2023-03-24T19:32Z"
+        },
+        {
+         "href": "https://a.espncdn.com/i/teamlogos/soccer/500-dark/3445.png",
+         "width": 500,
+         "height": 500,
+         "alt": "",
+         "rel": [
+          "full",
+          "dark"
+         ],
+         "lastUpdated": "2023-03-24T19:33Z"
+        }
+       ],
+       "groups": {
+        "name": "2026"
+       },
+       "links": [
+        {
+         "rel": [
+          "clubhouse",
+          "desktop",
+          "team"
+         ],
+         "href": "https://www.espn.com/soccer/club/_/id/3445/fluminense",
+         "text": "Clubhouse"
+        }
+       ],
+       "form": "DWWLL"
+      },
+      "score": "0",
+      "linescores": [
+       {
+        "displayValue": "0"
+       },
+       {
+        "displayValue": "0"
+       }
+      ],
+      "record": [
+       {
+        "type": "total",
+        "summary": "14-9-7",
+        "displayValue": "14-9-7"
+       },
+       {
+        "type": "points",
+        "summary": "51",
+        "displayValue": "51"
+       }
+      ],
+      "possession": false
+     }
+    ],
+    "notes": [],
+    "status": {
+     "type": {
+      "id": "28",
+      "name": "STATUS_FULL_TIME",
+      "state": "post",
+      "completed": true,
+      "description": "Full Time",
+      "detail": "FT",
+      "shortDetail": "FT"
+     }
+    },
+    "broadcasts": [],
+    "details": [
+     {
+      "clock": {
+       "value": 3881.0,
+       "displayValue": "65'"
+      },
+      "scoringPlay": true,
+      "team": {
+       "id": "819",
+       "uid": "s:600~t:819",
+       "location": "Flamengo",
+       "name": "Flamengo",
+       "abbreviation": "FLA",
+       "displayName": "Flamengo"
+      },
+      "participants": [
+       {
+        "athlete": {
+         "id": "208700",
+         "displayName": "Jorge Carrascal",
+         "shortName": "J. Carrascal",
+         "links": [
+          {
+           "language": "en-US",
+           "rel": [
+            "playercard",
+            "desktop",
+            "athlete"
+           ],
+           "href": "https://www.espn.com/soccer/player/_/id/208700/jorge-carrascal",
+           "text": "Player Card",
+           "shortText": "Player Card"
+          }
+         ]
+        }
+       },
+       {
+        "athlete": {
+         "id": "234715",
+         "displayName": "Lucas Paquetá",
+         "shortName": "L. Paquetá",
+         "links": [
+          {
+           "language": "en-US",
+           "rel": [
+            "playercard",
+            "desktop",
+            "athlete"
+           ],
+           "href": "https://www.espn.com/soccer/player/_/id/234715/lucas-paqueta",
+           "text": "Player Card",
+           "shortText": "Player Card"
+          }
+         ]
+        }
+       }
+      ],
+      "addedClock": {
+       "value": 0.0,
+       "displayValue": ""
+      },
+      "redCard": false,
+      "penaltyKick": false,
+      "ownGoal": false
+     }
+    ],
+    "groups": {
+     "id": "1",
+     "name": "Group A",
+     "abbreviation": "Group A"
+    },
+    "isFinal": false,
+    "isThirdPlace": false,
+    "altGameNote": "Brazil Serie A",
+    "boxscoreMinutes": false,
+    "shotMapAvailable": true
+   }
+  ],
+  "links": [
+   {
+    "rel": [
+     "summary",
+     "desktop",
+     "event"
+    ],
+    "href": "https://www.espn.com/soccer/match/_/gameId/401841263/fluminense-flamengo",
+    "text": "Summary",
+    "shortText": "Summary",
+    "isExternal": false,
+    "isPremium": false
+   },
+   {
+    "rel": [
+     "commentary",
+     "desktop",
+     "event"
+    ],
+    "href": "https://www.espn.com/soccer/commentary/_/gameId/401841263",
+    "text": "Commentary",
+    "shortText": "Commentary",
+    "isExternal": false,
+    "isPremium": false
+   }
+  ],
+  "league": {
+   "id": "630",
+   "uid": "s:600~l:630",
+   "name": "Brazilian Serie A",
+   "abbreviation": "Brazil Serie A",
+   "shortName": "Brazil Serie A",
+   "midsizeName": "BRA.1",
+   "slug": "bra.1",
+   "isTournament": false,
+   "links": [
+    {
+     "rel": [
+      "index",
+      "desktop",
+      "league"
+     ],
+     "href": "https://www.espn.com/soccer/league/_/name/bra.1",
+     "text": "Index"
+    },
+    {
+     "rel": [
+      "index",
+      "sportscenter",
+      "app",
+      "league"
+     ],
+     "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~l:630",
+     "text": "Index"
+    },
+    {
+     "rel": [
+      "schedule",
+      "desktop",
+      "league"
+     ],
+     "href": "https://www.espn.com/soccer/schedule/_/league/bra.1",
+     "text": "Schedule"
+    },
+    {
+     "rel": [
+      "schedule",
+      "sportscenter",
+      "app",
+      "league"
+     ],
+     "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~l:630&section=scores",
+     "text": "Schedule"
+    },
+    {
+     "rel": [
+      "standings",
+      "desktop",
+      "league"
+     ],
+     "href": "https://www.espn.com/soccer/table/_/league/bra.1",
+     "text": "Standings"
+    },
+    {
+     "rel": [
+      "standings",
+      "sportscenter",
+      "app",
+      "league"
+     ],
+     "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~l:630&section=standings",
+     "text": "Standings"
+    },
+    {
+     "rel": [
+      "scores",
+      "desktop",
+      "league"
+     ],
+     "href": "https://www.espn.com/soccer/scoreboard/_/league/bra.1",
+     "text": "Scores"
+    },
+    {
+     "rel": [
+      "scores",
+      "sportscenter",
+      "app",
+      "league"
+     ],
+     "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~l:630&section=scores",
+     "text": "Scores"
+    },
+    {
+     "rel": [
+      "stats",
+      "desktop",
+      "league"
+     ],
+     "href": "https://www.espn.com/soccer/stats/_/league/bra.1",
+     "text": "Stats"
+    },
+    {
+     "rel": [
+      "stats",
+      "sportscenter",
+      "app",
+      "league"
+     ],
+     "href": "sportscenter://x-callback-url/showClubhouse?uid=s:600~l:630&section=stats",
+     "text": "Stats"
+    },
+    {
+     "rel": [
+      "teams",
+      "desktop",
+      "league"
+     ],
+     "href": "https://www.espn.com/soccer/teams/_/league/bra.1",
+     "text": "Teams"
+    }
+   ],
+   "logos": [
+    {
+     "href": "https://a.espncdn.com/i/leaguelogos/soccer/500/85.png",
+     "rel": [
+      "full",
+      "default"
+     ]
+    },
+    {
+     "href": "https://a.espncdn.com/i/leaguelogos/soccer/500-dark/85.png",
+     "rel": [
+      "full",
+      "dark"
+     ]
+    }
+   ]
+  },
+  "linksv4": [
+   {
+    "rel": [
+     "summary",
+     "desktop",
+     "event"
+    ],
+    "href": "https://www.espn.com/soccer/match/_/gameId/401841263/fluminense-flamengo",
+    "text": "Gamecast",
+    "shortText": "Summary",
+    "isExternal": false,
+    "isPremium": false
+   },
+   {
+    "rel": [
+     "teamstats",
+     "desktop",
+     "event"
+    ],
+    "href": "https://www.espn.com/soccer/team-stats/_/gameId/401841263",
+    "text": "Team Stats",
+    "shortText": "Team Stats",
+    "isExternal": false,
+    "isPremium": false
+   },
+   {
+    "rel": [
+     "playerstats",
+     "desktop",
+     "event"
+    ],
+    "href": "https://www.espn.com/soccer/player-stats/_/gameId/401841263",
+    "text": "Player Stats",
+    "shortText": "Player Stats",
+    "isExternal": false,
+    "isPremium": false
+   },
+   {
+    "rel": [
+     "commentary",
+     "desktop",
+     "event"
+    ],
+    "href": "https://www.espn.com/soccer/commentary/_/gameId/401841263",
+    "text": "Commentary",
+    "shortText": "Commentary",
+    "isExternal": false,
+    "isPremium": false
+   }
+  ]
+ }
+}
