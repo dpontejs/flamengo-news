@@ -89,6 +89,7 @@ class Newsletter(BaseModel):
 
     edition: Edition
     intro: str
+    headline: str = ""
     topics: list[Topic] = Field(default_factory=list)
     last_match: MatchStats | None = None
     next_match: NextMatch | None = None

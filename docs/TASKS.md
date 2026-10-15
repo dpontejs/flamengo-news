@@ -142,7 +142,7 @@ Instruções para o modelo que for executar:
 
 ## Fase 4 — Renderização e envio
 
-### [ ] T14 — Template HTML e texto
+### [x] T14 — Template HTML e texto
 - **Arquivos:** `src/flanews/render/renderer.py`, `src/flanews/render/templates/newsletter.html.j2`, `newsletter.txt.j2`, `tests/test_renderer.py`
 - **O que fazer:**
   - Layout do PLAN §6, tabelas (não flex/grid), largura 600px, cores `#C3281E` (vermelho) e `#000`, fonte system.

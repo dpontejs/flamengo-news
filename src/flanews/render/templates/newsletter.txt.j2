@@ -1,0 +1,58 @@
+FLAMENGO NEWS
+{{ n.edition.label }}
+{% if n.headline %}
+
+{{ n.headline }}
+{% endif %}
+
+{{ n.intro }}
+{% if n.last_match %}{% set m = n.last_match %}
+
+== Última partida ==
+{{ m.home }} {{ m.home_goals }} x {{ m.away_goals }} {{ m.away }}
+{{ m.competition }} · {{ m.date | when }}{% if m.venue %} · {{ m.venue }}{% endif %}
+
+{% for e in m.events if e.type == "goal" %}
+⚽ {{ e | minute }} {{ e.player }}{% if e.detail %} ({{ e.detail }}){% endif %} — {{ e.team }}
+{% endfor %}
+{% if m.statistics %}
+
+{% for label, values in m.statistics.items() %}
+{{ label }}: {{ values[0] }} x {{ values[1] }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if n.topics %}
+
+== Notícias ==
+{% for t in n.topics %}
+
+* {{ t.title }}
+{{ t.summary }}
+{% for a in t.articles %}
+  - {{ a.source | source }}: {{ a.url }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% if n.next_match %}{% set x = n.next_match %}
+
+== Próximo jogo ==
+{% if x.is_home %}Flamengo x {{ x.opponent }}{% else %}{{ x.opponent }} x Flamengo{% endif %}
+
+{{ x.competition }} · {{ x.date | when }}{% if x.venue %} · {{ x.venue }}{% endif %}
+
+{% endif %}
+{% if standings %}
+
+== Classificação ==
+{% for r in standings %}
+{{ r.position }}. {{ r.team }} — {{ r.points }} pts ({{ r.played }} J, SG {{ r.goals_diff }}){% if r.is_flamengo %} ◀{% endif %}
+
+{% endfor %}
+{% endif %}
+
+--
+Resumo gerado com IA a partir das fontes citadas.
+{% if unsubscribe_url %}
+Para se descadastrar: {{ unsubscribe_url }}
+{% endif %}

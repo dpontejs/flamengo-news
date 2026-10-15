@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flamengo News — {{ n.edition.label }}</title>
+<style>
+  body { margin: 0; padding: 0; background-color: #f2f2f2; }
+  .wrapper { background-color: #f2f2f2; }
+  .container { background-color: #ffffff; }
+  .font { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #000000; }
+  .header { background-color: #000000; color: #ffffff; padding: 24px; }
+  .brand { color: #C3281E; font-size: 26px; font-weight: bold; margin: 0; }
+  .label { color: #ffffff; font-size: 14px; margin: 4px 0 0 0; }
+  .stripe { background-color: #C3281E; height: 6px; line-height: 6px; font-size: 6px; }
+  .section { padding: 20px 24px; border-bottom: 1px solid #e5e5e5; }
+  .section-title { color: #C3281E; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 12px 0; }
+  .headline { font-size: 22px; font-weight: bold; line-height: 1.3; margin: 0 0 8px 0; }
+  .text { font-size: 15px; line-height: 1.5; margin: 0; }
+  .muted { color: #666666; font-size: 13px; line-height: 1.5; margin: 4px 0 0 0; }
+  .score { font-size: 24px; font-weight: bold; margin: 0; }
+  .topic { padding: 0 0 16px 0; }
+  .topic-title { font-size: 17px; font-weight: bold; margin: 0 0 6px 0; }
+  .link { color: #C3281E; }
+  .stats td { font-size: 14px; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
+  .table th { font-size: 12px; color: #666666; text-align: left; padding: 4px; border-bottom: 2px solid #000000; }
+  .table td { font-size: 14px; padding: 6px 4px; border-bottom: 1px solid #f0f0f0; }
+  .fla td { font-weight: bold; color: #C3281E; }
+  .footer { padding: 20px 24px; color: #666666; font-size: 12px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<table role="presentation" class="wrapper" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td align="center" style="padding: 16px 8px;">
+<table role="presentation" class="container font" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
+
+  <tr><td class="header font">
+    <p class="brand">🔴⚫ Flamengo News</p>
+    <p class="label">{{ n.edition.label }}</p>
+  </td></tr>
+  <tr><td class="stripe">&nbsp;</td></tr>
+
+  <tr><td class="section font">
+    {% if n.headline %}<p class="headline">{{ n.headline }}</p>{% endif %}
+    <p class="text">{{ n.intro }}</p>
+  </td></tr>
+
+  {% if n.last_match %}{% set m = n.last_match %}
+  <tr><td class="section font">
+    <p class="section-title">Última partida</p>
+    <p class="score">{{ m.home }} {{ m.home_goals }} x {{ m.away_goals }} {{ m.away }}</p>
+    <p class="muted">{{ m.competition }} · {{ m.date | when }}{% if m.venue %} · {{ m.venue }}{% endif %}</p>
+    {% for e in m.events if e.type == "goal" %}
+    <p class="text">⚽ {{ e | minute }} {{ e.player }} <span class="muted">({{ e.team }}{% if e.detail %}; {{ e.detail }}{% endif %})</span></p>
+    {% endfor %}
+    {% if m.statistics %}
+    <table role="presentation" class="stats" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 12px;">
+      <tr><td width="30%" style="font-weight: bold;">{{ m.home }}</td><td width="40%" align="center"></td><td width="30%" align="right" style="font-weight: bold;">{{ m.away }}</td></tr>
+      {% for label, values in m.statistics.items() %}
+      <tr><td>{{ values[0] }}</td><td align="center" style="color: #666666;">{{ label }}</td><td align="right">{{ values[1] }}</td></tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </td></tr>
+  {% endif %}
+
+  {% if n.topics %}
+  <tr><td class="section font">
+    <p class="section-title">Notícias</p>
+    {% for t in n.topics %}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="topic">
+      <p class="topic-title">{{ t.title }}</p>
+      <p class="text">{{ t.summary }}</p>
+      {% if t.articles %}<p class="muted">Fontes: {% for a in t.articles %}<a class="link" href="{{ a.url }}">{{ a.source | source }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+    </td></tr></table>
+    {% endfor %}
+  </td></tr>
+  {% endif %}
+
+  {% if n.next_match %}{% set x = n.next_match %}
+  <tr><td class="section font">
+    <p class="section-title">Próximo jogo</p>
+    <p class="topic-title">{% if x.is_home %}Flamengo x {{ x.opponent }}{% else %}{{ x.opponent }} x Flamengo{% endif %}</p>
+    <p class="muted">{{ x.competition }} · {{ x.date | when }}{% if x.venue %} · {{ x.venue }}{% endif %}</p>
+  </td></tr>
+  {% endif %}
+
+  {% if standings %}
+  <tr><td class="section font">
+    <p class="section-title">Classificação</p>
+    <table role="presentation" class="table" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><th>#</th><th>Time</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr>
+      {% for r in standings %}
+      <tr{% if r.is_flamengo %} class="fla"{% endif %}><td>{{ r.position }}</td><td>{{ r.team }}</td><td>{{ r.points }}</td><td>{{ r.played }}</td><td>{{ r.won }}</td><td>{{ r.drawn }}</td><td>{{ r.lost }}</td><td>{{ r.goals_diff }}</td></tr>
+      {% endfor %}
+    </table>
+  </td></tr>
+  {% endif %}
+
+  <tr><td class="footer font">
+    Resumo gerado com IA a partir das fontes citadas; confira os links para detalhes.
+    {% if unsubscribe_url %}<br>Não quer mais receber? <a class="link" href="{{ unsubscribe_url }}">Clique para se descadastrar</a>.{% endif %}
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
