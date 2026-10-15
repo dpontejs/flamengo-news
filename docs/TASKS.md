@@ -203,7 +203,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** rodar manualmente via `workflow_dispatch` com dry-run primeiro.
 - **Commit:** `ci: add scheduled newsletter workflow`
 
-### [ ] T19 — Observabilidade e robustez
+### [x] T19 — Observabilidade e robustez
 - **O que fazer:** logging estruturado (`logging` com níveis), resumo final no log (artigos coletados por fonte, tópicos, tokens usados se disponível), falhas parciais não abortam. Escrever resumo no `$GITHUB_STEP_SUMMARY`.
 - **Commit:** `feat: add structured logging and run summary`
 

@@ -27,6 +27,14 @@ MAX_RETRY_DELAY = 60.0
 _backoff = wait_exponential(multiplier=5, max=MAX_RETRY_DELAY)
 
 
+class Usage(BaseModel):
+    """Successful calls and tokens spent, for the run report."""
+
+    calls: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+
+
 class LLMError(Exception):
     """Raised when the LLM cannot produce a valid response."""
 
@@ -83,6 +91,7 @@ class GeminiClient(LLMClient):
             api_key=api_key, http_options=types.HttpOptions(timeout=TIMEOUT_MS)
         )
         self._wait = wait or _default_wait
+        self.usage = Usage()
 
     def generate_json[T: BaseModel](self, prompt: str, schema: type[T]) -> T:
         retrying = Retrying(
@@ -115,7 +124,13 @@ class GeminiClient(LLMClient):
         )
         if not response.text:
             raise ValueError("empty response from Gemini")
-        return schema.model_validate_json(response.text)
+        result = schema.model_validate_json(response.text)
+        metadata = response.usage_metadata
+        self.usage.calls += 1
+        if metadata is not None:
+            self.usage.input_tokens += metadata.prompt_token_count or 0
+            self.usage.output_tokens += metadata.candidates_token_count or 0
+        return result
 
 
 def get_llm_client(settings: Settings | None = None) -> LLMClient:

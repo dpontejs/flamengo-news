@@ -1,4 +1,5 @@
 import logging
+import os
 import webbrowser
 from datetime import datetime
 from pathlib import Path
@@ -11,11 +12,13 @@ from rich.table import Table
 from flanews import __version__, pipeline
 from flanews.config import get_settings
 from flanews.edition import resolve_edition
-from flanews.models import Edition
+from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
+from flanews.report import ProblemCollector, RunReport
 from flanews.send.resend_sender import ResendSender, SendError, build_subject
 from flanews.stats.espn import ESPNStatsClient
 from flanews.stats.table import standings_window
+from flanews.summarizer.client import LLMError
 
 app = typer.Typer(help="Flamengo News CLI", no_args_is_help=True)
 
@@ -150,31 +153,72 @@ def run(
     _setup_logging()
     resolved = _resolve(edition, date)
     settings = get_settings()
-    newsletter = pipeline.build_newsletter(resolved, settings)
-    if pipeline.is_empty(newsletter):
-        typer.echo(f"Nada para enviar em {resolved.label}: sem notícias e sem partida.")
-        raise typer.Exit(code=1)
-
-    unsubscribe = pipeline.unsubscribe_url(settings)
-    html, text = render(newsletter, unsubscribe_url=unsubscribe)
-    html_path = Path("out") / f"newsletter-{resolved.end:%Y-%m-%d}.html"
-    html_path.parent.mkdir(parents=True, exist_ok=True)
-    html_path.write_text(html, encoding="utf-8")
-    html_path.with_suffix(".txt").write_text(text, encoding="utf-8")
-
+    report = RunReport(edition=resolved.label, outcome="interrompida")
     try:
-        email_id = ResendSender.from_settings(settings).send(
-            build_subject(newsletter), html, text, unsubscribe
-        )
-    except SendError as e:
-        typer.echo(f"Falha no envio: {e}")
-        raise typer.Exit(code=2) from e
-    status = f"enviada (id={email_id})" if email_id else "não enviada (DRY_RUN)"
-    typer.echo(f"{resolved.label}: {status}; cópia em {html_path}")
+        llm = pipeline.get_llm_client(settings)
+    except LLMError:
+        llm = None  # build_newsletter logs the failure and keeps the stats sections
+
+    with ProblemCollector() as problems:
+        try:
+            newsletter = pipeline.build_newsletter(resolved, settings, llm=llm, report=report)
+            _fill_report(report, newsletter)
+            if pipeline.is_empty(newsletter):
+                report.outcome = "nada para enviar (sem notícias e sem partida)"
+                typer.echo(f"Nada para enviar em {resolved.label}: sem notícias e sem partida.")
+                raise typer.Exit(code=1)
+
+            unsubscribe = pipeline.unsubscribe_url(settings)
+            html, text = render(newsletter, unsubscribe_url=unsubscribe)
+            html_path = Path("out") / f"newsletter-{resolved.end:%Y-%m-%d}.html"
+            html_path.parent.mkdir(parents=True, exist_ok=True)
+            html_path.write_text(html, encoding="utf-8")
+            html_path.with_suffix(".txt").write_text(text, encoding="utf-8")
+
+            try:
+                email_id = ResendSender.from_settings(settings).send(
+                    build_subject(newsletter), html, text, unsubscribe
+                )
+            except SendError as e:
+                report.outcome = f"falha no envio: {e}"
+                typer.echo(f"Falha no envio: {e}")
+                raise typer.Exit(code=2) from e
+            status = f"enviada (id={email_id})" if email_id else "não enviada (DRY_RUN)"
+            report.outcome = status
+            typer.echo(f"{resolved.label}: {status}; cópia em {html_path}")
+        finally:
+            usage = getattr(llm, "usage", None)
+            if usage is not None:
+                report.llm_calls = usage.calls
+                report.input_tokens = usage.input_tokens
+                report.output_tokens = usage.output_tokens
+            report.problems = problems.messages
+            _publish_report(report)
+
+
+def _fill_report(report: RunReport, newsletter: Newsletter) -> None:
+    report.topics = [t.title for t in newsletter.topics]
+    report.learn_more = len(newsletter.learn_more)
+    report.around_brazil = len(newsletter.around_brazil)
+    report.has_match = newsletter.last_match is not None
+    report.has_next_match = newsletter.next_match is not None
+    report.has_standings = bool(newsletter.standings)
+
+
+def _publish_report(report: RunReport) -> None:
+    """Print the run summary and, on GitHub Actions, add it to the job summary page."""
+    markdown = report.to_markdown()
+    typer.echo(markdown)
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        with open(summary_path, "a", encoding="utf-8") as summary:
+            summary.write(markdown)
 
 
 def _setup_logging() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+    )
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
 

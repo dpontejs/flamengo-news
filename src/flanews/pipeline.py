@@ -1,4 +1,5 @@
 import logging
+from collections import Counter
 from collections.abc import Callable
 from email.utils import parseaddr
 from typing import Protocol
@@ -19,6 +20,7 @@ from flanews.models import (
 )
 from flanews.processing.dedupe import dedupe, is_relevant
 from flanews.processing.extract import DomainRateLimiter, extract_articles
+from flanews.report import RunReport
 from flanews.stats.espn import ESPNStatsClient
 from flanews.summarizer.client import LLMClient, LLMError, get_llm_client
 from flanews.summarizer.pipeline import EditionSummary, summarize_edition, write_analysis
@@ -104,6 +106,7 @@ def build_newsletter(
     llm: LLMClient | None = None,
     candidates: Callable[[Edition, Settings], tuple[list[Article], list[Article]]] | None = None,
     extract: Callable[[list[Article]], list[Article]] | None = None,
+    report: RunReport | None = None,
 ) -> Newsletter:
     """Collect news and stats for the edition and summarize them into a Newsletter.
 
@@ -118,6 +121,11 @@ def build_newsletter(
 
     articles = collect(edition, settings)
     learn_more, brazil = (candidates or collect_candidates)(edition, settings)
+    if report is not None:
+        report.articles_by_source = dict(
+            Counter(a.source.split(":", 1)[0] for a in articles).most_common()
+        )
+        report.candidates = {"saiba_mais": len(learn_more), "brasil": len(brazil)}
     last_match = stats_client.get_last_match(edition.start, edition.end)
     next_match = stats_client.get_next_match(edition.end)
     standings = stats_client.get_standings("bra.1")

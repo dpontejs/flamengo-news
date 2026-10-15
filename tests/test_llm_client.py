@@ -143,3 +143,21 @@ def test_generate_json_does_not_retry_daily_quota_errors() -> None:
     with pytest.raises(LLMError):
         make_client().generate_json("Resuma", Headline)
     assert route.call_count == 1
+
+
+@respx.mock
+def test_generate_json_accumulates_token_usage() -> None:
+    response = gemini_response('{"title": "Flamengo vence", "importance": 5}')
+    body = json.loads(response.content)
+    body["usageMetadata"] = {"promptTokenCount": 120, "candidatesTokenCount": 30}
+    respx.post(GENERATE_URL).mock(return_value=httpx.Response(200, json=body))
+    client = make_client()
+
+    client.generate_json("Resuma", Headline)
+    client.generate_json("Resuma", Headline)
+
+    assert (client.usage.calls, client.usage.input_tokens, client.usage.output_tokens) == (
+        2,
+        240,
+        60,
+    )

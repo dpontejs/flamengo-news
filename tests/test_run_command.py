@@ -155,3 +155,56 @@ def test_run_dry_run_saves_but_does_not_send(env, tmp_path) -> None:
     assert result.exit_code == 0, result.output
     assert not route.called
     assert (tmp_path / "out" / "newsletter-2026-10-12.html").exists()
+
+
+@respx.mock
+def test_run_writes_report_to_github_step_summary(env, tmp_path) -> None:
+    summary = tmp_path / "summary.md"
+    env.setenv("GITHUB_STEP_SUMMARY", str(summary))
+
+    def collect(edition, settings):
+        import logging
+
+        logging.getLogger("flanews.collectors.ge").warning("ge fora do ar")
+        return [ARTICLE]
+
+    env.setattr(pipeline, "collect_articles", collect)
+    env.setattr(pipeline, "collect_candidates", lambda edition, settings: ([], []))
+    env.setattr(pipeline, "ESPNStatsClient", lambda **kwargs: FakeStats(MATCH))
+    respx.post(RESEND_URL).mock(return_value=httpx.Response(200, json={"id": "email_9"}))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    report = summary.read_text(encoding="utf-8")
+    assert "## Flamengo News — Edição de Segunda — 12/10/2026" in report
+    assert "**Resultado:** enviada (id=email_9)" in report
+    assert "| ge | 1 |" in report
+    assert "- Fla-Flu" in report
+    assert "Última partida: ✅" in report
+    assert "ge fora do ar" in report
+
+
+@respx.mock
+def test_run_reports_empty_edition(env, tmp_path) -> None:
+    summary = tmp_path / "summary.md"
+    env.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    use(env, [], None)
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 1
+    assert "**Resultado:** nada para enviar" in summary.read_text(encoding="utf-8")
+
+
+@respx.mock
+def test_run_reports_send_failure_and_prints_without_github(env) -> None:
+    use(env, [ARTICLE], MATCH)
+    respx.post(RESEND_URL).mock(
+        return_value=httpx.Response(403, json={"message": "Domain not verified"})
+    )
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 2
+    assert "**Resultado:** falha no envio" in result.output
