@@ -1,7 +1,7 @@
 # Identidade visual Urubu News
 
 - **Data:** 2026-10-15
-- **Status:** implementada com logo provisória (trocar `src/flanews/web/static/*.png` pela do Nano Banana)
+- **Status:** entregue, com a logo gerada no Nano Banana
 - **ADRs:** —
 
 ## Objetivo
@@ -22,8 +22,9 @@ não parecer canal oficial do clube. O conteúdo continua sendo o Flamengo.
 - Paleta: carvão `#141414`, vermelho-urubu `#A51C24`, papel `#F4EFE6`, tinta `#1C1C1C`,
   cinza `#6B6B6B`. Fonte de títulos na página: Oswald (Google Fonts); e-mail usa a fonte do sistema.
 - Arquivos em `src/flanews/web/static/`, servidos em `{PUBLIC_URL}/static/`:
-  - `logo-email.png` (600×120, exibida a 300×60, fundo transparente sobre o carvão do cabeçalho);
-  - `icon-512.png` (ícone sozinho: favicon, `og:image`, avatar do Gmail).
+  - `logo-email.png` (640×255, exibida a 320×127, sobre o papel; por isso o cabeçalho é claro);
+  - `icon-512.png` (ícone sozinho, transparente fora do círculo: favicon, `og:image`, avatar do Gmail).
+  - Originais (Nano Banana) recortados e com paleta reduzida (31 KB e 17 KB).
 - `render(..., logo_url=...)`: o cabeçalho da newsletter usa `<img src=logo_url alt="Urubu News">`.
 - Rodapé da newsletter e da página: "Feito por um torcedor, sem ligação oficial com o clube."
 - Ícone: urubu com cara de mau (mascote de time/e-sports), traço chapado e contorno forte,

@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ public_url }}/">
 <meta property="og:image" content="{{ public_url }}/static/icon-512.png">
-<meta name="theme-color" content="#141414">
+<meta name="theme-color" content="#F4EFE6">
 <link rel="icon" href="/static/icon-512.png">
 <link rel="apple-touch-icon" href="/static/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,6 @@
     --paper: #ffffff;
     --bg: #F4EFE6;
     --black: #141414;
-    --paper-text: #F4EFE6;
     --display: "Oswald", "Arial Narrow", Impact, sans-serif;
   }
   * { box-sizing: border-box; }
@@ -40,14 +39,14 @@
   }
   a { color: var(--red); font-weight: 600; text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .header { background: var(--black); }
+  .header { background: var(--bg); }
   .header-inner, .main, .footer-inner { max-width: 720px; margin: 0 auto; padding: 0 16px; }
   .header-inner { display: flex; align-items: center; gap: 14px; padding-top: 18px; padding-bottom: 18px; }
-  .header img { width: 52px; height: 52px; border-radius: 50%; }
-  .brand { color: var(--paper-text); font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: 1.5px; line-height: 1.1; margin: 0; }
+  .header img { width: 64px; height: 64px; }
+  .brand { color: var(--black); font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: 1.5px; line-height: 1.1; margin: 0; }
   .brand span { color: var(--red); }
   .brand-link:hover { text-decoration: none; }
-  .tagline { color: #bbbbbb; font-size: 13px; margin: 2px 0 0; }
+  .tagline { color: var(--muted); font-size: 13px; margin: 2px 0 0; }
   .stripe { background: var(--red); height: 5px; }
   .card { background: var(--paper); margin: 24px 0; padding: 28px 24px; }
   h1 { font-family: var(--display); font-size: 34px; line-height: 1.15; font-weight: 700; margin: 0 0 12px; color: var(--black); }
@@ -93,7 +92,7 @@
 <body>
 <header class="header">
   <div class="header-inner">
-    <img src="/static/icon-512.png" alt="" width="52" height="52">
+    <img src="/static/icon-512.png" alt="" width="64" height="64">
     <div>
       <a class="brand-link" href="/"><p class="brand">URUBU <span>NEWS</span></p></a>
       <p class="tagline">Segunda e sexta, às 8h, no seu e-mail</p>
