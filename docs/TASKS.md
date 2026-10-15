@@ -211,7 +211,7 @@ Instruções para o modelo que for executar:
 - **O que fazer:** README com setup completo: criar chaves (Gemini AI Studio, Resend + verificação de domínio), configurar secrets, rodar preview, ajustar prompts, adicionar nova fonte.
 - **Commit:** `docs: document setup, secrets and usage`
 
-### [ ] T21 — Inscritos e tokens
+### [x] T21 — Inscritos e tokens
 - **O que fazer:** `flanews.web.store` (SQLite: pending/active/unsubscribed) e `flanews.web.tokens` (HMAC para confirmar e descadastrar). Ver `docs/features/inscricao.md`.
 - **Commit:** `feat: add subscriber store and signed tokens`
 
