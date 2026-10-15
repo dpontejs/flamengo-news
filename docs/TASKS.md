@@ -223,7 +223,7 @@ Instruções para o modelo que for executar:
 - **O que fazer:** `run` junta `NEWSLETTER_RECIPIENTS` com `/api/subscribers`; envio pela API de lote da Resend, um e-mail por pessoa com o próprio link de descadastro; link da página de inscrição no rodapé.
 - **Commit:** `feat: send one email per subscriber with one-click unsubscribe`
 
-### [ ] T24 — Imagem Docker
+### [x] T24 — Imagem Docker
 - **O que fazer:** `Dockerfile` com healthcheck e publicação em `ghcr.io/dpontejs/flamengo-news:main` pelo CI; stack no repositório `infra`.
 - **Commit:** `build: publish subscription app image to ghcr`
 

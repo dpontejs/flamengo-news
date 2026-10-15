@@ -6,6 +6,7 @@ Run with `uvicorn flanews.web.app:create_app --factory`. Behind Caddy, start uvi
 
 import hmac
 import logging
+import os
 import re
 from collections import defaultdict, deque
 from collections.abc import Callable
@@ -188,6 +189,12 @@ def create_app(
             {"email": email, "unsubscribe_url": link("/unsubscribe", "unsubscribe", email)}
             for email in store.active()
         ]
+
+    @app.get("/version.json")
+    def version():
+        # The deploy check polls this until the new commit is live (infra: auto-deploy).
+        commit = os.environ.get("GIT_SHA", "dev")
+        return JSONResponse({"commit": commit}, headers={"Cache-Control": "no-store"})
 
     @app.get("/health")
     def health():

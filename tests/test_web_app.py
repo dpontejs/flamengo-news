@@ -259,3 +259,13 @@ def test_health(client) -> None:
 def test_app_refuses_to_start_without_secret(store, mailer) -> None:
     with pytest.raises(RuntimeError, match="SUBSCRIBE_SECRET"):
         create_app(Settings(), store=store, mailer=mailer)
+
+
+def test_version_reports_the_build_commit(store, mailer, monkeypatch) -> None:
+    monkeypatch.setenv("GIT_SHA", "abc123")
+    app = create_app(Settings(SUBSCRIBE_SECRET=SECRET), store=store, mailer=mailer)
+
+    response = TestClient(app).get("/version.json")
+
+    assert response.json() == {"commit": "abc123"}
+    assert response.headers["cache-control"] == "no-store"

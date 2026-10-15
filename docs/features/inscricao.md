@@ -1,7 +1,7 @@
 # Página de inscrição e descadastro
 
 - **Data:** 2026-10-15
-- **Status:** aprovada (abordagem A: API própria na VPS com SQLite)
+- **Status:** implementada no repo; falta o deploy na VPS (stack no `infra`)
 - **ADRs:** — (decisão registrada no PLAN §12)
 
 ## Objetivo

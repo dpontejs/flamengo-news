@@ -33,3 +33,48 @@ jobs:
 
       - name: Run pytest
         run: uv run pytest
+
+  # Builds the subscription page image on every PR (catches Dockerfile breakage) and publishes it
+  # from main. The VPS pulls :main every minute (infra repo, docs/features/auto-deploy.md).
+  image:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ghcr.io/dpontejs/flamengo-news
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build --build-arg GIT_SHA=$GITHUB_SHA -t $IMAGE:sha-$GITHUB_SHA .
+
+      - name: Smoke test (healthy, serves the page and this commit)
+        run: |
+          docker run -d --name smoke -e SUBSCRIBE_SECRET=ci -p 8000:8000 $IMAGE:sha-$GITHUB_SHA
+          for i in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' smoke)" = healthy ] && break
+            sleep 1
+          done
+          docker inspect -f '{{.State.Health.Status}}' smoke | grep -qx healthy
+          curl -fsS http://127.0.0.1:8000/ | grep -q 'action="/subscribe"'
+          curl -fsS http://127.0.0.1:8000/version.json | grep -q "$GITHUB_SHA"
+
+      - name: Log in to GHCR
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # :sha-<commit> is immutable (rollback target); :main moves and is what the VPS follows.
+      - name: Push image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker tag $IMAGE:sha-$GITHUB_SHA $IMAGE:main
+          docker push $IMAGE:sha-$GITHUB_SHA
+          docker push $IMAGE:main
