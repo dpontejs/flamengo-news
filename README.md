@@ -206,3 +206,7 @@ uv run ruff check . && uv run ruff format --check . && uv run pytest
 ```
 
 Regras do repositório (commits, ordem das tasks, convenções): [`AGENTS.md`](AGENTS.md).
+
+## Licença
+
+[MIT](LICENSE). Vulnerabilidades: veja [SECURITY.md](SECURITY.md).

@@ -10,3 +10,8 @@ out/
 *.egg-info/
 dist/
 .DS_Store
+# Local SQLite of the subscription page (has e-mail addresses): never commit it
+data/
+*.db
+# Local tool state
+.omc/

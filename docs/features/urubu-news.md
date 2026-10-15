@@ -46,7 +46,7 @@ não parecer canal oficial do clube. O conteúdo continua sendo o Flamengo.
 
 ```bash
 uv run python -m flanews preview --edition monday --open   # cabeçalho com a logo
-curl -sI https://flamengo.diegoponte.dev/static/icon-512.png   # depois do deploy
+curl -sI https://urubunews.diegoponte.dev/static/icon-512.png   # depois do deploy
 ```
 
 ## Riscos e dúvidas abertas

@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Least privilege: jobs that need more ask for it (the image job publishes to GHCR).
+permissions:
+  contents: read
+
 jobs:
   lint-and-test:
     name: Lint and Test

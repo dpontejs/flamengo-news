@@ -20,6 +20,10 @@ on:
         type: boolean
         default: true
 
+# Least privilege: jobs that need more ask for it (the image job publishes to GHCR).
+permissions:
+  contents: read
+
 # Never let two runs send the same edition in parallel.
 concurrency:
   group: newsletter
