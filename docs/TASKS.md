@@ -96,7 +96,7 @@ Instruções para o modelo que for executar:
 
 ## Fase 2 — Sumarização
 
-### [ ] T10 — Cliente Gemini
+### [x] T10 — Cliente Gemini
 - **Arquivos:** `src/flanews/summarizer/client.py`, `tests/test_llm_client.py`
 - **O que fazer:**
   - Wrapper `LLMClient.generate_json(prompt: str, schema: type[BaseModel]) -> BaseModel` usando `google-genai` (`client.models.generate_content` com `response_mime_type="application/json"` e `response_schema`).
