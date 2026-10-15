@@ -6,6 +6,7 @@ from typing import Protocol
 import httpx
 
 from flanews.collectors.base import Collector, create_http_client, get_collectors
+from flanews.collectors.candidates import BrazilCollector, ExtrasCollector
 from flanews.config import Settings, get_settings
 from flanews.models import (
     Article,
@@ -67,6 +68,27 @@ def collect_articles(
     return sorted(result, key=lambda a: a.published_at, reverse=True)
 
 
+def collect_candidates(
+    edition: Edition, settings: Settings | None = None
+) -> tuple[list[Article], list[Article]]:
+    """Headline-only candidates for "Saiba mais" and "Brasil afora" (no text yet)."""
+    results: list[list[Article]] = []
+    for collector_cls in (ExtrasCollector, BrazilCollector):
+        try:
+            results.append(collector_cls().collect(edition.start, edition.end))
+        except Exception:
+            logger.exception("Candidate collector %s failed", collector_cls.__name__)
+            results.append([])
+    learn_more, brazil = results
+    logger.info("Candidates: %d saiba mais, %d brasil", len(learn_more), len(brazil))
+    return learn_more, brazil
+
+
+def _extract_picks(articles: list[Article]) -> list[Article]:
+    with create_http_client() as client:
+        return extract_articles(articles, client)
+
+
 class StatsClient(Protocol):
     def get_last_match(self, start, end) -> MatchStats | None: ...
     def get_next_match(self, now) -> NextMatch | None: ...
@@ -80,6 +102,8 @@ def build_newsletter(
     collect: Callable[[Edition, Settings], list[Article]] | None = None,
     stats_client: StatsClient | None = None,
     llm: LLMClient | None = None,
+    candidates: Callable[[Edition, Settings], tuple[list[Article], list[Article]]] | None = None,
+    extract: Callable[[list[Article]], list[Article]] | None = None,
 ) -> Newsletter:
     """Collect news and stats for the edition and summarize them into a Newsletter.
 
@@ -93,6 +117,7 @@ def build_newsletter(
     )
 
     articles = collect(edition, settings)
+    learn_more, brazil = (candidates or collect_candidates)(edition, settings)
     last_match = stats_client.get_last_match(edition.start, edition.end)
     next_match = stats_client.get_next_match(edition.end)
     standings = stats_client.get_standings("bra.1")
@@ -100,7 +125,15 @@ def build_newsletter(
 
     try:
         llm = llm or get_llm_client(settings)
-        summary = summarize_edition(articles, llm, last_match=last_match, label=edition.label)
+        summary = summarize_edition(
+            articles,
+            llm,
+            last_match=last_match,
+            label=edition.label,
+            learn_more=learn_more,
+            brazil=brazil,
+            extract=extract or _extract_picks,
+        )
     except LLMError as e:
         logger.error("Summarization failed, sending stats only: %s", e)
         summary = EditionSummary()
@@ -119,6 +152,8 @@ def build_newsletter(
         analysis=analysis,
         moment=moment,
         topics=summary.topics,
+        learn_more=summary.learn_more,
+        around_brazil=summary.around_brazil,
         last_match=last_match,
         next_match=next_match,
         standings=standings,

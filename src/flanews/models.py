@@ -13,6 +13,19 @@ class Article(BaseModel):
     published_at: datetime
     summary_hint: str | None = None
     content: str | None = None
+    # flamengo: main news; saiba_mais: other Flamengo sports; brasil: Brazilian football
+    section: Literal["flamengo", "saiba_mais", "brasil"] = "flamengo"
+    category: str | None = None
+
+
+class Brief(BaseModel):
+    """Short item for the "Saiba mais" and "Brasil afora" sections."""
+
+    title: str
+    summary: str
+    url: str
+    source: str
+    category: str | None = None
 
 
 class Topic(BaseModel):
@@ -128,6 +141,8 @@ class Newsletter(BaseModel):
     analysis: str = ""
     moment: TeamMoment | None = None
     topics: list[Topic] = Field(default_factory=list)
+    learn_more: list[Brief] = Field(default_factory=list)
+    around_brazil: list[Brief] = Field(default_factory=list)
     last_match: MatchStats | None = None
     next_match: NextMatch | None = None
     standings: list[StandingRow] = Field(default_factory=list)

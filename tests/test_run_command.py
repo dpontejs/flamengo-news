@@ -82,6 +82,7 @@ def env(monkeypatch, tmp_path):
 
 def use(monkeypatch, articles: list[Article], match: MatchStats | None) -> None:
     monkeypatch.setattr(pipeline, "collect_articles", lambda edition, settings: articles)
+    monkeypatch.setattr(pipeline, "collect_candidates", lambda edition, settings: ([], []))
     monkeypatch.setattr(pipeline, "ESPNStatsClient", lambda **kwargs: FakeStats(match))
 
 

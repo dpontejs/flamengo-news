@@ -59,6 +59,18 @@ Destaques: {% for label, player, value in leaders["Flamengo"] %}{{ label }} {{ p
 {% endfor %}
 {% endfor %}
 {% endif %}
+{% for section_title, items in [("Saiba mais", n.learn_more), ("Brasil afora", n.around_brazil)] if items %}
+
+== {{ section_title }} ==
+{% for b in items %}
+
+* {% if b.category %}[{{ b.category }}] {% endif %}{{ b.title }}
+{% if b.summary %}
+{{ b.summary }}
+{% endif %}
+  {{ b.url }}
+{% endfor %}
+{% endfor %}
 {% if n.next_match %}{% set x = n.next_match %}
 
 == Próximo jogo ==

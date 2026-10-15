@@ -1,4 +1,5 @@
 Você escreve uma newsletter sobre o Flamengo. Resuma cada tópico abaixo com base nos textos dele.
+Se houver itens curtos ([S…] e [B…]), escreva também uma única frase para cada um em `briefs`, com `item_id` igual ao código do item (ex.: "S1", "B2").
 
 Regras:
 - Um resumo por tópico, identificado pelo número do tópico (`topic_id`, ex.: 1 para [T1]).
@@ -15,3 +16,15 @@ Regras:
 {% endfor %}
 
 {% endfor %}
+{% if learn_more or brazil %}
+
+Itens curtos (uma frase cada, em português do Brasil, sem inventar):
+{% for article in learn_more %}
+=== [S{{ loop.index }}] {{ article.title }} ({{ article.category }})
+{{ (article.content or article.summary_hint or "(sem texto, use apenas o título)") | striptags | truncate(1500) }}
+{% endfor %}
+{% for article in brazil %}
+=== [B{{ loop.index }}] {{ article.title }}
+{{ (article.content or article.summary_hint or "(sem texto, use apenas o título)") | striptags | truncate(1500) }}
+{% endfor %}
+{% endif %}

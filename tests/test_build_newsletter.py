@@ -111,6 +111,7 @@ def build(llm: FakeLLMClient, stats: FakeStats | None = None) -> Newsletter:
         collect=lambda edition, settings: [ARTICLE],
         stats_client=stats or FakeStats(),
         llm=llm,
+        candidates=lambda edition, settings: ([], []),
     )
 
 
@@ -205,3 +206,72 @@ def test_build_newsletter_without_match_skips_analysis() -> None:
 
     assert newsletter.analysis == ""
     assert not any("Leitura do jogo" in p for p in llm.prompts)
+
+
+def test_build_newsletter_adds_short_sections_extracting_only_picks() -> None:
+    extra = ARTICLE.model_copy(
+        update={
+            "url": "https://x.com/basquete",
+            "title": "FlaBasquete vence",
+            "section": "saiba_mais",
+            "category": "Basquete",
+        }
+    )
+    other = extra.model_copy(update={"url": "https://x.com/volei", "title": "Vôlei perde"})
+    brazil = ARTICLE.model_copy(
+        update={"url": "https://ge.globo.com/b", "title": "Palmeiras vence", "section": "brasil"}
+    )
+    extracted: list[str] = []
+
+    def extract(articles):
+        extracted.extend(a.url for a in articles)
+        return articles
+
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        data = good_llm().responder(prompt, schema)
+        if schema is GroupResponse:
+            data.update(learn_more_ids=[1], brazil_ids=[1])
+        if schema is SummaryResponse:
+            data["briefs"] = [
+                {"item_id": "S1", "summary": "Estreia com vitória."},
+                {"item_id": "B1", "summary": "Segue na cola."},
+            ]
+        return data
+
+    newsletter = pipeline.build_newsletter(
+        EDITION,
+        SETTINGS,
+        collect=lambda edition, settings: [ARTICLE],
+        stats_client=FakeStats(),
+        llm=FakeLLMClient(respond),
+        candidates=lambda edition, settings: ([extra, other], [brazil]),
+        extract=extract,
+    )
+
+    assert extracted == ["https://x.com/basquete", "https://ge.globo.com/b"]
+    assert [(b.title, b.summary, b.category) for b in newsletter.learn_more] == [
+        ("FlaBasquete vence", "Estreia com vitória.", "Basquete")
+    ]
+    assert [(b.title, b.summary) for b in newsletter.around_brazil] == [
+        ("Palmeiras vence", "Segue na cola.")
+    ]
+
+
+def test_collect_candidates_survives_failing_collector(monkeypatch) -> None:
+    class Broken:
+        def __init__(self, **kwargs):
+            pass
+
+        def collect(self, start, end):
+            raise RuntimeError("down")
+
+    class Ok(Broken):
+        def collect(self, start, end):
+            return [ARTICLE.model_copy(update={"section": "brasil"})]
+
+    monkeypatch.setattr(pipeline, "ExtrasCollector", Broken)
+    monkeypatch.setattr(pipeline, "BrazilCollector", Ok)
+
+    learn_more, brazil = pipeline.collect_candidates(EDITION, SETTINGS)
+
+    assert learn_more == [] and len(brazil) == 1

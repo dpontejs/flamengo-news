@@ -47,6 +47,9 @@
   .kpi { padding: 6px 0; }
   .kpi-value { font-size: 22px; font-weight: 800; color: #000000; }
   .kpi-label { font-size: 12px; color: #666666; }
+  .brief { padding: 0 0 14px 0; }
+  .brief-title { color: #000000; font-size: 15px; font-weight: 700; text-decoration: none; }
+  .tag { background-color: #C3281E; color: #ffffff; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; margin-right: 6px; }
   .footer { padding: 20px 24px 28px 24px; color: #777777; font-size: 12px; line-height: 1.5; }
 </style>
 </head>
@@ -164,6 +167,22 @@
     </td></tr></table>
   </td></tr>
   {% endif %}
+
+  {% for section_title, items in [("Saiba mais", n.learn_more), ("Brasil afora", n.around_brazil)] if items %}
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      <p class="card-title">{{ section_title }}</p>
+      {% for b in items %}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="brief">
+        {% if b.category %}<span class="tag">{{ b.category }}</span>{% endif %}
+        <a class="brief-title" href="{{ b.url }}">{{ b.title }}</a>
+        {% if b.summary %}<p class="text" style="margin-top: 4px;">{{ b.summary }}</p>{% endif %}
+        <p class="muted" style="margin-top: 2px;">{{ b.source | source }}</p>
+      </td></tr></table>
+      {% endfor %}
+    </td></tr></table>
+  </td></tr>
+  {% endfor %}
 
   {% if n.next_match %}{% set x = n.next_match %}
   <tr><td class="block font">

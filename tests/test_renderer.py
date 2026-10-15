@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 from flanews.models import (
     Article,
+    Brief,
     Edition,
     FormResult,
     MatchEvent,
@@ -242,3 +243,65 @@ def test_render_score_uses_separate_cells_for_alignment() -> None:
     score_cell = re.search(r"<td[^>]*>\s*x\s*</td>", html).group(0)
     assert "vertical-align:middle" in score_cell.replace(" ", "")
     assert "padding:0 12px" in score_cell
+
+
+def briefs_newsletter() -> Newsletter:
+    newsletter = full_newsletter()
+    newsletter.learn_more = [
+        Brief(
+            title="FlaBasquete vence na estreia do NBB",
+            summary="O time venceu o Minas & segue invicto.",
+            url="https://lnb.com.br/1",
+            source="google_news:LNB",
+            category="Basquete",
+        ),
+        Brief(
+            title="Sesc-Flamengo é campeão",
+            summary="",
+            url="https://ge.globo.com/v",
+            source="ge",
+            category="Vôlei",
+        ),
+    ]
+    newsletter.around_brazil = [
+        Brief(
+            title="Palmeiras chega a 100 gols",
+            summary="Marca histórica.",
+            url="https://ge.globo.com/p",
+            source="ge",
+        )
+    ]
+    return newsletter
+
+
+def test_render_learn_more_and_around_brazil_sections() -> None:
+    html, text = render(briefs_newsletter())
+
+    assert "Saiba mais" in html and "Brasil afora" in html
+    assert 'href="https://lnb.com.br/1"' in html
+    assert ">Basquete<" in html and ">Vôlei<" in html
+    assert "Minas &amp; segue invicto" in html
+    assert "Palmeiras chega a 100 gols" in html and "Marca histórica." in html
+    order = [html.index(s) for s in ("Notícias", "Saiba mais", "Brasil afora", "Próximo jogo")]
+    assert order == sorted(order)
+
+    assert "== Saiba mais ==" in text and "== Brasil afora ==" in text
+    assert "[Basquete] FlaBasquete vence na estreia do NBB" in text
+    assert "https://lnb.com.br/1" in text
+    assert "Minas & segue invicto" in text
+
+
+def test_render_brief_without_summary_shows_only_title_link() -> None:
+    html, _ = render(briefs_newsletter())
+
+    volley = html[
+        html.index("Sesc-Flamengo é campeão") - 300 : html.index("Sesc-Flamengo é campeão") + 200
+    ]
+    assert 'href="https://ge.globo.com/v"' in volley
+
+
+def test_render_hides_empty_short_sections() -> None:
+    html, text = render(full_newsletter())
+
+    assert "Saiba mais" not in html and "Brasil afora" not in html
+    assert "Saiba mais" not in text and "Brasil afora" not in text

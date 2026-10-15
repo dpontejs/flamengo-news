@@ -1,5 +1,6 @@
 import logging
 from datetime import UTC, datetime
+from urllib.parse import quote_plus
 from zoneinfo import ZoneInfo
 
 import feedparser
@@ -10,9 +11,13 @@ from flanews.models import Article
 
 logger = logging.getLogger(__name__)
 
-GOOGLE_NEWS_RSS_URL = (
-    "https://news.google.com/rss/search?q=Flamengo+futebol&hl=pt-BR&gl=BR&ceid=BR:pt-419"
-)
+
+def google_news_url(query: str) -> str:
+    """Google News RSS search URL for `query` in Brazilian Portuguese."""
+    return f"https://news.google.com/rss/search?q={quote_plus(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+
+
+GOOGLE_NEWS_RSS_URL = google_news_url("Flamengo futebol")
 
 
 class GoogleNewsCollector:

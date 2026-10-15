@@ -185,7 +185,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** teste end-to-end com tudo mockado.
 - **Commit:** `feat: add run command for full newsletter delivery`
 
-### [ ] T17a — Seções "Saiba mais" e "Brasil afora"
+### [x] T17a — Seções "Saiba mais" e "Brasil afora"
 - **O que fazer (a detalhar em design curto antes de implementar):**
   - "Saiba mais": lista configurável de extras (basquete, vôlei, futebol feminino...), uma busca Google News por extra; o LLM escolhe até 3 notícias mais interessantes entre todas (pode não haver nenhuma — a seção some).
   - "Brasil afora": 1 RSS de futebol brasileiro; o LLM escolhe as ~5 melhores notícias do país (sem Flamengo).

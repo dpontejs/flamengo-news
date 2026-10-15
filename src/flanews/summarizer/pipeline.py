@@ -1,16 +1,19 @@
 import logging
+from collections.abc import Callable
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from flanews.models import Article, MatchStats, TeamMoment, Topic
+from flanews.models import Article, Brief, MatchStats, TeamMoment, Topic
 from flanews.summarizer.client import LLMClient, LLMError
 
 logger = logging.getLogger(__name__)
 
 MAX_TOPICS = 8
 MAX_ARTICLES_PER_TOPIC = 5
+LEARN_MORE_PICKS = 3
+BRAZIL_PICKS = 5
 PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
 _env = Environment(
@@ -30,6 +33,8 @@ class GroupedTopic(BaseModel):
 
 class GroupResponse(BaseModel):
     topics: list[GroupedTopic]
+    learn_more_ids: list[int] = Field(default_factory=list)
+    brazil_ids: list[int] = Field(default_factory=list)
 
 
 class TopicSummary(BaseModel):
@@ -37,8 +42,14 @@ class TopicSummary(BaseModel):
     summary: str
 
 
+class BriefSummary(BaseModel):
+    item_id: str
+    summary: str
+
+
 class SummaryResponse(BaseModel):
     summaries: list[TopicSummary]
+    briefs: list[BriefSummary] = Field(default_factory=list)
 
 
 class IntroResponse(BaseModel):
@@ -56,23 +67,49 @@ class EditionSummary(BaseModel):
     headline: str = ""
     intro: str = ""
     topics: list[Topic] = []
+    learn_more: list[Brief] = []
+    around_brazil: list[Brief] = []
+
+
+class Selection(BaseModel):
+    """Topics plus the candidates the LLM picked for the short sections."""
+
+    topics: list[Topic] = []
+    learn_more: list[Article] = []
+    brazil: list[Article] = []
 
 
 def render_prompt(name: str, **context: object) -> str:
     return _env.get_template(f"{name}.md").render(**context)
 
 
-def group_articles(articles: list[Article], llm: LLMClient) -> list[Topic]:
-    """Ask the LLM to group articles into topics (without summaries yet).
+def _pick(ids: list[int], candidates: list[Article], limit: int) -> list[Article]:
+    """1-based ids into `candidates`, keeping order, dropping invalid and repeated ids."""
+    valid = [i for i in dict.fromkeys(ids) if 1 <= i <= len(candidates)]
+    return [candidates[i - 1] for i in valid[:limit]]
 
-    Ids are 1-based positions in `articles`; invalid or repeated ids are ignored
-    and topics left without articles are dropped.
+
+def group_articles(
+    articles: list[Article],
+    llm: LLMClient,
+    learn_more: list[Article] | None = None,
+    brazil: list[Article] | None = None,
+) -> Selection:
+    """Group articles into topics and pick candidates for the short sections (1 call).
+
+    Ids are 1-based positions in each list; invalid or repeated ids are ignored and
+    topics left without articles are dropped.
     """
-    dates = [a.published_at for a in articles]
+    learn_more, brazil = learn_more or [], brazil or []
+    dates = [a.published_at for a in (*articles, *learn_more, *brazil)]
     prompt = render_prompt(
         "group",
         articles=articles,
+        learn_more=learn_more,
+        brazil=brazil,
         max_topics=MAX_TOPICS,
+        learn_more_picks=LEARN_MORE_PICKS,
+        brazil_picks=BRAZIL_PICKS,
         start=min(dates).strftime("%d/%m/%Y"),
         end=max(dates).strftime("%d/%m/%Y"),
     )
@@ -94,27 +131,55 @@ def group_articles(articles: list[Article], llm: LLMClient) -> list[Topic]:
             )
         )
     topics.sort(key=lambda t: t.importance, reverse=True)
-    return topics[:MAX_TOPICS]
+    return Selection(
+        topics=topics[:MAX_TOPICS],
+        learn_more=_pick(response.learn_more_ids, learn_more, LEARN_MORE_PICKS),
+        brazil=_pick(response.brazil_ids, brazil, BRAZIL_PICKS),
+    )
 
 
-def summarize_topics(topics: list[Topic], llm: LLMClient) -> list[Topic]:
-    """Summarize all topics in a single call (keeps the edition within free-tier quotas).
+def _brief(article: Article, summary: str) -> Brief:
+    title = article.title
+    prefix, _, outlet = article.source.partition(":")
+    if prefix == "google_news" and outlet and title.endswith(f" - {outlet}"):
+        title = title[: -len(f" - {outlet}")]  # Google News appends the outlet name
+    return Brief(
+        title=title,
+        summary=summary,
+        url=article.url,
+        source=article.source,
+        category=article.category,
+    )
 
-    `topic_id` is the 1-based topic position; a topic the model skips keeps an empty
-    summary, and unknown ids are ignored.
+
+def summarize_selection(
+    selection: Selection, llm: LLMClient
+) -> tuple[list[Topic], list[Brief], list[Brief]]:
+    """Summarize topics and short items in a single call (keeps within free-tier quotas).
+
+    `topic_id` is the 1-based topic position and `item_id` is "S<n>"/"B<n>"; anything
+    the model skips keeps an empty summary, and unknown ids are ignored.
     """
+    topics = selection.topics
     prompt = render_prompt(
         "summarize",
         topics=[
             t.model_copy(update={"articles": t.articles[:MAX_ARTICLES_PER_TOPIC]}) for t in topics
         ],
+        learn_more=selection.learn_more,
+        brazil=selection.brazil,
     )
     response = llm.generate_json(prompt, SummaryResponse)
     by_id = {s.topic_id: s.summary.strip() for s in response.summaries}
     missing = [t.title for i, t in enumerate(topics, 1) if i not in by_id]
     if missing:
         logger.warning("No summary returned for topics: %s", missing)
-    return [t.model_copy(update={"summary": by_id.get(i, "")}) for i, t in enumerate(topics, 1)]
+    briefs = {b.item_id.strip().upper(): b.summary.strip() for b in response.briefs}
+    return (
+        [t.model_copy(update={"summary": by_id.get(i, "")}) for i, t in enumerate(topics, 1)],
+        [_brief(a, briefs.get(f"S{i}", "")) for i, a in enumerate(selection.learn_more, 1)],
+        [_brief(a, briefs.get(f"B{i}", "")) for i, a in enumerate(selection.brazil, 1)],
+    )
 
 
 def write_intro(
@@ -141,27 +206,43 @@ def summarize_edition(
     llm: LLMClient,
     last_match: MatchStats | None = None,
     label: str = "",
+    learn_more: list[Article] | None = None,
+    brazil: list[Article] | None = None,
+    extract: Callable[[list[Article]], list[Article]] | None = None,
 ) -> EditionSummary:
-    """Group articles into topics, summarize them and write the opening (3 LLM calls).
+    """Group, pick short items, summarize everything and write the opening (3 LLM calls).
 
-    A grouping failure propagates; if the summaries or the opening fail, the topics
-    are kept and the missing text stays empty.
+    Only the picked "Saiba mais"/"Brasil afora" candidates are passed to `extract`
+    (text download). A grouping failure propagates; if the summaries or the opening
+    fail, topics and picks are kept and the missing text stays empty.
     """
-    topics: list[Topic] = []
-    if articles:
-        topics = group_articles(articles, llm)
-        if topics:
-            try:
-                topics = summarize_topics(topics, llm)
-            except LLMError as e:
-                logger.error("Topic summaries failed, keeping titles and sources: %s", e)
+    selection = Selection()
+    if articles or learn_more or brazil:
+        selection = group_articles(articles, llm, learn_more, brazil)
+        picks = [*selection.learn_more, *selection.brazil]
+        if picks and extract is not None:
+            extracted = extract(picks)
+            n = len(selection.learn_more)
+            selection = selection.model_copy(
+                update={"learn_more": extracted[:n], "brazil": extracted[n:]}
+            )
+
+    topics = selection.topics
+    lm_briefs = [_brief(a, "") for a in selection.learn_more]
+    br_briefs = [_brief(a, "") for a in selection.brazil]
+    if topics or lm_briefs or br_briefs:
+        try:
+            topics, lm_briefs, br_briefs = summarize_selection(selection, llm)
+        except LLMError as e:
+            logger.error("Summaries failed, keeping titles and sources: %s", e)
 
     if not topics and last_match is None:
-        return EditionSummary()
+        return EditionSummary(learn_more=lm_briefs, around_brazil=br_briefs)
 
+    sections = {"topics": topics, "learn_more": lm_briefs, "around_brazil": br_briefs}
     try:
         intro = write_intro(topics, last_match, llm, label)
     except LLMError as e:
         logger.error("Opening failed: %s", e)
-        return EditionSummary(topics=topics)
-    return EditionSummary(headline=intro.headline.strip(), intro=intro.intro.strip(), topics=topics)
+        return EditionSummary(**sections)
+    return EditionSummary(headline=intro.headline.strip(), intro=intro.intro.strip(), **sections)
