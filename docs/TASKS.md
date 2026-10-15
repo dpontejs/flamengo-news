@@ -211,11 +211,26 @@ Instruções para o modelo que for executar:
 - **O que fazer:** README com setup completo: criar chaves (Gemini AI Studio, Resend + verificação de domínio), configurar secrets, rodar preview, ajustar prompts, adicionar nova fonte.
 - **Commit:** `docs: document setup, secrets and usage`
 
+### [ ] T21 — Inscritos e tokens
+- **O que fazer:** `flanews.web.store` (SQLite: pending/active/unsubscribed) e `flanews.web.tokens` (HMAC para confirmar e descadastrar). Ver `docs/features/inscricao.md`.
+- **Commit:** `feat: add subscriber store and signed tokens`
+
+### [ ] T22 — App de inscrição
+- **O que fazer:** FastAPI com landing page, `/subscribe`, `/confirm`, `/unsubscribe` (com one-click), `/api/subscribers` e `/health`; e-mail de confirmação pela Resend; honeypot e limite por IP.
+- **Commit:** `feat: add subscription web app`
+
+### [ ] T23 — Envio individual com descadastro em um clique
+- **O que fazer:** `run` junta `NEWSLETTER_RECIPIENTS` com `/api/subscribers`; envio pela API de lote da Resend, um e-mail por pessoa com o próprio link de descadastro; link da página de inscrição no rodapé.
+- **Commit:** `feat: send one email per subscriber with one-click unsubscribe`
+
+### [ ] T24 — Imagem Docker
+- **O que fazer:** `Dockerfile` com healthcheck e publicação em `ghcr.io/dpontejs/flamengo-news:main` pelo CI; stack no repositório `infra`.
+- **Commit:** `build: publish subscription app image to ghcr`
+
 ---
 
 ## Backlog futuro (não fazer agora)
 - [ ] Envio disparado N horas após o fim de cada jogo.
 - [ ] Persistência (SQLite) para não repetir notícias entre edições.
-- [ ] Página de inscrição/descadastro.
 - [ ] Seções "Departamento médico" e "Mercado da bola".
 - [ ] Gráfico de estatísticas como imagem.
