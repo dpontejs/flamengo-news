@@ -106,6 +106,7 @@ class ESPNStatsClient:
             date=kickoff.astimezone(self.tz),
             venue=(competition.get("venue") or {}).get("fullName"),
             is_home=ours["homeAway"] == "home",
+            opponent_logo=_logo(theirs["team"]),
         )
 
     def get_standings(self, league: str = "bra.1") -> list[StandingRow]:
@@ -170,6 +171,8 @@ class ESPNStatsClient:
             home_goals=int(home["score"]),
             away_goals=int(away["score"]),
             venue=(summary.get("gameInfo", {}).get("venue") or {}).get("fullName"),
+            home_logo=_logo(home["team"]),
+            away_logo=_logo(away["team"]),
             events=[e for e in map(_parse_event, summary.get("keyEvents", [])) if e],
             statistics=statistics,
             lineups=lineups,
@@ -188,6 +191,14 @@ class ESPNStatsClient:
             goals_diff=int(stats["pointDifferential"]),
             is_flamengo=entry["team"]["id"] == self.team_id,
         )
+
+
+def _logo(team: dict) -> str | None:
+    """First crest URL ESPN publishes for the team (schedule uses `logos`, others `logo`)."""
+    logos = team.get("logos") or []
+    if logos:
+        return logos[0].get("href")
+    return team.get("logo")
 
 
 def _format_stat(name: str, value: str) -> str:

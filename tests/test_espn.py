@@ -180,3 +180,20 @@ def test_default_client_uses_user_agent_accepted_by_espn() -> None:
     user_agent = route.calls.last.request.headers["User-Agent"]
     assert user_agent.startswith("flanews/")
     assert "@" not in user_agent
+
+
+def test_get_last_match_parses_logos(espn: respx.MockRouter) -> None:
+    match = make_client().get_last_match(
+        datetime(2026, 10, 9, 8, tzinfo=TZ), datetime(2026, 10, 12, 8, tzinfo=TZ)
+    )
+
+    assert match is not None
+    assert match.home_logo == "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
+    assert match.away_logo == "https://a.espncdn.com/i/teamlogos/soccer/500/3445.png"
+
+
+def test_get_next_match_includes_opponent_logo(espn: respx.MockRouter) -> None:
+    match = make_client().get_next_match(datetime(2026, 10, 14, 12, tzinfo=TZ))
+
+    assert match is not None
+    assert match.opponent_logo == "https://a.espncdn.com/i/teamlogos/soccer/500/8.png"

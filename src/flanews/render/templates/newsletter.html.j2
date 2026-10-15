@@ -5,28 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flamengo News — {{ n.edition.label }}</title>
 <style>
-  body { margin: 0; padding: 0; background-color: #f2f2f2; }
-  .wrapper { background-color: #f2f2f2; }
+  body { margin: 0; padding: 0; background-color: #ececec; }
+  .wrapper { background-color: #ececec; }
   .container { background-color: #ffffff; }
-  .font { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #000000; }
-  .header { background-color: #000000; color: #ffffff; padding: 24px; }
-  .brand { color: #C3281E; font-size: 26px; font-weight: bold; margin: 0; }
-  .label { color: #ffffff; font-size: 14px; margin: 4px 0 0 0; }
-  .stripe { background-color: #C3281E; height: 6px; line-height: 6px; font-size: 6px; }
-  .section { padding: 20px 24px; border-bottom: 1px solid #e5e5e5; }
-  .section-title { color: #C3281E; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 12px 0; }
-  .headline { font-size: 22px; font-weight: bold; line-height: 1.3; margin: 0 0 8px 0; }
-  .text { font-size: 15px; line-height: 1.5; margin: 0; }
-  .muted { color: #666666; font-size: 13px; line-height: 1.5; margin: 4px 0 0 0; }
-  .score { font-size: 24px; font-weight: bold; margin: 0; }
-  .topic { padding: 0 0 16px 0; }
-  .topic-title { font-size: 17px; font-weight: bold; margin: 0 0 6px 0; }
-  .link { color: #C3281E; }
-  .stats td { font-size: 14px; padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
-  .table th { font-size: 12px; color: #666666; text-align: left; padding: 4px; border-bottom: 2px solid #000000; }
-  .table td { font-size: 14px; padding: 6px 4px; border-bottom: 1px solid #f0f0f0; }
-  .fla td { font-weight: bold; color: #C3281E; }
-  .footer { padding: 20px 24px; color: #666666; font-size: 12px; line-height: 1.5; }
+  .font { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #111111; }
+  .header { background-color: #000000; padding: 20px 24px; }
+  .brand { color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: 1px; margin: 0; }
+  .brand-red { color: #C3281E; }
+  .edition { color: #bbbbbb; font-size: 13px; margin: 4px 0 0 0; }
+  .stripe { background-color: #C3281E; height: 5px; line-height: 5px; font-size: 5px; }
+  .lead { padding: 24px 24px 8px 24px; }
+  .headline { font-size: 24px; font-weight: 800; line-height: 1.25; margin: 0 0 10px 0; color: #000000; }
+  .text { font-size: 15px; line-height: 1.55; margin: 0; color: #222222; }
+  .muted { color: #666666; font-size: 13px; line-height: 1.5; margin: 0; }
+  .block { padding: 12px 24px; }
+  .card { border-left: 4px solid #C3281E; background-color: #fafafa; }
+  .card-body { padding: 16px 18px; }
+  .card-title { color: #C3281E; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin: 0 0 12px 0; }
+  .scoreboard { background-color: #000000; }
+  .scoreboard-body { padding: 18px 12px; }
+  .team-name { color: #ffffff; font-size: 14px; font-weight: 700; padding-top: 6px; }
+  .score { color: #ffffff; font-size: 40px; font-weight: 800; }
+  .score-x { color: #C3281E; font-size: 22px; font-weight: 800; }
+  .match-info { color: #bbbbbb; font-size: 12px; padding: 0 12px 14px 12px; }
+  .goals { background-color: #1a1a1a; color: #ffffff; font-size: 14px; padding: 10px 16px; }
+  .goal-detail { color: #999999; font-size: 12px; }
+  .stats td { font-size: 14px; padding: 6px 0; border-bottom: 1px solid #eeeeee; }
+  .stat-label { color: #666666; font-size: 13px; }
+  .topic { padding: 0 0 18px 0; }
+  .topic-title { font-size: 17px; font-weight: 700; margin: 0 0 6px 0; color: #000000; }
+  .link { color: #C3281E; text-decoration: none; font-weight: 600; }
+  .next-name { font-size: 18px; font-weight: 800; margin: 0 0 4px 0; color: #000000; }
+  .table th { font-size: 11px; color: #666666; text-align: left; padding: 6px 4px; border-bottom: 2px solid #000000; }
+  .table td { font-size: 14px; padding: 7px 4px; border-bottom: 1px solid #eeeeee; }
+  .fla td { font-weight: 800; color: #C3281E; }
+  .footer { padding: 20px 24px 28px 24px; color: #777777; font-size: 12px; line-height: 1.5; }
 </style>
 </head>
 <body>
@@ -35,29 +48,55 @@
 <table role="presentation" class="container font" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
 
   <tr><td class="header font">
-    <p class="brand">🔴⚫ Flamengo News</p>
-    <p class="label">{{ n.edition.label }}</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td width="56" valign="middle"><img src="{{ crest }}" alt="Flamengo" width="48" height="48" style="display: block; border: 0;"></td>
+      <td valign="middle" style="padding-left: 12px;">
+        <p class="brand">FLAMENGO <span class="brand-red">NEWS</span></p>
+        <p class="edition">{{ n.edition.label }}</p>
+      </td>
+    </tr></table>
   </td></tr>
   <tr><td class="stripe">&nbsp;</td></tr>
 
-  <tr><td class="section font">
+  <tr><td class="lead font">
     {% if n.headline %}<p class="headline">{{ n.headline }}</p>{% endif %}
     <p class="text">{{ n.intro }}</p>
   </td></tr>
 
   {% if n.last_match %}{% set m = n.last_match %}
-  <tr><td class="section font">
-    <p class="section-title">Última partida</p>
-    <p class="score">{{ m.home }} {{ m.home_goals }} x {{ m.away_goals }} {{ m.away }}</p>
-    <p class="muted">{{ m.competition }} · {{ m.date | when }}{% if m.venue %} · {{ m.venue }}{% endif %}</p>
-    {% for e in m.events if e.type == "goal" %}
-    <p class="text">⚽ {{ e | minute }} {{ e.player }} <span class="muted">({{ e.team }}{% if e.detail %}; {{ e.detail }}{% endif %})</span></p>
-    {% endfor %}
+  <tr><td class="block font">
+    <p class="card-title" style="margin-top: 8px;">Última partida</p>
+    <table role="presentation" class="scoreboard" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td class="scoreboard-body">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td width="35%" align="center" valign="top">
+            {% if m.home_logo %}<img src="{{ m.home_logo }}" alt="{{ m.home }}" width="56" height="56" style="display: block; border: 0; margin: 0 auto;">{% endif %}
+            <div class="team-name">{{ m.home }}</div>
+          </td>
+          <td width="30%" align="center" valign="middle">
+            <span class="score">{{ m.home_goals }}</span> <span class="score-x">x</span> <span class="score">{{ m.away_goals }}</span>
+          </td>
+          <td width="35%" align="center" valign="top">
+            {% if m.away_logo %}<img src="{{ m.away_logo }}" alt="{{ m.away }}" width="56" height="56" style="display: block; border: 0; margin: 0 auto;">{% endif %}
+            <div class="team-name">{{ m.away }}</div>
+          </td>
+        </tr></table>
+      </td></tr>
+      <tr><td class="match-info" align="center">{{ m.competition }} · {{ m.date | when }}{% if m.venue %} · {{ m.venue }}{% endif %}</td></tr>
+      {% set goals = m.events | selectattr("type", "equalto", "goal") | list %}
+      {% if goals %}
+      <tr><td class="goals">
+        {% for e in goals %}
+        <div>⚽ {{ e | minute }} <strong>{{ e.player }}</strong> <span class="goal-detail">{{ e.team }}{% if e.detail %} · {{ e.detail }}{% endif %}</span></div>
+        {% endfor %}
+      </td></tr>
+      {% endif %}
+    </table>
     {% if m.statistics %}
-    <table role="presentation" class="stats" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 12px;">
-      <tr><td width="30%" style="font-weight: bold;">{{ m.home }}</td><td width="40%" align="center"></td><td width="30%" align="right" style="font-weight: bold;">{{ m.away }}</td></tr>
+    <table role="presentation" class="stats" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 14px;">
+      <tr><td width="30%" style="font-weight: 700;">{{ m.home }}</td><td width="40%" align="center"></td><td width="30%" align="right" style="font-weight: 700;">{{ m.away }}</td></tr>
       {% for label, values in m.statistics.items() %}
-      <tr><td>{{ values[0] }}</td><td align="center" style="color: #666666;">{{ label }}</td><td align="right">{{ values[1] }}</td></tr>
+      <tr><td>{{ values[0] }}</td><td align="center" class="stat-label">{{ label }}</td><td align="right">{{ values[1] }}</td></tr>
       {% endfor %}
     </table>
     {% endif %}
@@ -65,40 +104,51 @@
   {% endif %}
 
   {% if n.topics %}
-  <tr><td class="section font">
-    <p class="section-title">Notícias</p>
-    {% for t in n.topics %}
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="topic">
-      <p class="topic-title">{{ t.title }}</p>
-      <p class="text">{{ t.summary }}</p>
-      {% if t.articles %}<p class="muted">Fontes: {% for a in t.articles %}<a class="link" href="{{ a.url }}">{{ a.source | source }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      <p class="card-title">Notícias</p>
+      {% for t in n.topics %}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="topic">
+        <p class="topic-title">{{ t.title }}</p>
+        {% if t.summary %}<p class="text">{{ t.summary }}</p>{% endif %}
+        {% if t.articles %}<p class="muted" style="margin-top: 6px;">Fontes: {% for a in t.articles %}<a class="link" href="{{ a.url }}">{{ a.source | source }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+      </td></tr></table>
+      {% endfor %}
     </td></tr></table>
-    {% endfor %}
   </td></tr>
   {% endif %}
 
   {% if n.next_match %}{% set x = n.next_match %}
-  <tr><td class="section font">
-    <p class="section-title">Próximo jogo</p>
-    <p class="topic-title">{% if x.is_home %}Flamengo x {{ x.opponent }}{% else %}{{ x.opponent }} x Flamengo{% endif %}</p>
-    <p class="muted">{{ x.competition }} · {{ x.date | when }}{% if x.venue %} · {{ x.venue }}{% endif %}</p>
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      <p class="card-title">Próximo jogo</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        {% if x.opponent_logo %}<td width="56" valign="middle"><img src="{{ x.opponent_logo }}" alt="{{ x.opponent }}" width="44" height="44" style="display: block; border: 0;"></td>{% endif %}
+        <td valign="middle">
+          <p class="next-name">{% if x.is_home %}Flamengo x {{ x.opponent }}{% else %}{{ x.opponent }} x Flamengo{% endif %}</p>
+          <p class="muted">{{ x.competition }} · {{ x.date | when }}{% if x.venue %} · {{ x.venue }}{% endif %}</p>
+        </td>
+      </tr></table>
+    </td></tr></table>
   </td></tr>
   {% endif %}
 
   {% if standings %}
-  <tr><td class="section font">
-    <p class="section-title">Classificação</p>
-    <table role="presentation" class="table" width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr><th>#</th><th>Time</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr>
-      {% for r in standings %}
-      <tr{% if r.is_flamengo %} class="fla"{% endif %}><td>{{ r.position }}</td><td>{{ r.team }}</td><td>{{ r.points }}</td><td>{{ r.played }}</td><td>{{ r.won }}</td><td>{{ r.drawn }}</td><td>{{ r.lost }}</td><td>{{ r.goals_diff }}</td></tr>
-      {% endfor %}
-    </table>
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      <p class="card-title">Classificação · Brasileirão</p>
+      <table role="presentation" class="table" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><th>#</th><th>Time</th><th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr>
+        {% for r in standings %}
+        <tr{% if r.is_flamengo %} class="fla"{% endif %}><td>{{ r.position }}</td><td>{{ r.team }}</td><td>{{ r.points }}</td><td>{{ r.played }}</td><td>{{ r.won }}</td><td>{{ r.drawn }}</td><td>{{ r.lost }}</td><td>{{ r.goals_diff }}</td></tr>
+        {% endfor %}
+      </table>
+    </td></tr></table>
   </td></tr>
   {% endif %}
 
   <tr><td class="footer font">
-    Resumo gerado com IA a partir das fontes citadas; confira os links para detalhes.
+    Resumo gerado com IA a partir das fontes citadas; confira os links para detalhes. Escudos e dados: ESPN.
     {% if unsubscribe_url %}<br>Não quer mais receber? <a class="link" href="{{ unsubscribe_url }}">Clique para se descadastrar</a>.{% endif %}
   </td></tr>
 

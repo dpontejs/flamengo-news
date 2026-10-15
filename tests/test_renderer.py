@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -11,7 +12,7 @@ from flanews.models import (
     StandingRow,
     Topic,
 )
-from flanews.render.renderer import render, source_label
+from flanews.render.renderer import FLAMENGO_CREST, render, source_label
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITION = Edition(
@@ -67,6 +68,8 @@ def full_newsletter() -> Newsletter:
             home_goals=1,
             away_goals=0,
             venue="Estadio do Maracana",
+            home_logo="https://cdn/819.png",
+            away_logo="https://cdn/3445.png",
             events=[
                 MatchEvent(
                     minute=65,
@@ -85,6 +88,7 @@ def full_newsletter() -> Newsletter:
             date=datetime(2026, 10, 15, 21, 30, tzinfo=TZ),
             venue="Estadio Jorge Luis Hirschi",
             is_home=False,
+            opponent_logo="https://cdn/8.png",
         ),
         standings=[row(i, "Flamengo" if i == 1 else f"Time {i}", i == 1) for i in range(1, 21)],
     )
@@ -102,8 +106,8 @@ def test_render_html_contains_all_sections() -> None:
 
     assert "Edição de Segunda — 12/10/2026" in html
     assert "Flamengo vence o Fla-Flu e segue líder" in html
-    assert "Flamengo 1 x 0 Fluminense" in html
-    assert "65&#39; Jorge Carrascal" in html or "65' Jorge Carrascal" in html
+    assert re.search(r">1</span>\s*<span[^>]*>x</span>\s*<span[^>]*>0<", html)
+    assert re.search(r"65(&#39;|')\s*<strong>Jorge Carrascal</strong>", html)
     assert "Erick Pulgar" not in html
     assert "Posse de bola" in html and "56.5%" in html
     assert "Vitória no clássico" in html
@@ -148,3 +152,24 @@ def test_render_text_version() -> None:
     assert "Estudiantes de La Plata" in text
     assert "1. Flamengo" in text
     assert "mailto:news@fla.com" in text
+
+
+def test_render_scoreboard_with_crests() -> None:
+    html, _ = render(full_newsletter())
+
+    assert "🔴" not in html and "⚫" not in html
+    assert f'src="{FLAMENGO_CREST}"' in html
+    assert 'src="https://cdn/819.png" alt="Flamengo"' in html
+    assert 'src="https://cdn/3445.png" alt="Fluminense"' in html
+    assert 'src="https://cdn/8.png" alt="Estudiantes de La Plata"' in html
+
+
+def test_render_without_crests_uses_names_only() -> None:
+    newsletter = full_newsletter()
+    newsletter.last_match.home_logo = None
+    newsletter.last_match.away_logo = None
+
+    html, _ = render(newsletter)
+
+    assert 'alt="Fluminense"' not in html
+    assert "Fluminense" in html

@@ -157,6 +157,18 @@ Instruções para o modelo que for executar:
 - **Aceite:** gerar preview real e conferir visualmente.
 - **Commit:** `feat: add preview command to render newsletter locally`
 
+### [x] T15a — Escudos e redesign "placar de TV"
+- **Arquivos:** `src/flanews/stats/espn.py`, `src/flanews/models.py`, `src/flanews/render/templates/*`, testes
+- **O que fazer:** escudos do CDN da ESPN em `MatchStats`/`NextMatch`; cabeçalho com escudo no lugar dos emojis; card de placar com os dois escudos; seções em cards com faixa vermelha. Ver `docs/features/analise-de-dados.md`.
+- **Aceite:** testes de parsing dos escudos e de renderização (`<img>` com `alt`, sem emojis 🔴⚫).
+- **Commit:** `feat: add team crests and scoreboard newsletter layout`
+
+### [ ] T15b — Seção "Análise"
+- **Arquivos:** `src/flanews/stats/espn.py`, `src/flanews/summarizer/pipeline.py`, `src/flanews/prompts/analysis.md`, `src/flanews/pipeline.py`, templates, testes
+- **O que fazer:** `TeamMoment` (forma nos últimos 5, campanha, distância na tabela, rankings de gols/assistências), destaques da partida e leitura do jogo pelo LLM. Ver `docs/features/analise-de-dados.md`.
+- **Aceite:** critérios de aceite da página da feature.
+- **Commit:** `feat: add data analysis section with match reading and team form`
+
 ### [ ] T16 — Envio via Resend
 - **Arquivos:** `src/flanews/send/resend_sender.py`, teste
 - **O que fazer:**

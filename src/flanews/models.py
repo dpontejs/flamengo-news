@@ -46,6 +46,8 @@ class MatchStats(BaseModel):
     home_goals: int
     away_goals: int
     venue: str | None = None
+    home_logo: str | None = None
+    away_logo: str | None = None
     events: list[MatchEvent] = Field(default_factory=list)
     statistics: dict[str, tuple[str, str]] = Field(default_factory=dict)
     lineups: dict[str, list[str]] = Field(default_factory=dict)
@@ -59,6 +61,7 @@ class NextMatch(BaseModel):
     date: datetime
     venue: str | None = None
     is_home: bool = True
+    opponent_logo: str | None = None
 
 
 class StandingRow(BaseModel):
