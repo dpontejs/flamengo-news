@@ -105,7 +105,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** teste com fake/mocks; nenhum teste chama a API real.
 - **Commit:** `feat: add gemini llm client with json output`
 
-### [ ] T11 — Prompts e pipeline de sumarização
+### [x] T11 — Prompts e pipeline de sumarização
 - **Arquivos:** `src/flanews/prompts/group.md`, `summarize.md`, `intro.md`, `src/flanews/summarizer/pipeline.py`, testes
 - **O que fazer:** implementar as 3 etapas do PLAN §4.
   - `group`: entrada lista numerada de artigos; saída `{"topics":[{"title","article_ids","importance"}]}`, máx. 8 tópicos, ordenados por importância, descartando irrelevantes.
