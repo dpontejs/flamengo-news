@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
 
+import httpx
 import typer
 from rich.console import Console
 from rich.table import Table
@@ -15,7 +16,7 @@ from flanews.edition import resolve_edition
 from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
-from flanews.send.recipients import resolve_recipients
+from flanews.send.recipients import publish_latest_edition, resolve_recipients
 from flanews.send.resend_sender import (
     UNSUBSCRIBE_PLACEHOLDER,
     ResendSender,
@@ -25,6 +26,8 @@ from flanews.send.resend_sender import (
 from flanews.stats.espn import ESPNStatsClient
 from flanews.stats.table import standings_window
 from flanews.summarizer.client import LLMError
+
+logger = logging.getLogger("flanews.run")
 
 app = typer.Typer(help="Flamengo News CLI", no_args_is_help=True)
 
@@ -191,14 +194,20 @@ def run(
             recipients = resolved_recipients.recipients
             report.recipients = len(recipients)
             report.subscribers = resolved_recipients.from_api
+            subject = build_subject(newsletter)
             try:
-                ids = ResendSender.from_settings(settings).send(
-                    build_subject(newsletter), html, text, recipients
-                )
+                ids = ResendSender.from_settings(settings).send(subject, html, text, recipients)
             except SendError as e:
                 report.outcome = f"falha no envio: {e}"
                 typer.echo(f"Falha no envio: {e}")
                 raise typer.Exit(code=2) from e
+            if ids and settings.SUBSCRIBERS_API_TOKEN:
+                try:
+                    publish_latest_edition(settings, subject, html, text)
+                except httpx.HTTPError as e:
+                    logger.warning(
+                        "Could not publish the latest edition for new subscribers: %s", e
+                    )
             noun = "destinatário" if len(ids) == 1 else "destinatários"
             status = f"enviada para {len(ids)} {noun}" if ids else "não enviada (DRY_RUN)"
             report.outcome = status

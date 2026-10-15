@@ -147,6 +147,8 @@ repositório [`infra`](https://github.com/dpontejs/infra)), a partir da imagem
 - `/unsubscribe`: o link do rodapé pede confirmação; o Gmail e outros usam o one-click (RFC 8058).
 - `/api/subscribers`: lista dos ativos com o link de descadastro de cada um, protegida por
   `SUBSCRIBERS_API_TOKEN`; é o que o workflow lê antes de enviar.
+- `/api/latest-edition`: depois de cada envio real, o workflow publica a edição aqui; quem
+  confirma a inscrição recebe essa edição na hora, com o assunto "Boas-vindas! …".
 
 Para rodar localmente (sem `RESEND_API_KEY`, o link de confirmação aparece no log):
 

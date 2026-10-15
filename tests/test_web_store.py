@@ -80,3 +80,17 @@ def test_data_survives_reopening_the_database(tmp_path) -> None:
     first.confirm("ana@example.com", NOW)
 
     assert SubscriberStore(path).active() == ["ana@example.com"]
+
+
+def test_latest_edition_is_empty_until_published(store: SubscriberStore) -> None:
+    assert store.latest_edition() is None
+
+
+def test_publishing_an_edition_replaces_the_previous_one(tmp_path) -> None:
+    store = SubscriberStore(tmp_path / "subscribers.db")
+    store.set_latest_edition("Antiga", "<p>a</p>", "a", NOW)
+    store.set_latest_edition("Nova", "<p>n</p>", "n", NOW + timedelta(days=4))
+
+    edition = SubscriberStore(tmp_path / "subscribers.db").latest_edition()
+
+    assert (edition.subject, edition.html, edition.text) == ("Nova", "<p>n</p>", "n")

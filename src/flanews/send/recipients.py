@@ -1,4 +1,8 @@
-"""Who receives an edition: the fixed list plus the subscription page's active subscribers."""
+"""Client of the subscription page API: who receives an edition, and the latest edition.
+
+Recipients are the fixed list plus the page's active subscribers; after a real send the edition
+is published back so new subscribers get it right after confirming.
+"""
 
 import logging
 from dataclasses import dataclass
@@ -98,3 +102,20 @@ def resolve_recipients(
                 # A subscriber's signed link beats the fixed list's mailto.
                 merged[email] = Recipient(email, s.unsubscribe_url)
     return ResolvedRecipients(list(merged.values()), from_api)
+
+
+def publish_latest_edition(
+    settings: Settings,
+    subject: str,
+    html: str,
+    text: str,
+    client: httpx.Client | None = None,
+) -> None:
+    """PUT the edition (unsubscribe placeholder included) to the page. Raises httpx.HTTPError."""
+    url = settings.PUBLIC_URL.rstrip("/") + "/api/latest-edition"
+    response = (client or httpx.Client(timeout=TIMEOUT)).put(
+        url,
+        json={"subject": subject, "html": html, "text": text},
+        headers={"Authorization": f"Bearer {settings.SUBSCRIBERS_API_TOKEN}"},
+    )
+    response.raise_for_status()

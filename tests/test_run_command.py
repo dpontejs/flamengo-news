@@ -14,6 +14,7 @@ from flanews import pipeline
 from flanews.config import get_settings
 from flanews.models import Article, MatchStats, StandingRow, TeamMoment
 from flanews.send.resend_sender import RESEND_BATCH_URL as RESEND_URL
+from flanews.send.resend_sender import UNSUBSCRIBE_PLACEHOLDER
 from flanews.summarizer.pipeline import (
     AnalysisResponse,
     GroupResponse,
@@ -233,6 +234,7 @@ def test_run_sends_to_api_subscribers_with_one_click_unsubscribe(env, tmp_path) 
         )
     )
     route = respx.post(RESEND_URL).mock(return_value=sent(["e1", "e2"]))
+    respx.put("https://news.test/api/latest-edition").mock(return_value=httpx.Response(204))
 
     result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
 
@@ -257,6 +259,7 @@ def test_run_survives_subscribers_api_failure(env, tmp_path, monkeypatch) -> Non
     use(env, [ARTICLE], MATCH)
     monkeypatch.setattr("flanews.send.recipients.FETCH_ATTEMPTS", 1)
     respx.get(API).mock(side_effect=httpx.ConnectError("vps down"))
+    respx.put("https://news.test/api/latest-edition").mock(side_effect=httpx.ConnectError("down"))
     route = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
 
     result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
@@ -267,3 +270,61 @@ def test_run_survives_subscribers_api_failure(env, tmp_path, monkeypatch) -> Non
     report = summary.read_text(encoding="utf-8")
     assert "Destinatários: 1 (0 pela página de inscrição)" in report
     assert "vps down" in report
+
+
+PUBLISH = "https://news.test/api/latest-edition"
+
+
+def enable_subscriptions(env) -> None:
+    env.setenv("SUBSCRIBERS_API_TOKEN", "api-token")
+    env.setenv("PUBLIC_URL", "https://news.test")
+    get_settings.cache_clear()
+    respx.get(API).mock(return_value=httpx.Response(200, json=[]))
+
+
+@respx.mock
+def test_run_publishes_the_edition_for_new_subscribers_after_a_real_send(env) -> None:
+    enable_subscriptions(env)
+    use(env, [ARTICLE], MATCH)
+    respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
+    publish = respx.put(PUBLISH).mock(return_value=httpx.Response(204))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    request = publish.calls.last.request
+    assert request.headers["Authorization"] == "Bearer api-token"
+    body = json.loads(request.content)
+    assert body["subject"].startswith("Flamengo News — Edição de Segunda")
+    assert UNSUBSCRIBE_PLACEHOLDER in body["html"] and UNSUBSCRIBE_PLACEHOLDER in body["text"]
+    assert "mailto:" not in body["html"]
+
+
+@respx.mock
+def test_dry_run_does_not_publish_the_edition(env) -> None:
+    env.setenv("DRY_RUN", "true")
+    enable_subscriptions(env)
+    use(env, [ARTICLE], MATCH)
+    publish = respx.put(PUBLISH)
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    assert not publish.called
+
+
+@respx.mock
+def test_publish_failure_keeps_the_sent_outcome(env, tmp_path) -> None:
+    summary = tmp_path / "summary.md"
+    env.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    enable_subscriptions(env)
+    use(env, [ARTICLE], MATCH)
+    respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
+    respx.put(PUBLISH).mock(return_value=httpx.Response(500))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    report = summary.read_text(encoding="utf-8")
+    assert "**Resultado:** enviada para 1 destinatário" in report
+    assert "latest edition" in report

@@ -29,6 +29,8 @@ GET  /unsubscribe?token=   -> página com botão de confirmação (scanners de l
 POST /unsubscribe?token=   -> descadastra; também atende o one-click (RFC 8058)
 GET  /api/subscribers      Authorization: Bearer <SUBSCRIBERS_API_TOKEN>
                            -> 200 [{"email": str, "unsubscribe_url": str}]
+PUT  /api/latest-edition    Authorization: Bearer <SUBSCRIBERS_API_TOKEN>
+                           json: subject, html, text (com o marcador de descadastro) -> 204
 GET  /health               -> 200 {"status": "ok"}
 ```
 
@@ -41,20 +43,25 @@ GET  /health               -> 200 {"status": "ok"}
   `SUBSCRIBERS_API_TOKEN` existe), sem repetição. Falha na API: loga erro e envia só para a lista
   fixa. Um e-mail por pessoa via `POST /emails/batch` da Resend (até 100 por chamada), com
   `List-Unsubscribe` e `List-Unsubscribe-Post` próprios; a lista fixa usa o `mailto:`.
+- Boas-vindas: o `run` publica a edição após cada envio real (falha só gera aviso); na primeira
+  confirmação a VPS envia essa edição com assunto "Boas-vindas! …" e o link de descadastro da
+  pessoa. Clicar de novo não reenvia; falha no envio não desfaz a inscrição.
 - Erros: token inválido/expirado -> 400 com página amigável; API sem token correto -> 401.
 
 ## Critérios de aceite (como testes)
 
-- [ ] `test_subscribe_creates_pending_and_sends_confirmation`
-- [ ] `test_subscribe_same_page_for_active_email` (sem enumeração; não reenvia)
-- [ ] `test_subscribe_honeypot_and_invalid_email_send_nothing`
-- [ ] `test_subscribe_rate_limited_per_ip` e `test_confirmation_resend_cooldown`
-- [ ] `test_confirm_activates_and_is_idempotent`, `test_confirm_rejects_expired_or_forged_token`
-- [ ] `test_unsubscribe_get_does_not_unsubscribe`, `test_one_click_post_unsubscribes`
-- [ ] `test_resubscribe_after_unsubscribe_requires_confirmation`
-- [ ] `test_api_subscribers_requires_token_and_lists_only_active`
-- [ ] `test_sender_batches_one_email_per_recipient_with_own_unsubscribe_link`
-- [ ] `test_run_merges_static_and_api_recipients_and_survives_api_failure`
+- [x] `test_subscribe_creates_pending_and_sends_confirmation`
+- [x] `test_subscribe_same_page_for_active_email` (sem enumeração; não reenvia)
+- [x] `test_subscribe_honeypot_and_invalid_email_send_nothing`
+- [x] `test_subscribe_rate_limited_per_ip` e `test_confirmation_resend_cooldown`
+- [x] `test_confirm_activates_and_is_idempotent`, `test_confirm_rejects_expired_or_forged_token`
+- [x] `test_unsubscribe_get_does_not_unsubscribe`, `test_one_click_post_unsubscribes`
+- [x] `test_resubscribe_after_unsubscribe_requires_confirmation`
+- [x] `test_api_subscribers_requires_token_and_lists_only_active`
+- [x] `test_sender_batches_one_email_per_recipient_with_own_unsubscribe_link`
+- [x] `test_run_merges_static_and_api_recipients_and_survives_api_failure`
+- [x] `test_first_confirmation_sends_the_latest_edition`, `test_clicking_the_confirmation_link_again_does_not_resend`
+- [x] `test_run_publishes_the_edition_for_new_subscribers_after_a_real_send`, `test_dry_run_does_not_publish_the_edition`
 
 ## Verificação ponta a ponta
 

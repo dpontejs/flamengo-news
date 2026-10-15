@@ -1,9 +1,12 @@
+import json
+
 import httpx
+import pytest
 import respx
 from tenacity import wait_none
 
 from flanews.config import Settings
-from flanews.send.recipients import Recipient, resolve_recipients
+from flanews.send.recipients import Recipient, publish_latest_edition, resolve_recipients
 
 API = "https://news.test/api/subscribers"
 MAILTO = "mailto:news@fla.com?subject=Descadastrar"
@@ -85,3 +88,22 @@ def test_network_error_falls_back() -> None:
     respx.get(API).mock(side_effect=httpx.ConnectError("down"))
 
     assert resolve(settings()).recipients == [Recipient("dono@x.com", MAILTO)]
+
+
+@respx.mock
+def test_publish_latest_edition_puts_it_with_the_token() -> None:
+    route = respx.put("https://news.test/api/latest-edition").mock(return_value=httpx.Response(204))
+
+    publish_latest_edition(settings(), "Assunto", "<p>h</p>", "t", client=httpx.Client())
+
+    request = route.calls.last.request
+    assert request.headers["Authorization"] == "Bearer api-token"
+    assert json.loads(request.content) == {"subject": "Assunto", "html": "<p>h</p>", "text": "t"}
+
+
+@respx.mock
+def test_publish_latest_edition_raises_on_error() -> None:
+    respx.put("https://news.test/api/latest-edition").mock(return_value=httpx.Response(401))
+
+    with pytest.raises(httpx.HTTPStatusError):
+        publish_latest_edition(settings(), "A", "h", "t", client=httpx.Client())

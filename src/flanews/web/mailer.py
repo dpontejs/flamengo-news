@@ -8,6 +8,8 @@ import httpx
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from flanews.config import Settings
+from flanews.send.recipients import Recipient
+from flanews.send.resend_sender import ResendSender, SendError
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +24,10 @@ class MailError(Exception):
 
 class Mailer(Protocol):
     def send_confirmation(self, email: str, confirm_url: str) -> None: ...
+
+    def send_edition(
+        self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
+    ) -> None: ...
 
 
 _env = Environment(
@@ -63,12 +69,27 @@ class ResendConfirmationMailer:
             raise MailError(f"Could not reach Resend: {e}") from e
         logger.info("Confirmation sent (id=%s)", response.json().get("id"))
 
+    def send_edition(
+        self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
+    ) -> None:
+        """Welcome a new subscriber with the latest edition, same path as the newsletter."""
+        sender = ResendSender(self.api_key, self.sender, dry_run=False, client=self._client)
+        try:
+            sender.send(subject, html, text, [Recipient(email, unsubscribe_url)])
+        except SendError as e:
+            raise MailError(str(e)) from e
+
 
 class LogMailer:
     """Local development without RESEND_API_KEY: the link goes to the log."""
 
     def send_confirmation(self, email: str, confirm_url: str) -> None:
         logger.warning("RESEND_API_KEY not set; confirmation link for %s: %s", email, confirm_url)
+
+    def send_edition(
+        self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
+    ) -> None:
+        logger.warning("RESEND_API_KEY not set; would send %r to %s", subject, email)
 
 
 def mailer_from_settings(settings: Settings) -> Mailer:

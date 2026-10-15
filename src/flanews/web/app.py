@@ -14,11 +14,13 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode
 
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
 from flanews.config import Settings, get_settings
+from flanews.send.resend_sender import UNSUBSCRIBE_PLACEHOLDER
 from flanews.web.mailer import Mailer, MailError, mailer_from_settings
 from flanews.web.store import RequestResult, SubscriberStore, normalize
 from flanews.web.tokens import make_token, read_token
@@ -30,6 +32,8 @@ SIGNUPS_PER_IP = 5
 SIGNUP_WINDOW = timedelta(hours=1)
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 MAX_EMAIL_LENGTH = 254
+
+WELCOME_PREFIX = "Boas-vindas! "
 
 CREST_URL = "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
 
@@ -52,6 +56,12 @@ class RateLimiter:
             return False
         hits.append(now)
         return True
+
+
+class EditionIn(BaseModel):
+    subject: str
+    html: str
+    text: str
 
 
 def is_valid_email(email: str) -> bool:
@@ -140,6 +150,7 @@ def create_app(
     @app.get("/confirm", response_class=HTMLResponse)
     def confirm(request: Request, token: str = ""):
         email = read_token(secret, "confirm", token, now(), max_age=CONFIRM_MAX_AGE)
+        before = store.get(email) if email else None
         if email is None or not store.confirm(email, now()):
             return message(
                 request,
@@ -148,11 +159,30 @@ def create_app(
                 "inicial.",
                 status=400,
             )
-        return message(
-            request,
-            "Inscrição confirmada!",
-            "Pronto: a próxima edição chega na segunda ou na sexta, às 8h. Saudações rubro-negras!",
-        )
+        # Only the first click welcomes: reopening the link must not resend the edition.
+        first_time = before is not None and before.status == "pending"
+        welcomed = first_time and send_latest_edition(email)
+        text = "Pronto: a próxima edição chega na segunda ou na sexta, às 8h."
+        if welcomed:
+            text += " Mandamos a última edição para o seu e-mail para você já ir lendo."
+        return message(request, "Inscrição confirmada!", text + " Saudações rubro-negras!")
+
+    def send_latest_edition(email: str) -> bool:
+        edition = store.latest_edition()
+        if edition is None:
+            return False
+        try:
+            mailer.send_edition(
+                email,
+                WELCOME_PREFIX + edition.subject,
+                edition.html,
+                edition.text,
+                link("/unsubscribe", "unsubscribe", email),
+            )
+        except MailError as e:
+            logger.error("Welcome edition failed: %s", e)
+            return False
+        return True
 
     def unsubscribe_email(token: str) -> str | None:
         return read_token(secret, "unsubscribe", token, now())
@@ -190,16 +220,34 @@ def create_app(
             "Não vai mais receber o Flamengo News. Se mudar de ideia, é só se inscrever de novo.",
         )
 
-    @app.get("/api/subscribers")
-    def subscribers(request: Request):
+    def authorized(request: Request) -> bool:
         expected = settings.SUBSCRIBERS_API_TOKEN
         given = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
-        if not expected or not hmac.compare_digest(given.encode(), expected.encode()):
-            return JSONResponse({"detail": "unauthorized"}, status_code=401)
+        return bool(expected) and hmac.compare_digest(given.encode(), expected.encode())
+
+    def unauthorized() -> JSONResponse:
+        return JSONResponse({"detail": "unauthorized"}, status_code=401)
+
+    @app.get("/api/subscribers")
+    def subscribers(request: Request):
+        if not authorized(request):
+            return unauthorized()
         return [
             {"email": email, "unsubscribe_url": link("/unsubscribe", "unsubscribe", email)}
             for email in store.active()
         ]
+
+    @app.put("/api/latest-edition", status_code=204)
+    def publish_edition(request: Request, edition: EditionIn):
+        # Published by the newsletter run after each real send; sent to new subscribers.
+        if not authorized(request):
+            return unauthorized()
+        if UNSUBSCRIBE_PLACEHOLDER not in edition.html:
+            return JSONResponse(
+                {"detail": "html must contain the unsubscribe placeholder"}, status_code=422
+            )
+        store.set_latest_edition(edition.subject, edition.html, edition.text, now())
+        return Response(status_code=204)
 
     @app.get("/version.json")
     def version():

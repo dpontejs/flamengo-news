@@ -17,7 +17,14 @@ CREATE TABLE IF NOT EXISTS subscribers (
     confirmation_sent_at TEXT,
     confirmed_at TEXT,
     unsubscribed_at TEXT
-)
+);
+CREATE TABLE IF NOT EXISTS editions (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    subject TEXT NOT NULL,
+    html TEXT NOT NULL,
+    text TEXT NOT NULL,
+    published_at TEXT NOT NULL
+);
 """
 
 
@@ -25,6 +32,15 @@ class RequestResult(Enum):
     SEND_CONFIRMATION = "send_confirmation"
     COOLDOWN = "cooldown"
     ALREADY_ACTIVE = "already_active"
+
+
+@dataclass(frozen=True)
+class Edition:
+    """Last edition sent, with the unsubscribe placeholder still in it."""
+
+    subject: str
+    html: str
+    text: str
 
 
 @dataclass(frozen=True)
@@ -42,7 +58,7 @@ class SubscriberStore:
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self._connect() as db:
-            db.execute(SCHEMA)
+            db.executescript(SCHEMA)
 
     def _connect(self) -> sqlite3.Connection:
         return sqlite3.connect(self.path)
@@ -119,3 +135,18 @@ class SubscriberStore:
             "SELECT email FROM subscribers WHERE status = 'active' ORDER BY confirmed_at, email"
         )
         return [email for (email,) in rows]
+
+    def set_latest_edition(self, subject: str, html: str, text: str, now: datetime) -> None:
+        self._run(
+            "INSERT INTO editions (id, subject, html, text, published_at) VALUES (1, ?, ?, ?, ?)"
+            " ON CONFLICT (id) DO UPDATE SET subject = excluded.subject, html = excluded.html,"
+            " text = excluded.text, published_at = excluded.published_at",
+            subject,
+            html,
+            text,
+            now.isoformat(),
+        )
+
+    def latest_edition(self) -> Edition | None:
+        rows = self._run("SELECT subject, html, text FROM editions WHERE id = 1")
+        return Edition(*rows[0]) if rows else None

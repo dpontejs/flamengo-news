@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from flanews.config import Settings
+from flanews.send.resend_sender import UNSUBSCRIBE_PLACEHOLDER
 from flanews.web.app import create_app
 from flanews.web.mailer import MailError
 from flanews.web.store import SubscriberStore
@@ -18,12 +19,21 @@ API_TOKEN = "api-token"
 class FakeMailer:
     def __init__(self) -> None:
         self.sent: list[tuple[str, str]] = []
+        self.editions: list[tuple[str, str, str, str, str]] = []
         self.fail = False
+        self.fail_editions = False
 
     def send_confirmation(self, email: str, confirm_url: str) -> None:
         if self.fail:
             raise MailError("Resend is down")
         self.sent.append((email, confirm_url))
+
+    def send_edition(
+        self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
+    ) -> None:
+        if self.fail_editions:
+            raise MailError("Resend is down")
+        self.editions.append((email, subject, html, text, unsubscribe_url))
 
 
 class Clock:
@@ -288,3 +298,81 @@ def test_favicon_points_to_the_crest(client) -> None:
 
     assert response.status_code in (301, 302, 307, 308)
     assert response.headers["location"].endswith("/819.png")
+
+
+AUTH = {"Authorization": f"Bearer {API_TOKEN}"}
+EDITION = {
+    "subject": "Flamengo News — Edição de Segunda",
+    "html": f'<p>Fla</p><a href="{UNSUBSCRIBE_PLACEHOLDER}">sair</a>',
+    "text": f"Fla\nSair: {UNSUBSCRIBE_PLACEHOLDER}",
+}
+
+
+def confirm_new_subscriber(client, mailer, email: str = "ana@example.com"):
+    subscribe(client, email)
+    token = token_from(mailer.sent[-1][1])
+    return client.get(f"/confirm?token={token}")
+
+
+def test_publish_latest_edition_requires_token(client, store) -> None:
+    assert client.put("/api/latest-edition", json=EDITION).status_code == 401
+    wrong = {"Authorization": "Bearer wrong"}
+    assert client.put("/api/latest-edition", json=EDITION, headers=wrong).status_code == 401
+    assert store.latest_edition() is None
+
+
+def test_publish_latest_edition_requires_unsubscribe_placeholder(client, store) -> None:
+    edition = {**EDITION, "html": "<p>sem link de descadastro</p>"}
+
+    response = client.put("/api/latest-edition", json=edition, headers=AUTH)
+
+    assert response.status_code == 422
+    assert store.latest_edition() is None
+
+
+def test_first_confirmation_sends_the_latest_edition(client, mailer) -> None:
+    assert client.put("/api/latest-edition", json=EDITION, headers=AUTH).status_code == 204
+
+    response = confirm_new_subscriber(client, mailer)
+
+    assert response.status_code == 200
+    assert "última edição" in response.text
+    [(email, subject, html, text, unsubscribe_url)] = mailer.editions
+    assert email == "ana@example.com"
+    assert subject == "Boas-vindas! Flamengo News — Edição de Segunda"
+    assert (html, text) == (EDITION["html"], EDITION["text"])
+    token = token_from(unsubscribe_url)
+    assert unsubscribe_url.startswith("https://news.test/unsubscribe?token=")
+    assert read_token(SECRET, "unsubscribe", token, NOW) == "ana@example.com"
+
+
+def test_clicking_the_confirmation_link_again_does_not_resend(client, mailer) -> None:
+    client.put("/api/latest-edition", json=EDITION, headers=AUTH)
+    subscribe(client)
+    url = f"/confirm?token={token_from(mailer.sent[0][1])}"
+
+    client.get(url)
+    second = client.get(url)
+
+    assert second.status_code == 200
+    assert len(mailer.editions) == 1
+
+
+def test_confirmation_without_published_edition_sends_nothing(client, mailer) -> None:
+    response = confirm_new_subscriber(client, mailer)
+
+    assert response.status_code == 200
+    assert "última edição" not in response.text
+    assert mailer.editions == []
+
+
+def test_edition_failure_keeps_the_subscription(client, store, mailer) -> None:
+    client.put("/api/latest-edition", json=EDITION, headers=AUTH)
+    mailer.fail_editions = True
+
+    response = confirm_new_subscriber(client, mailer)
+
+    assert response.status_code == 200
+    assert "Inscrição confirmada" in response.text
+    assert "última edição" not in response.text
+    assert store.active() == ["ana@example.com"]
