@@ -125,6 +125,11 @@ def build_newsletter(
     )
 
 
+def is_empty(newsletter: Newsletter) -> bool:
+    """True when there is neither news nor a match: such an edition is not sent."""
+    return not newsletter.topics and newsletter.last_match is None
+
+
 def unsubscribe_url(settings: Settings) -> str:
     """mailto: link to the sender address, used in the footer and List-Unsubscribe."""
     _, address = parseaddr(settings.NEWSLETTER_FROM)

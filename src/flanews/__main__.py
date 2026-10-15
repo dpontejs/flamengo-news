@@ -13,6 +13,7 @@ from flanews.config import get_settings
 from flanews.edition import resolve_edition
 from flanews.models import Edition
 from flanews.render.renderer import render
+from flanews.send.resend_sender import ResendSender, SendError, build_subject
 from flanews.stats.espn import ESPNStatsClient
 from flanews.stats.table import standings_window
 
@@ -138,6 +139,38 @@ def preview(
     typer.echo(f"Preview saved to {html_path} and {html_path.with_suffix('.txt')}")
     if open_browser:
         webbrowser.open(html_path.resolve().as_uri())
+
+
+@app.command()
+def run(
+    edition: EditionOption = "auto",
+    date: DateOption = None,
+) -> None:
+    """Build, render, save to out/ and send the newsletter (respects DRY_RUN)."""
+    _setup_logging()
+    resolved = _resolve(edition, date)
+    settings = get_settings()
+    newsletter = pipeline.build_newsletter(resolved, settings)
+    if pipeline.is_empty(newsletter):
+        typer.echo(f"Nada para enviar em {resolved.label}: sem notícias e sem partida.")
+        raise typer.Exit(code=1)
+
+    unsubscribe = pipeline.unsubscribe_url(settings)
+    html, text = render(newsletter, unsubscribe_url=unsubscribe)
+    html_path = Path("out") / f"newsletter-{resolved.end:%Y-%m-%d}.html"
+    html_path.parent.mkdir(parents=True, exist_ok=True)
+    html_path.write_text(html, encoding="utf-8")
+    html_path.with_suffix(".txt").write_text(text, encoding="utf-8")
+
+    try:
+        email_id = ResendSender.from_settings(settings).send(
+            build_subject(newsletter), html, text, unsubscribe
+        )
+    except SendError as e:
+        typer.echo(f"Falha no envio: {e}")
+        raise typer.Exit(code=2) from e
+    status = f"enviada (id={email_id})" if email_id else "não enviada (DRY_RUN)"
+    typer.echo(f"{resolved.label}: {status}; cópia em {html_path}")
 
 
 def _setup_logging() -> None:

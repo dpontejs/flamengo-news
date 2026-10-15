@@ -179,7 +179,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** teste com `respx` verifica payload; dry-run não faz request.
 - **Commit:** `feat: add resend email sender`
 
-### [ ] T17 — Comando `run`
+### [x] T17 — Comando `run`
 - **Arquivos:** `src/flanews/__main__.py`, `src/flanews/pipeline.py`
 - **O que fazer:** `run --edition auto` = build + render + send; salva HTML em `out/`. Exit code ≠ 0 se não houver nenhuma notícia **e** nenhuma partida (não envia newsletter vazia).
 - **Aceite:** teste end-to-end com tudo mockado.
