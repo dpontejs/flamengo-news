@@ -305,3 +305,12 @@ def test_render_hides_empty_short_sections() -> None:
 
     assert "Saiba mais" not in html and "Brasil afora" not in html
     assert "Saiba mais" not in text and "Brasil afora" not in text
+
+
+def test_render_subscribe_link_only_when_given() -> None:
+    html, text = render(full_newsletter(), subscribe_url="https://news.test")
+
+    assert 'href="https://news.test"' in html and "Inscreva-se" in html
+    assert "https://news.test" in text
+    plain_html, plain_text = render(full_newsletter())
+    assert "Inscreva-se" not in plain_html and "Inscreva-se" not in plain_text

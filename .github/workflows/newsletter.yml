@@ -52,6 +52,9 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           NEWSLETTER_FROM: ${{ secrets.NEWSLETTER_FROM }}
           NEWSLETTER_RECIPIENTS: ${{ secrets.NEWSLETTER_RECIPIENTS }}
+          # Subscription page: without the token, only NEWSLETTER_RECIPIENTS receives it.
+          SUBSCRIBERS_API_TOKEN: ${{ secrets.SUBSCRIBERS_API_TOKEN }}
+          PUBLIC_URL: ${{ vars.PUBLIC_URL || 'https://flamengo.diegoponte.dev' }}
           # Scheduled runs send for real; manual runs default to a dry run.
           DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || (inputs.dry_run && 'true' || 'false') }}
           EDITION: ${{ inputs.edition || 'auto' }}

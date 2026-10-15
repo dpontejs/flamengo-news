@@ -15,7 +15,13 @@ from flanews.edition import resolve_edition
 from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
-from flanews.send.resend_sender import ResendSender, SendError, build_subject
+from flanews.send.recipients import resolve_recipients
+from flanews.send.resend_sender import (
+    UNSUBSCRIBE_PLACEHOLDER,
+    ResendSender,
+    SendError,
+    build_subject,
+)
 from flanews.stats.espn import ESPNStatsClient
 from flanews.stats.table import standings_window
 from flanews.summarizer.client import LLMError
@@ -168,22 +174,33 @@ def run(
                 typer.echo(f"Nada para enviar em {resolved.label}: sem notícias e sem partida.")
                 raise typer.Exit(code=1)
 
-            unsubscribe = pipeline.unsubscribe_url(settings)
-            html, text = render(newsletter, unsubscribe_url=unsubscribe)
+            # The page link only shows up once subscriptions are live (API token configured).
+            subscribe = settings.PUBLIC_URL.rstrip("/") if settings.SUBSCRIBERS_API_TOKEN else None
+            html, text = render(
+                newsletter, unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER, subscribe_url=subscribe
+            )
+            mailto = pipeline.unsubscribe_url(settings)
             html_path = Path("out") / f"newsletter-{resolved.end:%Y-%m-%d}.html"
             html_path.parent.mkdir(parents=True, exist_ok=True)
-            html_path.write_text(html, encoding="utf-8")
-            html_path.with_suffix(".txt").write_text(text, encoding="utf-8")
+            html_path.write_text(html.replace(UNSUBSCRIBE_PLACEHOLDER, mailto), encoding="utf-8")
+            html_path.with_suffix(".txt").write_text(
+                text.replace(UNSUBSCRIBE_PLACEHOLDER, mailto), encoding="utf-8"
+            )
 
+            resolved_recipients = resolve_recipients(settings)
+            recipients = resolved_recipients.recipients
+            report.recipients = len(recipients)
+            report.subscribers = resolved_recipients.from_api
             try:
-                email_id = ResendSender.from_settings(settings).send(
-                    build_subject(newsletter), html, text, unsubscribe
+                ids = ResendSender.from_settings(settings).send(
+                    build_subject(newsletter), html, text, recipients
                 )
             except SendError as e:
                 report.outcome = f"falha no envio: {e}"
                 typer.echo(f"Falha no envio: {e}")
                 raise typer.Exit(code=2) from e
-            status = f"enviada (id={email_id})" if email_id else "não enviada (DRY_RUN)"
+            noun = "destinatário" if len(ids) == 1 else "destinatários"
+            status = f"enviada para {len(ids)} {noun}" if ids else "não enviada (DRY_RUN)"
             report.outcome = status
             typer.echo(f"{resolved.label}: {status}; cópia em {html_path}")
         finally:

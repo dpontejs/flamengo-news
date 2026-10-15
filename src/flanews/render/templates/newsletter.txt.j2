@@ -90,6 +90,9 @@ Destaques: {% for label, player, value in leaders["Flamengo"] %}{{ label }} {{ p
 
 --
 Resumo gerado com IA a partir das fontes citadas.
+{% if subscribe_url %}
+Recebeu de alguém? Inscreva-se em {{ subscribe_url }}
+{% endif %}
 {% if unsubscribe_url %}
 Para se descadastrar: {{ unsubscribe_url }}
 {% endif %}

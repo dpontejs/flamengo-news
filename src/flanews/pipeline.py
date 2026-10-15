@@ -1,7 +1,6 @@
 import logging
 from collections import Counter
 from collections.abc import Callable
-from email.utils import parseaddr
 from typing import Protocol
 
 import httpx
@@ -21,6 +20,7 @@ from flanews.models import (
 from flanews.processing.dedupe import dedupe, is_relevant
 from flanews.processing.extract import DomainRateLimiter, extract_articles
 from flanews.report import RunReport
+from flanews.send.recipients import mailto_unsubscribe
 from flanews.stats.espn import ESPNStatsClient
 from flanews.summarizer.client import LLMClient, LLMError, get_llm_client
 from flanews.summarizer.pipeline import EditionSummary, summarize_edition, write_analysis
@@ -175,5 +175,4 @@ def is_empty(newsletter: Newsletter) -> bool:
 
 def unsubscribe_url(settings: Settings) -> str:
     """mailto: link to the sender address, used in the footer and List-Unsubscribe."""
-    _, address = parseaddr(settings.NEWSLETTER_FROM)
-    return f"mailto:{address}?subject=Descadastrar"
+    return mailto_unsubscribe(settings)

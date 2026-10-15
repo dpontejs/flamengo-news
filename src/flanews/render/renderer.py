@@ -55,13 +55,18 @@ def _environment() -> Environment:
 _env = _environment()
 
 
-def render(newsletter: Newsletter, unsubscribe_url: str | None = None) -> tuple[str, str]:
+def render(
+    newsletter: Newsletter,
+    unsubscribe_url: str | None = None,
+    subscribe_url: str | None = None,
+) -> tuple[str, str]:
     """Render the newsletter as (html with inlined CSS, plain text)."""
     context = {
         "n": newsletter,
         "crest": FLAMENGO_CREST,
         "standings": standings_window(newsletter.standings),
         "unsubscribe_url": unsubscribe_url,
+        "subscribe_url": subscribe_url,
     }
     html = _env.get_template("newsletter.html.j2").render(**context)
     text = _env.get_template("newsletter.txt.j2").render(**context)

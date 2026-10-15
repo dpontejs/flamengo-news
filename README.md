@@ -9,6 +9,9 @@ Newsletter automática do Flamengo, enviada por e-mail **toda segunda e sexta à
   pela IA só quando há algo relevante.
 - **Próximo jogo** e **classificação**.
 
+Quem quiser receber se inscreve em **[flamengo.diegoponte.dev](https://flamengo.diegoponte.dev)**,
+confirma pelo e-mail e sai com um clique.
+
 Arquitetura e decisões: [`docs/PLAN.md`](docs/PLAN.md). Backlog: [`docs/TASKS.md`](docs/TASKS.md).
 
 ## Como funciona
@@ -20,11 +23,13 @@ GitHub Actions (cron seg/sex 11:00 UTC)
        ├─ estatísticas: API pública da ESPN (sem chave)
        ├─ IA: Gemini (4 chamadas por edição)
        ├─ render: HTML (CSS inline) + texto puro
-       └─ envio: Resend (domínio próprio)
+       └─ envio: Resend (domínio próprio), um e-mail por inscrito
+                 ▲
+                 └─ GET /api/subscribers ── VPS: página de inscrição (FastAPI + SQLite)
 ```
 
-Sem banco de dados: cada execução olha só a janela da edição (seg 08:00 → sex 08:00 e
-sex 08:00 → seg 08:00).
+As notícias não têm banco: cada execução olha só a janela da edição (seg 08:00 → sex 08:00 e
+sex 08:00 → seg 08:00). Só a página de inscrição guarda dados (os e-mails, num SQLite na VPS).
 
 ## Setup local
 
@@ -43,7 +48,11 @@ cp .env.example .env   # depois preencha as chaves (veja abaixo)
 | `GEMINI_MODEL` | não | padrão `gemini-flash-latest` |
 | `RESEND_API_KEY` | para enviar | chave da Resend (permissão "Sending access" basta) |
 | `NEWSLETTER_FROM` | para enviar | ex.: `"Flamengo News <news@seudominio.com>"` |
-| `NEWSLETTER_RECIPIENTS` | para enviar | e-mails separados por vírgula (vão em cópia oculta) |
+| `NEWSLETTER_RECIPIENTS` | para enviar | lista fixa, separada por vírgula (recebe sempre, mesmo com a página fora do ar) |
+| `SUBSCRIBERS_API_TOKEN` | não | liga a página de inscrição: o envio busca os inscritos na API e o rodapé ganha o link |
+| `PUBLIC_URL` | não | endereço da página de inscrição (padrão `https://flamengo.diegoponte.dev`) |
+| `SUBSCRIBE_SECRET` | só na VPS | assina os links de confirmação e descadastro |
+| `SUBSCRIBERS_DB` | só na VPS | caminho do SQLite (padrão `data/subscribers.db`) |
 | `DRY_RUN` | não | padrão `true`: monta tudo mas não envia |
 | `FLAMENGO_TEAM_ID` | não | id do Flamengo na ESPN (`819`) |
 | `TIMEZONE` | não | padrão `America/Sao_Paulo` |
@@ -122,10 +131,31 @@ O workflow [`newsletter.yml`](.github/workflows/newsletter.yml) roda segunda e s
 4. Cada execução publica um **resumo** na página da execução (notícias por fonte, tópicos, tokens
    do Gemini, falhas parciais e resultado) e guarda o HTML enviado como artifact por 30 dias.
 
-Para mudar quem recebe: `gh secret set NEWSLETTER_RECIPIENTS --body "a@x.com,b@y.com"`.
+Para mudar a lista fixa: `gh secret set NEWSLETTER_RECIPIENTS --body "a@x.com,b@y.com"`. Os demais
+se inscrevem pela página; o resumo da execução mostra quantos vieram de lá.
 
 O GitHub desativa workflows agendados após 60 dias sem commits no repositório; se isso acontecer,
 reative na aba Actions.
+
+## Página de inscrição
+
+App FastAPI em [`src/flanews/web/`](src/flanews/web) que roda na VPS (stack `flamengo-news` do
+repositório [`infra`](https://github.com/dpontejs/infra)), a partir da imagem
+`ghcr.io/dpontejs/flamengo-news:main` publicada pelo CI.
+
+- `/`: página com o formulário; `/subscribe` manda o e-mail de confirmação (link válido por 7 dias).
+- `/unsubscribe`: o link do rodapé pede confirmação; o Gmail e outros usam o one-click (RFC 8058).
+- `/api/subscribers`: lista dos ativos com o link de descadastro de cada um, protegida por
+  `SUBSCRIBERS_API_TOKEN`; é o que o workflow lê antes de enviar.
+
+Para rodar localmente (sem `RESEND_API_KEY`, o link de confirmação aparece no log):
+
+```bash
+SUBSCRIBE_SECRET=dev uv run uvicorn flanews.web.app:create_app --factory --reload
+```
+
+Plano grátis da Resend: 100 e-mails/dia. Como cada inscrito recebe o próprio e-mail, isso dá
+uns 90 inscritos com folga para as confirmações.
 
 ## Personalizar
 

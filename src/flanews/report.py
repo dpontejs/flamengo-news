@@ -23,6 +23,8 @@ class RunReport(BaseModel):
     llm_calls: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
+    recipients: int = 0
+    subscribers: int = 0
     problems: list[str] = Field(default_factory=list)
     outcome: str = ""
 
@@ -49,6 +51,7 @@ class RunReport(BaseModel):
             f"{check(self.has_next_match)} · Classificação: {check(self.has_standings)}",
             f"- LLM: {self.llm_calls} chamadas, {number(self.input_tokens)} tokens de entrada, "
             f"{number(self.output_tokens)} de saída",
+            f"- Destinatários: {self.recipients} ({self.subscribers} pela página de inscrição)",
             "",
             "### Falhas parciais",
             "",

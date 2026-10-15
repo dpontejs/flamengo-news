@@ -17,6 +17,8 @@ def test_report_markdown_lists_counts_problems_and_outcome() -> None:
         llm_calls=4,
         input_tokens=30500,
         output_tokens=1200,
+        recipients=3,
+        subscribers=2,
         problems=["WARNING flanews.processing.extract: Failed to extract content from x"],
         outcome="enviada (id=abc)",
     )
@@ -31,6 +33,7 @@ def test_report_markdown_lists_counts_problems_and_outcome() -> None:
     assert "- Fla-Flu" in md
     assert "LLM: 4 chamadas, 30.500 tokens de entrada, 1.200 de saída" in md
     assert "Última partida: ✅" in md
+    assert "Destinatários: 3 (2 pela página de inscrição)" in md
     assert "Failed to extract content from x" in md
 
 

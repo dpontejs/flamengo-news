@@ -219,7 +219,7 @@ Instruções para o modelo que for executar:
 - **O que fazer:** FastAPI com landing page, `/subscribe`, `/confirm`, `/unsubscribe` (com one-click), `/api/subscribers` e `/health`; e-mail de confirmação pela Resend; honeypot e limite por IP.
 - **Commit:** `feat: add subscription web app`
 
-### [ ] T23 — Envio individual com descadastro em um clique
+### [x] T23 — Envio individual com descadastro em um clique
 - **O que fazer:** `run` junta `NEWSLETTER_RECIPIENTS` com `/api/subscribers`; envio pela API de lote da Resend, um e-mail por pessoa com o próprio link de descadastro; link da página de inscrição no rodapé.
 - **Commit:** `feat: send one email per subscriber with one-click unsubscribe`
 

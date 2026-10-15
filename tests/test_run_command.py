@@ -13,7 +13,7 @@ import flanews.__main__ as cli
 from flanews import pipeline
 from flanews.config import get_settings
 from flanews.models import Article, MatchStats, StandingRow, TeamMoment
-from flanews.send.resend_sender import RESEND_URL
+from flanews.send.resend_sender import RESEND_BATCH_URL as RESEND_URL
 from flanews.summarizer.pipeline import (
     AnalysisResponse,
     GroupResponse,
@@ -80,6 +80,10 @@ def env(monkeypatch, tmp_path):
     get_settings.cache_clear()
 
 
+def sent(ids: list[str]) -> httpx.Response:
+    return httpx.Response(200, json={"data": [{"id": i} for i in ids]})
+
+
 def use(monkeypatch, articles: list[Article], match: MatchStats | None) -> None:
     monkeypatch.setattr(pipeline, "collect_articles", lambda edition, settings: articles)
     monkeypatch.setattr(pipeline, "collect_candidates", lambda edition, settings: ([], []))
@@ -89,22 +93,23 @@ def use(monkeypatch, articles: list[Article], match: MatchStats | None) -> None:
 @respx.mock
 def test_run_builds_renders_saves_and_sends(env, tmp_path) -> None:
     use(env, [ARTICLE], MATCH)
-    route = respx.post(RESEND_URL).mock(return_value=httpx.Response(200, json={"id": "email_9"}))
+    route = respx.post(RESEND_URL).mock(return_value=sent(["email_9"]))
 
     result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
 
     assert result.exit_code == 0, result.output
-    body = json.loads(route.calls.last.request.content)
+    [body] = json.loads(route.calls.last.request.content)
     assert (
         body["subject"]
         == "Flamengo News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
     )
-    assert body["bcc"] == ["a@x.com"]
+    assert body["to"] == ["a@x.com"]
     assert "O Flamengo venceu." in body["html"] and "Eficiência decidiu." in body["text"]
     assert body["headers"]["List-Unsubscribe"] == "<mailto:news@fla.com?subject=Descadastrar>"
     saved = tmp_path / "out" / "newsletter-2026-10-12.html"
     assert saved.read_text(encoding="utf-8") == body["html"]
-    assert "email_9" in result.output
+    assert "enviada para 1 destinatário" in result.output
+    assert "Inscreva-se" not in body["html"]  # page link only once subscriptions are live
 
 
 @respx.mock
@@ -122,7 +127,7 @@ def test_run_refuses_to_send_empty_newsletter(env, tmp_path) -> None:
 @respx.mock
 def test_run_sends_stats_only_edition(env) -> None:
     use(env, [], MATCH)
-    route = respx.post(RESEND_URL).mock(return_value=httpx.Response(200, json={"id": "e"}))
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e"]))
 
     result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
 
@@ -171,14 +176,15 @@ def test_run_writes_report_to_github_step_summary(env, tmp_path) -> None:
     env.setattr(pipeline, "collect_articles", collect)
     env.setattr(pipeline, "collect_candidates", lambda edition, settings: ([], []))
     env.setattr(pipeline, "ESPNStatsClient", lambda **kwargs: FakeStats(MATCH))
-    respx.post(RESEND_URL).mock(return_value=httpx.Response(200, json={"id": "email_9"}))
+    respx.post(RESEND_URL).mock(return_value=sent(["email_9"]))
 
     result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
 
     assert result.exit_code == 0, result.output
     report = summary.read_text(encoding="utf-8")
     assert "## Flamengo News — Edição de Segunda — 12/10/2026" in report
-    assert "**Resultado:** enviada (id=email_9)" in report
+    assert "**Resultado:** enviada para 1 destinatário" in report
+    assert "Destinatários: 1 (0 pela página de inscrição)" in report
     assert "| ge | 1 |" in report
     assert "- Fla-Flu" in report
     assert "Última partida: ✅" in report
@@ -208,3 +214,56 @@ def test_run_reports_send_failure_and_prints_without_github(env) -> None:
 
     assert result.exit_code == 2
     assert "**Resultado:** falha no envio" in result.output
+
+
+API = "https://news.test/api/subscribers"
+
+
+@respx.mock
+def test_run_sends_to_api_subscribers_with_one_click_unsubscribe(env, tmp_path) -> None:
+    summary = tmp_path / "summary.md"
+    env.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    env.setenv("SUBSCRIBERS_API_TOKEN", "api-token")
+    env.setenv("PUBLIC_URL", "https://news.test")
+    get_settings.cache_clear()
+    use(env, [ARTICLE], MATCH)
+    respx.get(API).mock(
+        return_value=httpx.Response(
+            200, json=[{"email": "ana@y.com", "unsubscribe_url": "https://news.test/u?token=A"}]
+        )
+    )
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e1", "e2"]))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    owner, ana = json.loads(route.calls.last.request.content)
+    assert owner["to"] == ["a@x.com"] and ana["to"] == ["ana@y.com"]
+    assert 'href="https://news.test/u?token=A"' in ana["html"]
+    assert ana["headers"]["List-Unsubscribe-Post"] == "List-Unsubscribe=One-Click"
+    assert 'href="https://news.test"' in ana["html"] and "Inscreva-se" in ana["html"]
+    report = summary.read_text(encoding="utf-8")
+    assert "enviada para 2 destinatários" in report
+    assert "Destinatários: 2 (1 pela página de inscrição)" in report
+
+
+@respx.mock
+def test_run_survives_subscribers_api_failure(env, tmp_path, monkeypatch) -> None:
+    summary = tmp_path / "summary.md"
+    env.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    env.setenv("SUBSCRIBERS_API_TOKEN", "api-token")
+    env.setenv("PUBLIC_URL", "https://news.test")
+    get_settings.cache_clear()
+    use(env, [ARTICLE], MATCH)
+    monkeypatch.setattr("flanews.send.recipients.FETCH_ATTEMPTS", 1)
+    respx.get(API).mock(side_effect=httpx.ConnectError("vps down"))
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    [owner] = json.loads(route.calls.last.request.content)
+    assert owner["to"] == ["a@x.com"]
+    report = summary.read_text(encoding="utf-8")
+    assert "Destinatários: 1 (0 pela página de inscrição)" in report
+    assert "vps down" in report

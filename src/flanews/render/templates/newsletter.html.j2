@@ -215,6 +215,7 @@
 
   <tr><td class="footer font">
     Resumo gerado com IA a partir das fontes citadas; confira os links para detalhes. Escudos e dados: ESPN.
+    {% if subscribe_url %}<br>Recebeu de alguém? Inscreva-se em <a class="link" href="{{ subscribe_url }}">{{ subscribe_url | replace("https://", "") }}</a>.{% endif %}
     {% if unsubscribe_url %}<br>Não quer mais receber? <a class="link" href="{{ unsubscribe_url }}">Clique para se descadastrar</a>.{% endif %}
   </td></tr>
 
