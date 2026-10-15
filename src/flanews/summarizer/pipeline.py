@@ -4,7 +4,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pydantic import BaseModel
 
-from flanews.models import Article, MatchStats, Topic
+from flanews.models import Article, MatchStats, TeamMoment, Topic
 from flanews.summarizer.client import LLMClient, LLMError
 
 logger = logging.getLogger(__name__)
@@ -44,6 +44,10 @@ class SummaryResponse(BaseModel):
 class IntroResponse(BaseModel):
     headline: str
     intro: str
+
+
+class AnalysisResponse(BaseModel):
+    analysis: str
 
 
 class EditionSummary(BaseModel):
@@ -118,6 +122,18 @@ def write_intro(
 ) -> IntroResponse:
     prompt = render_prompt("intro", topics=topics, last_match=last_match, label=label)
     return llm.generate_json(prompt, IntroResponse)
+
+
+def write_analysis(match: MatchStats, moment: TeamMoment | None, llm: LLMClient) -> str:
+    """'Leitura do jogo': the LLM interprets the match stats and the team's moment."""
+    prompt = render_prompt(
+        "analysis",
+        m=match,
+        moment=moment,
+        goals=[e for e in match.events if e.type == "goal"],
+        cards=[e for e in match.events if e.type == "red_card"],
+    )
+    return llm.generate_json(prompt, AnalysisResponse).analysis.strip()
 
 
 def summarize_edition(

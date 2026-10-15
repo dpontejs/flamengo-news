@@ -1,7 +1,7 @@
 # Análise de dados e redesign "placar de TV"
 
 - **Data:** 2026-10-14
-- **Status:** aprovada
+- **Status:** entregue (commits T15a e T15b, sem PR: trabalho direto na main)
 - **ADRs:** —
 
 ## Objetivo

@@ -163,7 +163,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** testes de parsing dos escudos e de renderização (`<img>` com `alt`, sem emojis 🔴⚫).
 - **Commit:** `feat: add team crests and scoreboard newsletter layout`
 
-### [ ] T15b — Seção "Análise"
+### [x] T15b — Seção "Análise"
 - **Arquivos:** `src/flanews/stats/espn.py`, `src/flanews/summarizer/pipeline.py`, `src/flanews/prompts/analysis.md`, `src/flanews/pipeline.py`, templates, testes
 - **O que fazer:** `TeamMoment` (forma nos últimos 5, campanha, distância na tabela, rankings de gols/assistências), destaques da partida e leitura do jogo pelo LLM. Ver `docs/features/analise-de-dados.md`.
 - **Aceite:** critérios de aceite da página da feature.

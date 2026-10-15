@@ -1,0 +1,1116 @@
+{
+ "stats": [
+  {
+   "name": "goalsLeaders",
+   "displayName": "Goals",
+   "leaders": [
+    {
+     "value": 21.0,
+     "displayValue": "Matches: 28, Goals: 21",
+     "athlete": {
+      "displayName": "Kevin Viveros",
+      "team": {
+       "id": "3458",
+       "displayName": "Athletico Paranaense"
+      }
+     }
+    },
+    {
+     "value": 16.0,
+     "displayValue": "Matches: 30, Goals: 16",
+     "athlete": {
+      "displayName": "Pedro",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 14.0,
+     "displayValue": "Matches: 22, Goals: 14",
+     "athlete": {
+      "displayName": "Gabriel Barbosa",
+      "team": {
+       "id": "2674",
+       "displayName": "Santos"
+      }
+     }
+    },
+    {
+     "value": 10.0,
+     "displayValue": "Matches: 29, Goals: 10",
+     "athlete": {
+      "displayName": "Carlos Vinícius",
+      "team": {
+       "id": "6273",
+       "displayName": "Grêmio"
+      }
+     }
+    },
+    {
+     "value": 10.0,
+     "displayValue": "Matches: 26, Goals: 10",
+     "athlete": {
+      "displayName": "Luciano Juba",
+      "team": {
+       "id": "9967",
+       "displayName": "Bahia"
+      }
+     }
+    },
+    {
+     "value": 10.0,
+     "displayValue": "Matches: 25, Goals: 10",
+     "athlete": {
+      "displayName": "Jonathan Calleri",
+      "team": {
+       "id": "2026",
+       "displayName": "São Paulo"
+      }
+     }
+    },
+    {
+     "value": 10.0,
+     "displayValue": "Matches: 23, Goals: 10",
+     "athlete": {
+      "displayName": "Danilo Santos",
+      "team": {
+       "id": "6086",
+       "displayName": "Botafogo"
+      }
+     }
+    },
+    {
+     "value": 9.0,
+     "displayValue": "Matches: 29, Goals: 9",
+     "athlete": {
+      "displayName": "Samuel Lino",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 9.0,
+     "displayValue": "Matches: 27, Goals: 9",
+     "athlete": {
+      "displayName": "Matheus Pereira",
+      "team": {
+       "id": "2022",
+       "displayName": "Cruzeiro"
+      }
+     }
+    },
+    {
+     "value": 9.0,
+     "displayValue": "Matches: 27, Goals: 9",
+     "athlete": {
+      "displayName": "José Manuel López",
+      "team": {
+       "id": "2029",
+       "displayName": "Palmeiras"
+      }
+     }
+    },
+    {
+     "value": 9.0,
+     "displayValue": "Matches: 23, Goals: 9",
+     "athlete": {
+      "displayName": "Luciano",
+      "team": {
+       "id": "2026",
+       "displayName": "São Paulo"
+      }
+     }
+    },
+    {
+     "value": 9.0,
+     "displayValue": "Matches: 23, Goals: 9",
+     "athlete": {
+      "displayName": "Renê",
+      "team": {
+       "id": "3457",
+       "displayName": "Vitória"
+      }
+     }
+    },
+    {
+     "value": 9.0,
+     "displayValue": "Matches: 18, Goals: 9",
+     "athlete": {
+      "displayName": "John Kennedy",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 8.0,
+     "displayValue": "Matches: 29, Goals: 8",
+     "athlete": {
+      "displayName": "Pedro Rocha",
+      "team": {
+       "id": "3456",
+       "displayName": "Coritiba"
+      }
+     }
+    },
+    {
+     "value": 8.0,
+     "displayValue": "Matches: 26, Goals: 8",
+     "athlete": {
+      "displayName": "Breno",
+      "team": {
+       "id": "3456",
+       "displayName": "Coritiba"
+      }
+     }
+    },
+    {
+     "value": 8.0,
+     "displayValue": "Matches: 23, Goals: 8",
+     "athlete": {
+      "displayName": "Kaio Jorge",
+      "team": {
+       "id": "2022",
+       "displayName": "Cruzeiro"
+      }
+     }
+    },
+    {
+     "value": 8.0,
+     "displayValue": "Matches: 13, Goals: 8",
+     "athlete": {
+      "displayName": "Neymar",
+      "team": {
+       "id": "2674",
+       "displayName": "Santos"
+      }
+     }
+    },
+    {
+     "value": 7.0,
+     "displayValue": "Matches: 29, Goals: 7",
+     "athlete": {
+      "displayName": "Johan Carbonero",
+      "team": {
+       "id": "1936",
+       "displayName": "Internacional"
+      }
+     }
+    },
+    {
+     "value": 7.0,
+     "displayValue": "Matches: 25, Goals: 7",
+     "athlete": {
+      "displayName": "Arthur Cabral",
+      "team": {
+       "id": "6086",
+       "displayName": "Botafogo"
+      }
+     }
+    },
+    {
+     "value": 7.0,
+     "displayValue": "Matches: 25, Goals: 7",
+     "athlete": {
+      "displayName": "Maurício",
+      "team": {
+       "id": "2029",
+       "displayName": "Palmeiras"
+      }
+     }
+    },
+    {
+     "value": 7.0,
+     "displayValue": "Matches: 24, Goals: 7",
+     "athlete": {
+      "displayName": "Jajá",
+      "team": {
+       "id": "4936",
+       "displayName": "Remo"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 28, Goals: 6",
+     "athlete": {
+      "displayName": "Lucas Barbosa",
+      "team": {
+       "id": "6079",
+       "displayName": "Red Bull Bragantino"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 24, Goals: 6",
+     "athlete": {
+      "displayName": "Jorge Carrascal",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 22, Goals: 6",
+     "athlete": {
+      "displayName": "Jefferson Savarino",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 22, Goals: 6",
+     "athlete": {
+      "displayName": "Carlos Eduardo",
+      "team": {
+       "id": "9169",
+       "displayName": "Mirassol"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 21, Goals: 6",
+     "athlete": {
+      "displayName": "Lucas Paquetá",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 11, Goals: 6",
+     "athlete": {
+      "displayName": "Hulk",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 30, Goals: 5",
+     "athlete": {
+      "displayName": "Stiven Mendoza",
+      "team": {
+       "id": "3458",
+       "displayName": "Athletico Paranaense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 28, Goals: 5",
+     "athlete": {
+      "displayName": "Erick",
+      "team": {
+       "id": "3457",
+       "displayName": "Vitória"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 28, Goals: 5",
+     "athlete": {
+      "displayName": "Alef Manga",
+      "team": {
+       "id": "4936",
+       "displayName": "Remo"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 28, Goals: 5",
+     "athlete": {
+      "displayName": "Marcinho",
+      "team": {
+       "id": "9318",
+       "displayName": "Chapecoense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 27, Goals: 5",
+     "athlete": {
+      "displayName": "Isidro Pitta",
+      "team": {
+       "id": "6079",
+       "displayName": "Red Bull Bragantino"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 27, Goals: 5",
+     "athlete": {
+      "displayName": "Matheus",
+      "team": {
+       "id": "3457",
+       "displayName": "Vitória"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 27, Goals: 5",
+     "athlete": {
+      "displayName": "Joaquín Lavega",
+      "team": {
+       "id": "3456",
+       "displayName": "Coritiba"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 26, Goals: 5",
+     "athlete": {
+      "displayName": "Thiago Mendes",
+      "team": {
+       "id": "3454",
+       "displayName": "Vasco da Gama"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 26, Goals: 5",
+     "athlete": {
+      "displayName": "Andrés Gómez",
+      "team": {
+       "id": "3454",
+       "displayName": "Vasco da Gama"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 25, Goals: 5",
+     "athlete": {
+      "displayName": "Tomás Cuello",
+      "team": {
+       "id": "7632",
+       "displayName": "Atlético-MG"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 25, Goals: 5",
+     "athlete": {
+      "displayName": "Alan Patrick",
+      "team": {
+       "id": "1936",
+       "displayName": "Internacional"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 25, Goals: 5",
+     "athlete": {
+      "displayName": "Luciano Acosta",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 24, Goals: 5",
+     "athlete": {
+      "displayName": "Álvaro Barreal",
+      "team": {
+       "id": "2674",
+       "displayName": "Santos"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 22, Goals: 5",
+     "athlete": {
+      "displayName": "Agustín Canobbio",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 18, Goals: 5",
+     "athlete": {
+      "displayName": "Vitor Roque",
+      "team": {
+       "id": "2029",
+       "displayName": "Palmeiras"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 17, Goals: 5",
+     "athlete": {
+      "displayName": "Christian",
+      "team": {
+       "id": "2022",
+       "displayName": "Cruzeiro"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 16, Goals: 5",
+     "athlete": {
+      "displayName": "Leozinho",
+      "team": {
+       "id": "3458",
+       "displayName": "Athletico Paranaense"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 29, Goals: 4",
+     "athlete": {
+      "displayName": "Vitinho",
+      "team": {
+       "id": "1936",
+       "displayName": "Internacional"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 29, Goals: 4",
+     "athlete": {
+      "displayName": "Kevin Serna",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 27, Goals: 4",
+     "athlete": {
+      "displayName": "Gustavo Gómez",
+      "team": {
+       "id": "2029",
+       "displayName": "Palmeiras"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 27, Goals: 4",
+     "athlete": {
+      "displayName": "Igor Marques",
+      "team": {
+       "id": "9169",
+       "displayName": "Mirassol"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 27, Goals: 4",
+     "athlete": {
+      "displayName": "Alex Telles",
+      "team": {
+       "id": "6086",
+       "displayName": "Botafogo"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 26, Goals: 4",
+     "athlete": {
+      "displayName": "Alexander Bernabei",
+      "team": {
+       "id": "1936",
+       "displayName": "Internacional"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "assistsLeaders",
+   "displayName": "Assists",
+   "leaders": [
+    {
+     "value": 10.0,
+     "displayValue": "Matches: 29, Assists: 10",
+     "athlete": {
+      "displayName": "Andreas Pereira",
+      "team": {
+       "id": "2029",
+       "displayName": "Palmeiras"
+      }
+     }
+    },
+    {
+     "value": 10.0,
+     "displayValue": "Matches: 27, Assists: 10",
+     "athlete": {
+      "displayName": "Josué Pesqueira",
+      "team": {
+       "id": "3456",
+       "displayName": "Coritiba"
+      }
+     }
+    },
+    {
+     "value": 8.0,
+     "displayValue": "Matches: 24, Assists: 8",
+     "athlete": {
+      "displayName": "Jorge Carrascal",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 7.0,
+     "displayValue": "Matches: 29, Assists: 7",
+     "athlete": {
+      "displayName": "Samuel Lino",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 30, Assists: 6",
+     "athlete": {
+      "displayName": "Pedro",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 28, Assists: 6",
+     "athlete": {
+      "displayName": "Erick",
+      "team": {
+       "id": "3457",
+       "displayName": "Vitória"
+      }
+     }
+    },
+    {
+     "value": 6.0,
+     "displayValue": "Matches: 27, Assists: 6",
+     "athlete": {
+      "displayName": "Rodrigo Garro",
+      "team": {
+       "id": "874",
+       "displayName": "Corinthians"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 27, Assists: 5",
+     "athlete": {
+      "displayName": "Matheus Pereira",
+      "team": {
+       "id": "2022",
+       "displayName": "Cruzeiro"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 27, Assists: 5",
+     "athlete": {
+      "displayName": "Igor Marques",
+      "team": {
+       "id": "9169",
+       "displayName": "Mirassol"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 26, Assists: 5",
+     "athlete": {
+      "displayName": "Álvaro Montoro",
+      "team": {
+       "id": "6086",
+       "displayName": "Botafogo"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 26, Assists: 5",
+     "athlete": {
+      "displayName": "Alesson",
+      "team": {
+       "id": "9169",
+       "displayName": "Mirassol"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 25, Assists: 5",
+     "athlete": {
+      "displayName": "Luciano Acosta",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 23, Assists: 5",
+     "athlete": {
+      "displayName": "João Cruz",
+      "team": {
+       "id": "3458",
+       "displayName": "Athletico Paranaense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 22, Assists: 5",
+     "athlete": {
+      "displayName": "Gastón Benavídez",
+      "team": {
+       "id": "3458",
+       "displayName": "Athletico Paranaense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 21, Assists: 5",
+     "athlete": {
+      "displayName": "Lucas Esquivel",
+      "team": {
+       "id": "3458",
+       "displayName": "Athletico Paranaense"
+      }
+     }
+    },
+    {
+     "value": 5.0,
+     "displayValue": "Matches: 21, Assists: 5",
+     "athlete": {
+      "displayName": "Giovanni Augusto",
+      "team": {
+       "id": "9318",
+       "displayName": "Chapecoense"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 29, Assists: 4",
+     "athlete": {
+      "displayName": "Johan Carbonero",
+      "team": {
+       "id": "1936",
+       "displayName": "Internacional"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 29, Assists: 4",
+     "athlete": {
+      "displayName": "Kevin Serna",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 27, Assists: 4",
+     "athlete": {
+      "displayName": "Reinaldo",
+      "team": {
+       "id": "9169",
+       "displayName": "Mirassol"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 27, Assists: 4",
+     "athlete": {
+      "displayName": "Alex Telles",
+      "team": {
+       "id": "6086",
+       "displayName": "Botafogo"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 27, Assists: 4",
+     "athlete": {
+      "displayName": "José Manuel López",
+      "team": {
+       "id": "2029",
+       "displayName": "Palmeiras"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 27, Assists: 4",
+     "athlete": {
+      "displayName": "Cristian Pavón",
+      "team": {
+       "id": "6273",
+       "displayName": "Grêmio"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 27, Assists: 4",
+     "athlete": {
+      "displayName": "Matheus",
+      "team": {
+       "id": "3457",
+       "displayName": "Vitória"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 25, Assists: 4",
+     "athlete": {
+      "displayName": "Keny Arroyo",
+      "team": {
+       "id": "2022",
+       "displayName": "Cruzeiro"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 23, Assists: 4",
+     "athlete": {
+      "displayName": "Rodrigo Nestor",
+      "team": {
+       "id": "9967",
+       "displayName": "Bahia"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 23, Assists: 4",
+     "athlete": {
+      "displayName": "Alerrando",
+      "team": {
+       "id": "1936",
+       "displayName": "Internacional"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 22, Assists: 4",
+     "athlete": {
+      "displayName": "Henry Mosquera",
+      "team": {
+       "id": "6079",
+       "displayName": "Red Bull Bragantino"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 21, Assists: 4",
+     "athlete": {
+      "displayName": "Giorgian de Arrascaeta",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 20, Assists: 4",
+     "athlete": {
+      "displayName": "Fagner",
+      "team": {
+       "id": "2022",
+       "displayName": "Cruzeiro"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 20, Assists: 4",
+     "athlete": {
+      "displayName": "José Luis Rodríguez",
+      "team": {
+       "id": "3454",
+       "displayName": "Vasco da Gama"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 20, Assists: 4",
+     "athlete": {
+      "displayName": "Éverton Ribeiro",
+      "team": {
+       "id": "9967",
+       "displayName": "Bahia"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 19, Assists: 4",
+     "athlete": {
+      "displayName": "Cuiabano",
+      "team": {
+       "id": "3454",
+       "displayName": "Vasco da Gama"
+      }
+     }
+    },
+    {
+     "value": 4.0,
+     "displayValue": "Matches: 15, Assists: 4",
+     "athlete": {
+      "displayName": "Joaquín Piquerez",
+      "team": {
+       "id": "2029",
+       "displayName": "Palmeiras"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 29, Assists: 3",
+     "athlete": {
+      "displayName": "Vitinho",
+      "team": {
+       "id": "1936",
+       "displayName": "Internacional"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 28, Assists: 3",
+     "athlete": {
+      "displayName": "Kevin Viveros",
+      "team": {
+       "id": "3458",
+       "displayName": "Athletico Paranaense"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 28, Assists: 3",
+     "athlete": {
+      "displayName": "Vitinho",
+      "team": {
+       "id": "6086",
+       "displayName": "Botafogo"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 28, Assists: 3",
+     "athlete": {
+      "displayName": "Alef Manga",
+      "team": {
+       "id": "4936",
+       "displayName": "Remo"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 27, Assists: 3",
+     "athlete": {
+      "displayName": "Isidro Pitta",
+      "team": {
+       "id": "6079",
+       "displayName": "Red Bull Bragantino"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 26, Assists: 3",
+     "athlete": {
+      "displayName": "Gerson",
+      "team": {
+       "id": "2022",
+       "displayName": "Cruzeiro"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 26, Assists: 3",
+     "athlete": {
+      "displayName": "Jean Lucas",
+      "team": {
+       "id": "9967",
+       "displayName": "Bahia"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 25, Assists: 3",
+     "athlete": {
+      "displayName": "Renan Lodi",
+      "team": {
+       "id": "7632",
+       "displayName": "Atlético-MG"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 25, Assists: 3",
+     "athlete": {
+      "displayName": "Francis Amuzu",
+      "team": {
+       "id": "6273",
+       "displayName": "Grêmio"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 25, Assists: 3",
+     "athlete": {
+      "displayName": "Bernard",
+      "team": {
+       "id": "7632",
+       "displayName": "Atlético-MG"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 25, Assists: 3",
+     "athlete": {
+      "displayName": "José Enamorado",
+      "team": {
+       "id": "6273",
+       "displayName": "Grêmio"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 24, Assists: 3",
+     "athlete": {
+      "displayName": "Jhon Arias",
+      "team": {
+       "id": "2029",
+       "displayName": "Palmeiras"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 23, Assists: 3",
+     "athlete": {
+      "displayName": "Jorginho",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 23, Assists: 3",
+     "athlete": {
+      "displayName": "Bruno Henrique",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 22, Assists: 3",
+     "athlete": {
+      "displayName": "Martinelli",
+      "team": {
+       "id": "3445",
+       "displayName": "Fluminense"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 22, Assists: 3",
+     "athlete": {
+      "displayName": "Guillermo Varela",
+      "team": {
+       "id": "819",
+       "displayName": "Flamengo"
+      }
+     }
+    },
+    {
+     "value": 3.0,
+     "displayValue": "Matches: 22, Assists: 3",
+     "athlete": {
+      "displayName": "Gabriel Barbosa",
+      "team": {
+       "id": "2674",
+       "displayName": "Santos"
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

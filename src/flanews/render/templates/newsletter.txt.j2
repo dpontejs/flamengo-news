@@ -22,6 +22,31 @@ FLAMENGO NEWS
 {% endfor %}
 {% endif %}
 {% endif %}
+{% set mo = n.moment %}
+{% set leaders = n.last_match.leaders if n.last_match else {} %}
+{% if n.analysis or (mo and (mo.form or mo.standing or mo.rankings)) or leaders %}
+
+== Análise ==
+{% if n.analysis %}
+{{ n.analysis }}
+{% endif %}
+{% if mo and mo.form %}
+
+Forma: {{ mo.form | map(attribute="result") | join(" ") }} ({% for f in mo.form %}{{ f.score }} {{ f.opponent }}{% if not loop.last %}, {% endif %}{% endfor %})
+{% endif %}
+{% if mo and mo.standing %}
+Brasileirão: {{ mo.standing.position }}º, {{ mo.standing.points }} pts, {{ mo.standing | performance }} de aproveitamento, {{ mo.standing.goals_for }} gols pró e {{ mo.standing.goals_against }} contra{% if mo.gap %}; {{ mo.gap }}{% endif %}.
+{% endif %}
+{% if mo and mo.rankings %}
+{% for r in mo.rankings %}
+{{ r.player }}: {{ r.position }}º em {{ r.category | lower }} ({{ r.value }})
+{% endfor %}
+{% endif %}
+{% if leaders.get("Flamengo") %}
+Destaques: {% for label, player, value in leaders["Flamengo"] %}{{ label }} {{ player }} ({{ value }}){% if not loop.last %}; {% endif %}{% endfor %}
+
+{% endif %}
+{% endif %}
 {% if n.topics %}
 
 == Notícias ==

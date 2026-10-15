@@ -5,7 +5,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 from premailer import Premailer
 
-from flanews.models import MatchEvent, Newsletter
+from flanews.models import MatchEvent, Newsletter, StandingRow
 from flanews.stats.table import standings_window
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
@@ -33,6 +33,13 @@ def _minute(event: MatchEvent) -> str:
     return f"{event.minute}'{extra}"
 
 
+def _performance(row: StandingRow) -> str:
+    """Share of possible points won, e.g. 64 of 90 -> '71%'."""
+    if row.played == 0:
+        return "-"
+    return f"{round(100 * row.points / (3 * row.played))}%"
+
+
 def _environment() -> Environment:
     env = Environment(
         loader=FileSystemLoader(TEMPLATES_DIR),
@@ -41,7 +48,7 @@ def _environment() -> Environment:
         trim_blocks=True,
         lstrip_blocks=True,
     )
-    env.filters.update(source=source_label, when=_when, minute=_minute)
+    env.filters.update(source=source_label, when=_when, minute=_minute, performance=_performance)
     return env
 
 

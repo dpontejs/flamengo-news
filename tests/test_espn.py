@@ -7,12 +7,13 @@ import httpx
 import pytest
 import respx
 
-from flanews.models import MatchEvent
+from flanews.models import MatchEvent, StandingRow
 from flanews.stats.espn import (
     ESPN_SITE_URL,
     ESPN_STANDINGS_URL,
     LEAGUES,
     ESPNStatsClient,
+    standings_gap,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures" / "espn"
@@ -37,6 +38,9 @@ def espn() -> respx.MockRouter:
             )
         router.get(f"{ESPN_SITE_URL}/bra.1/summary", params={"event": "401841263"}).mock(
             return_value=httpx.Response(200, json=load("summary_401841263"))
+        )
+        router.get(f"{ESPN_SITE_URL}/bra.1/statistics").mock(
+            return_value=httpx.Response(200, json=load("league_statistics_bra.1"))
         )
         for league in ("bra.1", "conmebol.libertadores"):
             router.get(f"{ESPN_STANDINGS_URL}/{league}/standings").mock(
@@ -197,3 +201,80 @@ def test_get_next_match_includes_opponent_logo(espn: respx.MockRouter) -> None:
 
     assert match is not None
     assert match.opponent_logo == "https://a.espncdn.com/i/teamlogos/soccer/500/8.png"
+
+
+def test_get_last_match_parses_leaders(espn: respx.MockRouter) -> None:
+    match = make_client().get_last_match(
+        datetime(2026, 10, 9, 8, tzinfo=TZ), datetime(2026, 10, 12, 8, tzinfo=TZ)
+    )
+
+    assert match is not None
+    assert match.leaders["Flamengo"][0] == ("Finalizações", "Samuel Lino", "3")
+    assert ("Intervenções defensivas", "Léo Ortiz", "16") in match.leaders["Flamengo"]
+    assert match.leaders["Fluminense"][0] == ("Finalizações", "Rodrigo Castillo", "4")
+
+
+def test_get_standings_includes_goals_for_and_against(espn: respx.MockRouter) -> None:
+    leader = make_client().get_standings("bra.1")[0]
+    assert (leader.goals_for, leader.goals_against) == (58, 25)
+
+
+def test_get_moment_form_rankings_and_gap(espn: respx.MockRouter) -> None:
+    client = make_client()
+    standings = client.get_standings("bra.1")
+
+    moment = client.get_moment(datetime(2026, 10, 12, 8, tzinfo=TZ), standings)
+
+    assert moment is not None
+    # Newest first; matches ESPN lastFiveGames (oldest first) plus the Fla-Flu itself.
+    assert [f.result for f in moment.form] == ["V", "E", "V", "E", "V"]
+    latest = moment.form[0]
+    assert (latest.opponent, latest.score, latest.competition) == (
+        "Fluminense",
+        "1-0",
+        "Brasileirão",
+    )
+    assert moment.standing is not None and moment.standing.points == 64
+    assert moment.gap == "1 ponto à frente do Palmeiras"
+    goals = [(r.player, r.position, r.value) for r in moment.rankings if r.category == "Gols"]
+    assert goals[0] == ("Pedro", 2, 16)
+    assert all(r.position <= 10 for r in moment.rankings)
+    assists = [r.player for r in moment.rankings if r.category == "Assistências"]
+    assert assists[:3] == ["Jorge Carrascal", "Samuel Lino", "Pedro"]
+
+
+def test_get_moment_reuses_schedules_already_loaded(espn: respx.MockRouter) -> None:
+    client = make_client()
+    client.get_last_match(datetime(2026, 10, 9, 8, tzinfo=TZ), datetime(2026, 10, 12, 8, tzinfo=TZ))
+    calls_before = len(espn.calls)
+
+    client.get_moment(datetime(2026, 10, 12, 8, tzinfo=TZ), [])
+
+    assert len(espn.calls) == calls_before + 1  # only the league statistics
+
+
+def standing(position: int, team: str, points: int, is_flamengo: bool = False) -> StandingRow:
+    return StandingRow(
+        position=position,
+        team=team,
+        points=points,
+        played=30,
+        won=0,
+        drawn=0,
+        lost=0,
+        goals_diff=0,
+        is_flamengo=is_flamengo,
+    )
+
+
+def test_standings_gap_for_leader_chaser_and_tie() -> None:
+    assert standings_gap([standing(1, "Flamengo", 64, True), standing(2, "Palmeiras", 60)]) == (
+        "4 pontos à frente do Palmeiras"
+    )
+    assert standings_gap([standing(1, "Palmeiras", 65), standing(2, "Flamengo", 64, True)]) == (
+        "1 ponto atrás do líder Palmeiras"
+    )
+    assert standings_gap([standing(1, "Flamengo", 64, True), standing(2, "Palmeiras", 64)]) == (
+        "empatado em pontos com o Palmeiras"
+    )
+    assert standings_gap([standing(1, "Palmeiras", 65)]) is None

@@ -7,7 +7,15 @@ import httpx
 from dateutil.parser import isoparse
 
 from flanews.collectors.base import DEFAULT_TIMEOUT
-from flanews.models import MatchEvent, MatchStats, NextMatch, StandingRow
+from flanews.models import (
+    FormResult,
+    MatchEvent,
+    MatchStats,
+    NextMatch,
+    PlayerRanking,
+    StandingRow,
+    TeamMoment,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +45,17 @@ STAT_LABELS = {
     "redCards": "Cartões vermelhos",
 }
 
+LEADER_LABELS = {
+    "totalShots": "Finalizações",
+    "accuratePasses": "Passes certos",
+    "defensiveInterventions": "Intervenções defensivas",
+    "saves": "Defesas",
+}
+
+RANKING_LABELS = {"goalsLeaders": "Gols", "assistsLeaders": "Assistências"}
+RANKING_TOP = 10
+FORM_SIZE = 5
+
 EVENT_TYPES = {
     "yellow-card": "yellow_card",
     "red-card": "red_card",
@@ -64,6 +83,7 @@ class ESPNStatsClient:
             headers={"User-Agent": ESPN_USER_AGENT}, timeout=DEFAULT_TIMEOUT
         )
         self.tz = ZoneInfo(tz_name)
+        self._schedules: dict[tuple[str, tuple], list[dict]] = {}
 
     def get_last_match(self, start: datetime, end: datetime) -> MatchStats | None:
         """Most recent completed match whose kickoff falls in [start, end]."""
@@ -109,6 +129,29 @@ class ESPNStatsClient:
             opponent_logo=_logo(theirs["team"]),
         )
 
+    def get_moment(self, end: datetime, standings: list[StandingRow]) -> TeamMoment | None:
+        """Form in the last matches up to `end`, league campaign and player rankings."""
+        played: list[tuple[datetime, str, dict]] = []
+        for league in LEAGUES:
+            for event in self._schedule(league, {"season": str(end.year)}):
+                kickoff = isoparse(event["date"])
+                if event["competitions"][0]["status"]["type"]["completed"] and kickoff <= end:
+                    played.append((kickoff, league, event))
+        played.sort(key=lambda p: p[0], reverse=True)
+        try:
+            form = [self._parse_form(e, league, k) for k, league, e in played[:FORM_SIZE]]
+        except Exception as e:
+            logger.warning("Failed to parse ESPN form: %s", e)
+            form = []
+
+        rankings = self._rankings("bra.1")
+        standing = next((r for r in standings if r.is_flamengo), None)
+        if not form and standing is None and not rankings:
+            return None
+        return TeamMoment(
+            form=form, standing=standing, gap=standings_gap(standings), rankings=rankings
+        )
+
     def get_standings(self, league: str = "bra.1") -> list[StandingRow]:
         """League table; for group competitions only Flamengo's group."""
         try:
@@ -129,11 +172,57 @@ class ESPNStatsClient:
         return response.json()
 
     def _schedule(self, league: str, params: dict[str, str]) -> list[dict]:
-        url = f"{ESPN_SITE_URL}/{league}/teams/{self.team_id}/schedule"
+        key = (league, tuple(sorted(params.items())))
+        if key not in self._schedules:
+            url = f"{ESPN_SITE_URL}/{league}/teams/{self.team_id}/schedule"
+            try:
+                self._schedules[key] = self._get(url, params).get("events", [])
+            except Exception as e:
+                logger.warning("Failed to load ESPN schedule for %s: %s", league, e)
+                return []
+        return self._schedules[key]
+
+    def _parse_form(self, event: dict, league: str, kickoff: datetime) -> FormResult:
+        competitors = event["competitions"][0]["competitors"]
+        ours = next(c for c in competitors if c["team"]["id"] == self.team_id)
+        theirs = next(c for c in competitors if c is not ours)
+        goals_for, goals_against = int(_score(ours)), int(_score(theirs))
+        if goals_for > goals_against:
+            result = "V"
+        elif goals_for < goals_against:
+            result = "D"
+        else:
+            result = "E"
+        return FormResult(
+            result=result,
+            opponent=theirs["team"]["displayName"],
+            score=f"{goals_for}-{goals_against}",
+            competition=LEAGUES[league],
+            date=kickoff.astimezone(self.tz),
+        )
+
+    def _rankings(self, league: str) -> list[PlayerRanking]:
         try:
-            return self._get(url, params).get("events", [])
+            data = self._get(f"{ESPN_SITE_URL}/{league}/statistics", {"season": "2026"})
+            rankings = []
+            for category in data.get("stats", []):
+                label = RANKING_LABELS.get(category["name"])
+                if label is None:
+                    continue
+                for position, leader in enumerate(category["leaders"][:RANKING_TOP], 1):
+                    team = leader["athlete"].get("team") or {}
+                    if team.get("id") == self.team_id:
+                        rankings.append(
+                            PlayerRanking(
+                                category=label,
+                                player=leader["athlete"]["displayName"],
+                                position=position,
+                                value=int(leader["value"]),
+                            )
+                        )
+            return rankings
         except Exception as e:
-            logger.warning("Failed to load ESPN schedule for %s: %s", league, e)
+            logger.warning("Failed to load ESPN rankings for %s: %s", league, e)
             return []
 
     def _parse_match(self, summary: dict, league: str) -> MatchStats:
@@ -176,7 +265,20 @@ class ESPNStatsClient:
             events=[e for e in map(_parse_event, summary.get("keyEvents", [])) if e],
             statistics=statistics,
             lineups=lineups,
+            leaders=self._parse_leaders(summary),
         )
+
+    def _parse_leaders(self, summary: dict) -> dict[str, list[tuple[str, str, str]]]:
+        leaders: dict[str, list[tuple[str, str, str]]] = {}
+        for team in summary.get("leaders", []):
+            rows = []
+            for category in team.get("leaders", []):
+                label = LEADER_LABELS.get(category["name"])
+                if label and category.get("leaders"):
+                    top = category["leaders"][0]
+                    rows.append((label, top["athlete"]["displayName"], top["displayValue"]))
+            leaders[team["team"]["displayName"]] = rows
+        return leaders
 
     def _parse_standing(self, entry: dict) -> StandingRow:
         stats = {s["name"]: s.get("value") for s in entry["stats"]}
@@ -189,8 +291,33 @@ class ESPNStatsClient:
             drawn=int(stats["ties"]),
             lost=int(stats["losses"]),
             goals_diff=int(stats["pointDifferential"]),
+            goals_for=int(stats.get("pointsFor") or 0),
+            goals_against=int(stats.get("pointsAgainst") or 0),
             is_flamengo=entry["team"]["id"] == self.team_id,
         )
+
+
+def standings_gap(standings: list[StandingRow]) -> str | None:
+    """Points gap phrase: ahead of the 2nd place when leading, else behind the leader."""
+    ordered = sorted(standings, key=lambda r: r.position)
+    fla = next((r for r in ordered if r.is_flamengo), None)
+    if fla is None or len(ordered) < 2:
+        return None
+    other = ordered[1] if fla is ordered[0] else ordered[0]
+    diff = abs(fla.points - other.points)
+    if diff == 0:
+        return f"empatado em pontos com o {other.team}"
+    points = f"{diff} ponto{'s' if diff > 1 else ''}"
+    if fla is ordered[0]:
+        return f"{points} à frente do {other.team}"
+    return f"{points} atrás do líder {other.team}"
+
+
+def _score(competitor: dict) -> str:
+    score = competitor.get("score")
+    if isinstance(score, dict):
+        return str(score.get("displayValue", score.get("value", 0)))
+    return str(score)
 
 
 def _logo(team: dict) -> str | None:

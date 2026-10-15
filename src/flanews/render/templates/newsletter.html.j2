@@ -39,6 +39,14 @@
   .table th { font-size: 11px; color: #666666; text-align: left; padding: 6px 4px; border-bottom: 2px solid #000000; }
   .table td { font-size: 14px; padding: 7px 4px; border-bottom: 1px solid #eeeeee; }
   .fla td { font-weight: 800; color: #C3281E; }
+  .subhead { font-size: 13px; font-weight: 700; color: #000000; margin: 14px 0 6px 0; }
+  .chip { width: 28px; height: 28px; font-size: 13px; font-weight: 800; color: #ffffff; }
+  .chip-V { background-color: #1E8E3E; }
+  .chip-E { background-color: #8A8A8A; }
+  .chip-D { background-color: #C3281E; }
+  .kpi { padding: 6px 0; }
+  .kpi-value { font-size: 22px; font-weight: 800; color: #000000; }
+  .kpi-label { font-size: 12px; color: #666666; }
   .footer { padding: 20px 24px 28px 24px; color: #777777; font-size: 12px; line-height: 1.5; }
 </style>
 </head>
@@ -100,6 +108,41 @@
       {% endfor %}
     </table>
     {% endif %}
+  </td></tr>
+  {% endif %}
+
+  {% set mo = n.moment %}
+  {% set leaders = n.last_match.leaders if n.last_match else {} %}
+  {% if n.analysis or (mo and (mo.form or mo.standing or mo.rankings)) or leaders %}
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      <p class="card-title">Análise</p>
+      {% if n.analysis %}<p class="subhead">Leitura do jogo</p><p class="text">{{ n.analysis }}</p>{% endif %}
+      {% if mo and mo.form %}
+      <p class="subhead">Últimos {{ mo.form | length }} jogos</p>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+        {% for f in mo.form %}<td class="chip chip-{{ f.result }}" align="center" title="{{ f.score }} {{ f.opponent }}">{{ f.result }}</td><td width="6"></td>{% endfor %}
+      </tr></table>
+      <p class="muted" style="margin-top: 6px;">{% for f in mo.form %}{{ f.score }} {{ f.opponent }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+      {% endif %}
+      {% if mo and mo.standing %}{% set s = mo.standing %}
+      <p class="subhead">Campanha no Brasileirão</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        <td width="33%" class="kpi"><span class="kpi-value">{{ s.position }}º</span><br><span class="kpi-label">{{ s.points }} pontos</span></td>
+        <td width="33%" class="kpi"><span class="kpi-value">{{ s | performance }}</span><br><span class="kpi-label">aproveitamento</span></td>
+        <td width="34%" class="kpi"><span class="kpi-value">{{ s.goals_for }}</span><br><span class="kpi-label">{{ s.goals_for }} gols pró · {{ s.goals_against }} contra</span></td>
+      </tr></table>
+      {% if mo.gap %}<p class="muted" style="margin-top: 6px;">Na tabela: {{ mo.gap }}.</p>{% endif %}
+      {% endif %}
+      {% if mo and mo.rankings %}
+      <p class="subhead">Rankings do campeonato</p>
+      {% for r in mo.rankings %}<p class="text">{{ r.player }} · {{ r.position }}º em {{ r.category | lower }} ({{ r.value }})</p>{% endfor %}
+      {% endif %}
+      {% if leaders.get("Flamengo") %}
+      <p class="subhead">Destaques do Flamengo na partida</p>
+      {% for label, player, value in leaders["Flamengo"] %}<p class="text">{{ label }}: <strong>{{ player }}</strong> ({{ value }})</p>{% endfor %}
+      {% endif %}
+    </td></tr></table>
   </td></tr>
   {% endif %}
 

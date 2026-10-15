@@ -204,3 +204,46 @@ def test_group_failure_propagates() -> None:
 
     with pytest.raises(LLMError):
         summarize_edition(ARTICLES, FakeLLMClient(broken))
+
+
+def test_write_analysis_prompt_has_stats_events_and_form() -> None:
+    from flanews.models import FormResult, MatchEvent, PlayerRanking, TeamMoment
+    from flanews.summarizer.pipeline import AnalysisResponse, write_analysis
+
+    match = LAST_MATCH.model_copy(
+        update={
+            "statistics": {"Posse de bola": ("43.5%", "56.5%"), "Finalizações": ("17", "12")},
+            "events": [
+                MatchEvent(minute=65, team="Flamengo", player="Jorge Carrascal", type="goal")
+            ],
+            "leaders": {"Flamengo": [("Finalizações", "Samuel Lino", "3")]},
+        }
+    )
+    moment = TeamMoment(
+        form=[
+            FormResult(
+                result="V",
+                opponent="Fluminense",
+                score="1-0",
+                competition="Brasileirão",
+                date=datetime(2026, 10, 11, tzinfo=TZ),
+            )
+        ],
+        gap="1 ponto à frente do Palmeiras",
+        rankings=[PlayerRanking(category="Gols", player="Pedro", position=2, value=16)],
+    )
+    llm = FakeLLMClient(lambda prompt, schema: {"analysis": " Leitura do jogo. "})
+
+    assert write_analysis(match, moment, llm) == "Leitura do jogo."
+    prompt = llm.prompts[0]
+    for expected in (
+        "Posse de bola: 43.5% x 56.5%",
+        "65' Jorge Carrascal",
+        "Samuel Lino",
+        "V 1-0 Fluminense",
+        "1 ponto à frente do Palmeiras",
+        "Pedro",
+        "não invente",
+    ):
+        assert expected in prompt or expected in prompt.lower(), expected
+    assert AnalysisResponse.model_fields.keys() == {"analysis"}

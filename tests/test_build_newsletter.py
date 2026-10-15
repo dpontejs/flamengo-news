@@ -8,9 +8,22 @@ from typer.testing import CliRunner
 import flanews.__main__ as cli
 from flanews import pipeline
 from flanews.config import Settings
-from flanews.models import Article, Edition, MatchStats, Newsletter, NextMatch, StandingRow
+from flanews.models import (
+    Article,
+    Edition,
+    MatchStats,
+    Newsletter,
+    NextMatch,
+    StandingRow,
+    TeamMoment,
+)
 from flanews.summarizer.client import LLMError
-from flanews.summarizer.pipeline import GroupResponse, IntroResponse, SummaryResponse
+from flanews.summarizer.pipeline import (
+    AnalysisResponse,
+    GroupResponse,
+    IntroResponse,
+    SummaryResponse,
+)
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITION = Edition(
@@ -53,6 +66,8 @@ STANDINGS = [
     )
 ]
 
+MOMENT = TeamMoment(gap="1 ponto à frente do Palmeiras")
+
 
 class FakeStats:
     def __init__(self) -> None:
@@ -69,6 +84,10 @@ class FakeStats:
     def get_standings(self, league: str = "bra.1") -> list[StandingRow]:
         return STANDINGS
 
+    def get_moment(self, end: datetime, standings: list[StandingRow]) -> TeamMoment | None:
+        self.calls["moment"] = (end, standings)
+        return MOMENT
+
 
 def good_llm() -> FakeLLMClient:
     def respond(prompt: str, schema: type[BaseModel]) -> dict:
@@ -78,6 +97,8 @@ def good_llm() -> FakeLLMClient:
             return {"summaries": [{"topic_id": 1, "summary": "O Flamengo venceu."}]}
         if schema is IntroResponse:
             return {"headline": "Flamengo vence", "intro": "Vitória no clássico. Líder."}
+        if schema is AnalysisResponse:
+            return {"analysis": "Menos posse, mais eficiência."}
         raise AssertionError(schema)
 
     return FakeLLMClient(respond)
@@ -107,6 +128,9 @@ def test_build_newsletter_combines_news_stats_and_summary() -> None:
     assert newsletter.standings == STANDINGS
     assert stats.calls["last"] == (EDITION.start, EDITION.end)
     assert stats.calls["next"] == EDITION.end
+    assert newsletter.moment == MOMENT
+    assert stats.calls["moment"] == (EDITION.end, STANDINGS)
+    assert newsletter.analysis == "Menos posse, mais eficiência."
     assert "Flamengo 1 x 0 Fluminense" in llm.prompts[-1]
 
 
@@ -156,3 +180,28 @@ def test_preview_command_custom_out(monkeypatch, tmp_path) -> None:
     assert result.exit_code == 0, result.output
     assert target.exists()
     assert target.with_suffix(".txt").exists()
+
+
+def test_build_newsletter_analysis_failure_keeps_moment() -> None:
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is AnalysisResponse:
+            raise LLMError("quota")
+        return good_llm().responder(prompt, schema)
+
+    newsletter = build(FakeLLMClient(respond))
+
+    assert newsletter.analysis == ""
+    assert newsletter.moment == MOMENT
+    assert newsletter.headline == "Flamengo vence"
+
+
+def test_build_newsletter_without_match_skips_analysis() -> None:
+    class NoMatch(FakeStats):
+        def get_last_match(self, start, end):
+            return None
+
+    llm = good_llm()
+    newsletter = build(llm, NoMatch())
+
+    assert newsletter.analysis == ""
+    assert not any("Leitura do jogo" in p for p in llm.prompts)

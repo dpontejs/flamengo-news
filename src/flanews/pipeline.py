@@ -7,12 +7,20 @@ import httpx
 
 from flanews.collectors.base import Collector, create_http_client, get_collectors
 from flanews.config import Settings, get_settings
-from flanews.models import Article, Edition, MatchStats, Newsletter, NextMatch, StandingRow
+from flanews.models import (
+    Article,
+    Edition,
+    MatchStats,
+    Newsletter,
+    NextMatch,
+    StandingRow,
+    TeamMoment,
+)
 from flanews.processing.dedupe import dedupe, is_relevant
 from flanews.processing.extract import DomainRateLimiter, extract_articles
 from flanews.stats.espn import ESPNStatsClient
 from flanews.summarizer.client import LLMClient, LLMError, get_llm_client
-from flanews.summarizer.pipeline import EditionSummary, summarize_edition
+from flanews.summarizer.pipeline import EditionSummary, summarize_edition, write_analysis
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +71,7 @@ class StatsClient(Protocol):
     def get_last_match(self, start, end) -> MatchStats | None: ...
     def get_next_match(self, now) -> NextMatch | None: ...
     def get_standings(self, league: str = "bra.1") -> list[StandingRow]: ...
+    def get_moment(self, end, standings: list[StandingRow]) -> TeamMoment | None: ...
 
 
 def build_newsletter(
@@ -87,19 +96,28 @@ def build_newsletter(
     last_match = stats_client.get_last_match(edition.start, edition.end)
     next_match = stats_client.get_next_match(edition.end)
     standings = stats_client.get_standings("bra.1")
+    moment = stats_client.get_moment(edition.end, standings)
 
     try:
-        summary = summarize_edition(
-            articles, llm or get_llm_client(settings), last_match=last_match, label=edition.label
-        )
+        llm = llm or get_llm_client(settings)
+        summary = summarize_edition(articles, llm, last_match=last_match, label=edition.label)
     except LLMError as e:
         logger.error("Summarization failed, sending stats only: %s", e)
         summary = EditionSummary()
+
+    analysis = ""
+    if last_match is not None and llm is not None:
+        try:
+            analysis = write_analysis(last_match, moment, llm)
+        except LLMError as e:
+            logger.error("Match analysis failed, keeping the numbers only: %s", e)
 
     return Newsletter(
         edition=edition,
         headline=summary.headline,
         intro=summary.intro,
+        analysis=analysis,
+        moment=moment,
         topics=summary.topics,
         last_match=last_match,
         next_match=next_match,

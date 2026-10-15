@@ -51,6 +51,8 @@ class MatchStats(BaseModel):
     events: list[MatchEvent] = Field(default_factory=list)
     statistics: dict[str, tuple[str, str]] = Field(default_factory=dict)
     lineups: dict[str, list[str]] = Field(default_factory=dict)
+    # team -> [(category in pt-BR, player, value)]
+    leaders: dict[str, list[tuple[str, str, str]]] = Field(default_factory=dict)
 
 
 class NextMatch(BaseModel):
@@ -75,7 +77,37 @@ class StandingRow(BaseModel):
     drawn: int
     lost: int
     goals_diff: int
+    goals_for: int = 0
+    goals_against: int = 0
     is_flamengo: bool = False
+
+
+class FormResult(BaseModel):
+    """Flamengo's result in a recent match, from Flamengo's point of view."""
+
+    result: Literal["V", "E", "D"]
+    opponent: str
+    score: str
+    competition: str
+    date: datetime
+
+
+class PlayerRanking(BaseModel):
+    """A Flamengo player's position in a league leaderboard."""
+
+    category: str
+    player: str
+    position: int
+    value: int
+
+
+class TeamMoment(BaseModel):
+    """Recent form, league campaign and player rankings."""
+
+    form: list[FormResult] = Field(default_factory=list)
+    standing: StandingRow | None = None
+    gap: str | None = None
+    rankings: list[PlayerRanking] = Field(default_factory=list)
 
 
 class Edition(BaseModel):
@@ -93,6 +125,8 @@ class Newsletter(BaseModel):
     edition: Edition
     intro: str
     headline: str = ""
+    analysis: str = ""
+    moment: TeamMoment | None = None
     topics: list[Topic] = Field(default_factory=list)
     last_match: MatchStats | None = None
     next_match: NextMatch | None = None

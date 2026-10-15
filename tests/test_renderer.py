@@ -5,11 +5,14 @@ from zoneinfo import ZoneInfo
 from flanews.models import (
     Article,
     Edition,
+    FormResult,
     MatchEvent,
     MatchStats,
     Newsletter,
     NextMatch,
+    PlayerRanking,
     StandingRow,
+    TeamMoment,
     Topic,
 )
 from flanews.render.renderer import FLAMENGO_CREST, render, source_label
@@ -173,3 +176,58 @@ def test_render_without_crests_uses_names_only() -> None:
 
     assert 'alt="Fluminense"' not in html
     assert "Fluminense" in html
+
+
+def form(result: str, opponent: str, score: str) -> FormResult:
+    return FormResult(
+        result=result,
+        opponent=opponent,
+        score=score,
+        competition="Brasileirão",
+        date=datetime(2026, 10, 11, tzinfo=TZ),
+    )
+
+
+def analysis_newsletter() -> Newsletter:
+    newsletter = full_newsletter()
+    newsletter.analysis = "Mesmo com menos posse, o Flamengo finalizou mais."
+    newsletter.last_match.leaders = {
+        "Flamengo": [("Finalizações", "Samuel Lino", "3"), ("Defesas", "Agustín Rossi", "4")]
+    }
+    newsletter.moment = TeamMoment(
+        form=[
+            form("V", "Fluminense", "1-0"),
+            form("E", "Santos", "2-2"),
+            form("D", "Bahia", "0-1"),
+        ],
+        standing=row(1, "Flamengo", True).model_copy(
+            update={"points": 64, "played": 30, "goals_for": 58, "goals_against": 25}
+        ),
+        gap="1 ponto à frente do Palmeiras",
+        rankings=[PlayerRanking(category="Gols", player="Pedro", position=2, value=16)],
+    )
+    return newsletter
+
+
+def test_render_analysis_section() -> None:
+    html, text = render(analysis_newsletter())
+
+    assert "Análise" in html
+    assert "Mesmo com menos posse, o Flamengo finalizou mais." in html
+    assert re.search(r">V</td>.*>E</td>.*>D</td>", html, re.S)
+    assert "71%" in html  # 64 pts / 90 possíveis
+    assert "1 ponto à frente do Palmeiras" in html
+    assert "58 gols pró" in html and "25 contra" in html
+    assert "Pedro" in html and "2º em gols" in html
+    assert "Samuel Lino" in html and "Finalizações" in html
+
+    assert "== Análise ==" in text
+    assert "Forma: V E D" in text
+    assert "Pedro: 2º em gols (16)" in text
+
+
+def test_render_analysis_hidden_without_data() -> None:
+    html, text = render(full_newsletter())
+
+    assert "Análise" not in html
+    assert "Análise" not in text
