@@ -1,7 +1,7 @@
 # Identidade visual Urubu News
 
 - **Data:** 2026-10-15
-- **Status:** aprovada (logo provisória até a definitiva sair do Nano Banana)
+- **Status:** implementada com logo provisória (trocar `src/flanews/web/static/*.png` pela do Nano Banana)
 - **ADRs:** —
 
 ## Objetivo
@@ -31,12 +31,12 @@ não parecer canal oficial do clube. O conteúdo continua sendo o Flamengo.
 
 ## Critérios de aceite (como testes)
 
-- [ ] `test_build_subject_with_and_without_headline`: assunto começa com "Urubu News —".
-- [ ] `test_render_header_uses_the_logo_image`: `<img src=logo_url alt="Urubu News">`, sem "FLAMENGO NEWS".
-- [ ] `test_render_footer_says_unofficial`: aviso de sem ligação oficial no HTML e no texto.
-- [ ] `test_static_logo_files_are_served`: `/static/logo-email.png` e `/static/icon-512.png` → 200 `image/png`.
-- [ ] `test_page_uses_the_brand_not_the_crest`: título, `og:image` e favicon com o ícone; escudo só no placar de exemplo.
-- [ ] `test_confirmation_email_uses_the_logo`: e-mail de confirmação com a logo e "Urubu News".
+- [x] `test_build_subject_with_and_without_headline`: assunto começa com "Urubu News —".
+- [x] `test_render_header_uses_the_logo_image`: `<img src=logo_url alt="Urubu News">`, sem "FLAMENGO NEWS".
+- [x] `test_render_footer_says_unofficial`: aviso de sem ligação oficial no HTML e no texto.
+- [x] `test_static_logo_files_are_served`: `/static/logo-email.png` e `/static/icon-512.png` → 200 `image/png`.
+- [x] `test_page_uses_the_brand_not_the_crest`: título, `og:image` e favicon com o ícone; escudo só no placar de exemplo.
+- [x] `test_confirmation_email_uses_the_logo`: e-mail de confirmação com a logo e "Urubu News".
 
 ## Verificação ponta a ponta
 

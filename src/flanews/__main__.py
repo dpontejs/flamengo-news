@@ -29,7 +29,7 @@ from flanews.summarizer.client import LLMError
 
 logger = logging.getLogger("flanews.run")
 
-app = typer.Typer(help="Flamengo News CLI", no_args_is_help=True)
+app = typer.Typer(help="Urubu News CLI", no_args_is_help=True)
 
 EditionOption = Annotated[Literal["monday", "friday", "auto"], typer.Option(help="Edition kind")]
 DateOption = Annotated[
@@ -40,7 +40,7 @@ DateOption = Annotated[
 
 @app.callback()
 def main() -> None:
-    """Flamengo News CLI root callback."""
+    """Urubu News CLI root callback."""
 
 
 @app.command()
@@ -142,7 +142,9 @@ def preview(
     resolved = _resolve(edition, date)
     settings = get_settings()
     newsletter = pipeline.build_newsletter(resolved, settings)
-    html, text = render(newsletter, unsubscribe_url=pipeline.unsubscribe_url(settings))
+    html, text = render(
+        newsletter, unsubscribe_url=pipeline.unsubscribe_url(settings), logo_url=_logo(settings)
+    )
 
     html_path = out or Path("out") / f"preview-{resolved.end:%Y-%m-%d}.html"
     html_path.parent.mkdir(parents=True, exist_ok=True)
@@ -180,7 +182,10 @@ def run(
             # The page link only shows up once subscriptions are live (API token configured).
             subscribe = settings.PUBLIC_URL.rstrip("/") if settings.SUBSCRIBERS_API_TOKEN else None
             html, text = render(
-                newsletter, unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER, subscribe_url=subscribe
+                newsletter,
+                unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER,
+                subscribe_url=subscribe,
+                logo_url=_logo(settings),
             )
             mailto = pipeline.unsubscribe_url(settings)
             html_path = Path("out") / f"newsletter-{resolved.end:%Y-%m-%d}.html"
@@ -220,6 +225,11 @@ def run(
                 report.output_tokens = usage.output_tokens
             report.problems = problems.messages
             _publish_report(report)
+
+
+def _logo(settings) -> str:
+    """Header logo, served by the subscription page."""
+    return settings.PUBLIC_URL.rstrip("/") + "/static/logo-email.png"
 
 
 def _fill_report(report: RunReport, newsletter: Newsletter) -> None:

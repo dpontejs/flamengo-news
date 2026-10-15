@@ -16,7 +16,7 @@ from flanews.models import (
     TeamMoment,
     Topic,
 )
-from flanews.render.renderer import FLAMENGO_CREST, render, source_label
+from flanews.render.renderer import render, source_label
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITION = Edition(
@@ -129,7 +129,7 @@ def test_render_html_escapes_content_and_inlines_css() -> None:
     assert "1 a 0 &amp; segue" in html
     assert "<style" not in html
     assert 'style="' in html
-    assert "#C3281E" in html.upper() or "#c3281e" in html
+    assert "#A51C24" in html.upper()  # brand red (Urubu News palette)
     assert 'width="600"' in html
     assert html.lower().startswith("<!doctype html>")
 
@@ -162,7 +162,6 @@ def test_render_scoreboard_with_crests() -> None:
     html, _ = render(full_newsletter())
 
     assert "🔴" not in html and "⚫" not in html
-    assert f'src="{FLAMENGO_CREST}"' in html
     assert 'src="https://cdn/819.png" alt="Flamengo"' in html
     assert 'src="https://cdn/3445.png" alt="Fluminense"' in html
     assert 'src="https://cdn/8.png" alt="Estudiantes de La Plata"' in html
@@ -314,3 +313,19 @@ def test_render_subscribe_link_only_when_given() -> None:
     assert "https://news.test" in text
     plain_html, plain_text = render(full_newsletter())
     assert "Inscreva-se" not in plain_html and "Inscreva-se" not in plain_text
+
+
+def test_render_header_uses_the_logo_image() -> None:
+    html, text = render(full_newsletter(), logo_url="https://news.test/static/logo-email.png")
+
+    assert re.search(r'<img src="https://news.test/static/logo-email.png" alt="Urubu News"', html)
+    assert "<title>Urubu News" in html
+    assert "FLAMENGO" not in html
+    assert text.startswith("URUBU NEWS")
+
+
+def test_render_footer_says_unofficial() -> None:
+    html, text = render(full_newsletter())
+
+    assert "sem ligação oficial com o clube" in html
+    assert "sem ligação oficial com o clube" in text

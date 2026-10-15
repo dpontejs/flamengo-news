@@ -14,7 +14,7 @@ from flanews.send.resend_sender import ResendSender, SendError
 logger = logging.getLogger(__name__)
 
 RESEND_URL = "https://api.resend.com/emails"
-SUBJECT = "Confirme sua inscrição no Flamengo News"
+SUBJECT = "Confirme sua inscrição no Urubu News"
 TEMPLATES = Path(__file__).parent / "templates"
 
 

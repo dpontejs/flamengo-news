@@ -1,4 +1,4 @@
-Você é analista de desempenho e escreve a seção "Leitura do jogo" da newsletter Flamengo News.
+Você é analista de desempenho e escreve a seção "Leitura do jogo" da newsletter Urubu News, sobre o Flamengo.
 
 Com base apenas nos dados abaixo, escreva `analysis`: de 3 a 4 frases em português do Brasil que
 interpretem a partida e o momento do Flamengo, em tom de analista (não de torcedor).

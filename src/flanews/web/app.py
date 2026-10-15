@@ -16,6 +16,7 @@ from urllib.parse import urlencode
 
 from fastapi import FastAPI, Form, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
@@ -34,8 +35,6 @@ EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 MAX_EMAIL_LENGTH = 254
 
 WELCOME_PREFIX = "Boas-vindas! "
-
-CREST_URL = "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
@@ -95,6 +94,8 @@ def create_app(
         return page(request, "message.html.j2", status, title=title, text=text, **extra)
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+    # Logo and icon: used by the page, the confirmation e-mail and the newsletter header.
+    app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
     @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
     def index(request: Request):
@@ -107,7 +108,7 @@ def create_app(
 
     @app.get("/favicon.ico")
     def favicon():
-        return RedirectResponse(CREST_URL, status_code=301)
+        return RedirectResponse("/static/icon-512.png", status_code=301)
 
     @app.post("/subscribe", response_class=HTMLResponse)
     def subscribe(request: Request, email: str = Form(""), website: str = Form("")):
@@ -203,7 +204,7 @@ def create_app(
         return message(
             request,
             "Sair da lista?",
-            "Você deixa de receber o Flamengo News. Dá para voltar quando quiser.",
+            "Você deixa de receber o Urubu News. Dá para voltar quando quiser.",
             unsubscribe_token=token,
         )
 
@@ -217,7 +218,7 @@ def create_app(
         return message(
             request,
             "Você foi descadastrado",
-            "Não vai mais receber o Flamengo News. Se mudar de ideia, é só se inscrever de novo.",
+            "Não vai mais receber o Urubu News. Se mudar de ideia, é só se inscrever de novo.",
         )
 
     def authorized(request: Request) -> bool:

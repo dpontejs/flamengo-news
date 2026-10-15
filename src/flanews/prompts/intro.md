@@ -1,4 +1,4 @@
-Você escreve a abertura da newsletter "Flamengo News"{% if label %} ({{ label }}){% endif %}.
+Você escreve a abertura da newsletter "Urubu News", sobre o Flamengo,{% if label %} ({{ label }}){% endif %}.
 
 Regras:
 - `headline`: uma manchete curta (até 80 caracteres) com o fato mais importante da edição.

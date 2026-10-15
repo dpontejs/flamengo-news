@@ -27,7 +27,9 @@ def test_sends_confirmation_email_with_link() -> None:
     assert route.calls.last.request.headers["Authorization"] == "Bearer re_test"
     assert payload["to"] == ["ana@example.com"]
     assert payload["from"] == "Flamengo News <news@example.com>"
-    assert "Confirme" in payload["subject"]
+    assert payload["subject"] == "Confirme sua inscrição no Urubu News"
+    assert '<img src="https://news.test/static/logo-email.png" alt="Urubu News"' in payload["html"]
+    assert "FLAMENGO" not in payload["html"] and "URUBU NEWS" in payload["text"]
     assert URL in payload["html"] and URL in payload["text"]
 
 

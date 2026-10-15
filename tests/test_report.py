@@ -25,7 +25,7 @@ def test_report_markdown_lists_counts_problems_and_outcome() -> None:
 
     md = report.to_markdown()
 
-    assert md.startswith("## Flamengo News — Edição de Segunda — 12/10/2026")
+    assert md.startswith("## Urubu News — Edição de Segunda — 12/10/2026")
     assert "**Resultado:** enviada (id=abc)" in md
     assert "| google_news | 9 |" in md and "| **total** | 13 |" in md
     assert "Saiba mais: 3 de 37 candidatos" in md

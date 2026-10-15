@@ -3,53 +3,53 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flamengo News — {{ n.edition.label }}</title>
+<title>Urubu News — {{ n.edition.label }}</title>
 <style>
-  body { margin: 0; padding: 0; background-color: #ececec; }
-  .wrapper { background-color: #ececec; }
+  body { margin: 0; padding: 0; background-color: #F4EFE6; }
+  .wrapper { background-color: #F4EFE6; }
   .container { background-color: #ffffff; }
-  .font { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #111111; }
-  .header { background-color: #000000; padding: 20px 24px; }
+  .font { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1C1C1C; }
+  .header { background-color: #141414; padding: 20px 24px; }
   .brand { color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: 1px; margin: 0; }
-  .brand-red { color: #C3281E; }
+  .brand-red { color: #A51C24; }
   .edition { color: #bbbbbb; font-size: 13px; margin: 4px 0 0 0; }
-  .stripe { background-color: #C3281E; height: 5px; line-height: 5px; font-size: 5px; }
+  .stripe { background-color: #A51C24; height: 5px; line-height: 5px; font-size: 5px; }
   .lead { padding: 24px 24px 8px 24px; }
-  .headline { font-size: 24px; font-weight: 800; line-height: 1.25; margin: 0 0 10px 0; color: #000000; }
+  .headline { font-size: 24px; font-weight: 800; line-height: 1.25; margin: 0 0 10px 0; color: #141414; }
   .text { font-size: 15px; line-height: 1.55; margin: 0; color: #222222; }
-  .muted { color: #666666; font-size: 13px; line-height: 1.5; margin: 0; }
+  .muted { color: #6B6B6B; font-size: 13px; line-height: 1.5; margin: 0; }
   .block { padding: 12px 24px; }
-  .card { border-left: 4px solid #C3281E; background-color: #fafafa; }
+  .card { border-left: 4px solid #A51C24; background-color: #fafafa; }
   .card-body { padding: 16px 18px; }
-  .card-title { color: #C3281E; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin: 0 0 12px 0; }
-  .scoreboard { background-color: #000000; }
+  .card-title { color: #A51C24; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin: 0 0 12px 0; }
+  .scoreboard { background-color: #141414; }
   .scoreboard-body { padding: 18px 12px; }
   .team-name { color: #ffffff; font-size: 14px; font-weight: 700; padding-top: 6px; }
   .score { color: #ffffff; font-size: 40px; line-height: 44px; font-weight: 700; }
-  .score-x { color: #C3281E; font-size: 20px; line-height: 44px; font-weight: 700; }
+  .score-x { color: #A51C24; font-size: 20px; line-height: 44px; font-weight: 700; }
   .match-info { color: #bbbbbb; font-size: 12px; padding: 0 12px 14px 12px; }
   .goals { background-color: #1a1a1a; color: #ffffff; font-size: 14px; padding: 10px 16px; }
   .goal-detail { color: #999999; font-size: 12px; }
   .stats td { font-size: 14px; padding: 6px 0; border-bottom: 1px solid #eeeeee; }
-  .stat-label { color: #666666; font-size: 13px; }
+  .stat-label { color: #6B6B6B; font-size: 13px; }
   .topic { padding: 0 0 18px 0; }
-  .topic-title { font-size: 17px; font-weight: 700; margin: 0 0 6px 0; color: #000000; }
-  .link { color: #C3281E; text-decoration: none; font-weight: 600; }
-  .next-name { font-size: 18px; font-weight: 800; margin: 0 0 4px 0; color: #000000; }
-  .table th { font-size: 11px; color: #666666; text-align: left; padding: 6px 4px; border-bottom: 2px solid #000000; }
+  .topic-title { font-size: 17px; font-weight: 700; margin: 0 0 6px 0; color: #141414; }
+  .link { color: #A51C24; text-decoration: none; font-weight: 600; }
+  .next-name { font-size: 18px; font-weight: 800; margin: 0 0 4px 0; color: #141414; }
+  .table th { font-size: 11px; color: #6B6B6B; text-align: left; padding: 6px 4px; border-bottom: 2px solid #141414; }
   .table td { font-size: 14px; padding: 7px 4px; border-bottom: 1px solid #eeeeee; }
-  .fla td { font-weight: 800; color: #C3281E; }
-  .subhead { font-size: 13px; font-weight: 700; color: #000000; margin: 14px 0 6px 0; }
+  .fla td { font-weight: 800; color: #A51C24; }
+  .subhead { font-size: 13px; font-weight: 700; color: #141414; margin: 14px 0 6px 0; }
   .chip { width: 28px; height: 28px; font-size: 13px; font-weight: 800; color: #ffffff; }
   .chip-V { background-color: #1E8E3E; }
   .chip-E { background-color: #8A8A8A; }
-  .chip-D { background-color: #C3281E; }
+  .chip-D { background-color: #A51C24; }
   .kpi { padding: 6px 0; }
-  .kpi-value { font-size: 22px; font-weight: 800; color: #000000; }
-  .kpi-label { font-size: 12px; color: #666666; }
+  .kpi-value { font-size: 22px; font-weight: 800; color: #141414; }
+  .kpi-label { font-size: 12px; color: #6B6B6B; }
   .brief { padding: 0 0 14px 0; }
-  .brief-title { color: #000000; font-size: 15px; font-weight: 700; text-decoration: none; }
-  .tag { background-color: #C3281E; color: #ffffff; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; margin-right: 6px; }
+  .brief-title { color: #141414; font-size: 15px; font-weight: 700; text-decoration: none; }
+  .tag { background-color: #A51C24; color: #ffffff; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; margin-right: 6px; }
   .footer { padding: 20px 24px 28px 24px; color: #777777; font-size: 12px; line-height: 1.5; }
 </style>
 </head>
@@ -60,10 +60,9 @@
 
   <tr><td class="header font">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td width="56" valign="middle"><img src="{{ crest }}" alt="Flamengo" width="48" height="48" style="display: block; border: 0;"></td>
-      <td valign="middle" style="padding-left: 12px;">
-        <p class="brand">FLAMENGO <span class="brand-red">NEWS</span></p>
-        <p class="edition">{{ n.edition.label }}</p>
+      <td valign="middle">
+        <img src="{{ logo_url }}" alt="Urubu News" width="300" height="60" style="display: block; border: 0; color: #ffffff; font-size: 24px; font-weight: 800;">
+        <p class="edition" style="padding-left: 4px;">{{ n.edition.label }}</p>
       </td>
     </tr></table>
   </td></tr>
@@ -215,6 +214,7 @@
 
   <tr><td class="footer font">
     Resumo gerado com IA a partir das fontes citadas; confira os links para detalhes. Escudos e dados: ESPN.
+    <br>Feito por um torcedor, sem ligação oficial com o clube.
     {% if subscribe_url %}<br>Recebeu de alguém? Inscreva-se em <a class="link" href="{{ subscribe_url }}">{{ subscribe_url | replace("https://", "") }}</a>.{% endif %}
     {% if unsubscribe_url %}<br>Não quer mais receber? <a class="link" href="{{ unsubscribe_url }}">Clique para se descadastrar</a>.{% endif %}
   </td></tr>

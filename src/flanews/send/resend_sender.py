@@ -30,7 +30,7 @@ class SendError(Exception):
 
 
 def build_subject(newsletter: Newsletter) -> str:
-    subject = f"Flamengo News — {newsletter.edition.label}"
+    subject = f"Urubu News — {newsletter.edition.label}"
     return f"{subject}: {newsletter.headline}" if newsletter.headline else subject
 
 

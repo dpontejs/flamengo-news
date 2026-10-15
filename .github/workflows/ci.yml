@@ -62,6 +62,7 @@ jobs:
           docker inspect -f '{{.State.Health.Status}}' smoke | grep -qx healthy
           curl -fsS http://127.0.0.1:8000/ | grep -q 'action="/subscribe"'
           curl -fsS http://127.0.0.1:8000/version.json | grep -q "$GITHUB_SHA"
+          curl -fsS -o /dev/null http://127.0.0.1:8000/static/logo-email.png
 
       - name: Log in to GHCR
         if: github.ref == 'refs/heads/main'

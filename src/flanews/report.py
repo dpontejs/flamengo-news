@@ -35,7 +35,7 @@ class RunReport(BaseModel):
         def number(value: int) -> str:
             return f"{value:,}".replace(",", ".")
 
-        lines = [f"## Flamengo News — {self.edition}", "", f"**Resultado:** {self.outcome}", ""]
+        lines = [f"## Urubu News — {self.edition}", "", f"**Resultado:** {self.outcome}", ""]
         lines += ["### Notícias coletadas", "", "| Fonte | Artigos |", "|---|---|"]
         lines += [f"| {source} | {count} |" for source, count in self.articles_by_source.items()]
         lines += [f"| **total** | {sum(self.articles_by_source.values())} |", ""]

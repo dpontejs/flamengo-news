@@ -1,6 +1,6 @@
-# Flamengo News
+# Urubu News
 
-Newsletter automática do Flamengo, enviada por e-mail **toda segunda e sexta às 08:00 (BRT)**:
+Newsletter automática sobre o Flamengo (feita por um torcedor, sem ligação oficial com o clube), enviada por e-mail **toda segunda e sexta às 08:00 (BRT)**:
 
 - **Notícias** do período, coletadas de várias fontes e resumidas por IA (Gemini).
 - **Última partida** com placar, gols e estatísticas, e uma **Análise**: leitura do jogo por IA,

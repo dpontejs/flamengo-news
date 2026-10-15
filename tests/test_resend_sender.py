@@ -51,10 +51,10 @@ def ok(count: int) -> httpx.Response:
 def test_build_subject_with_and_without_headline() -> None:
     with_headline = Newsletter(edition=EDITION, intro="", headline="Flamengo vence o Fla-Flu")
     assert build_subject(with_headline) == (
-        "Flamengo News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
+        "Urubu News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
     )
     assert build_subject(Newsletter(edition=EDITION, intro="")) == (
-        "Flamengo News — Edição de Segunda — 12/10/2026"
+        "Urubu News — Edição de Segunda — 12/10/2026"
     )
 
 

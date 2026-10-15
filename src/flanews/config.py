@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-flash-latest"
     FLAMENGO_TEAM_ID: int = 819  # ESPN team id
     RESEND_API_KEY: str | None = None
-    NEWSLETTER_FROM: str = "Flamengo News <news@seudominio.com>"
+    NEWSLETTER_FROM: str = "Urubu News <news@seudominio.com>"
     NEWSLETTER_RECIPIENTS: str | list[str] = ["voce@email.com"]
     TIMEZONE: str = "America/Sao_Paulo"
     DRY_RUN: bool = True

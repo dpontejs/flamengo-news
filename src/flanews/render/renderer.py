@@ -9,7 +9,7 @@ from flanews.models import MatchEvent, Newsletter, StandingRow
 from flanews.stats.table import standings_window
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
-FLAMENGO_CREST = "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
+DEFAULT_LOGO_URL = "https://flamengo.diegoponte.dev/static/logo-email.png"
 WEEKDAYS = ("segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo")
 SOURCE_LABELS = {
     "ge": "ge",
@@ -59,11 +59,12 @@ def render(
     newsletter: Newsletter,
     unsubscribe_url: str | None = None,
     subscribe_url: str | None = None,
+    logo_url: str = DEFAULT_LOGO_URL,
 ) -> tuple[str, str]:
     """Render the newsletter as (html with inlined CSS, plain text)."""
     context = {
         "n": newsletter,
-        "crest": FLAMENGO_CREST,
+        "logo_url": logo_url,
         "standings": standings_window(newsletter.standings),
         "unsubscribe_url": unsubscribe_url,
         "subscribe_url": subscribe_url,

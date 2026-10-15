@@ -293,11 +293,11 @@ def test_head_on_pages_for_link_previews(client) -> None:
     assert client.head("/").status_code == 200
 
 
-def test_favicon_points_to_the_crest(client) -> None:
+def test_favicon_points_to_the_icon(client) -> None:
     response = client.get("/favicon.ico", follow_redirects=False)
 
     assert response.status_code in (301, 302, 307, 308)
-    assert response.headers["location"].endswith("/819.png")
+    assert response.headers["location"] == "/static/icon-512.png"
 
 
 AUTH = {"Authorization": f"Bearer {API_TOKEN}"}
@@ -376,3 +376,24 @@ def test_edition_failure_keeps_the_subscription(client, store, mailer) -> None:
     assert "Inscrição confirmada" in response.text
     assert "última edição" not in response.text
     assert store.active() == ["ana@example.com"]
+
+
+@pytest.mark.parametrize("name", ["logo-email.png", "icon-512.png"])
+def test_static_logo_files_are_served(client, name) -> None:
+    response = client.get(f"/static/{name}")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+    assert response.content.startswith(b"\x89PNG")
+
+
+def test_page_uses_the_brand_not_the_crest(client) -> None:
+    html = client.get("/").text
+
+    assert "<title>Urubu News</title>" in html
+    assert '<meta property="og:image" content="https://news.test/static/icon-512.png">' in html
+    assert 'rel="icon" href="/static/icon-512.png"' in html
+    assert "URUBU" in html and "FLAMENGO" not in html
+    assert "sem ligação oficial com o clube" in html
+    # The crest only appears as match data, in the sample scoreboard.
+    assert html.count("819.png") == 1

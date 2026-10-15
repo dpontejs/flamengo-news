@@ -101,8 +101,7 @@ def test_run_builds_renders_saves_and_sends(env, tmp_path) -> None:
     assert result.exit_code == 0, result.output
     [body] = json.loads(route.calls.last.request.content)
     assert (
-        body["subject"]
-        == "Flamengo News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
+        body["subject"] == "Urubu News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
     )
     assert body["to"] == ["a@x.com"]
     assert "O Flamengo venceu." in body["html"] and "Eficiência decidiu." in body["text"]
@@ -183,7 +182,7 @@ def test_run_writes_report_to_github_step_summary(env, tmp_path) -> None:
 
     assert result.exit_code == 0, result.output
     report = summary.read_text(encoding="utf-8")
-    assert "## Flamengo News — Edição de Segunda — 12/10/2026" in report
+    assert "## Urubu News — Edição de Segunda — 12/10/2026" in report
     assert "**Resultado:** enviada para 1 destinatário" in report
     assert "Destinatários: 1 (0 pela página de inscrição)" in report
     assert "| ge | 1 |" in report
@@ -295,7 +294,7 @@ def test_run_publishes_the_edition_for_new_subscribers_after_a_real_send(env) ->
     request = publish.calls.last.request
     assert request.headers["Authorization"] == "Bearer api-token"
     body = json.loads(request.content)
-    assert body["subject"].startswith("Flamengo News — Edição de Segunda")
+    assert body["subject"].startswith("Urubu News — Edição de Segunda")
     assert UNSUBSCRIBE_PLACEHOLDER in body["html"] and UNSUBSCRIBE_PLACEHOLDER in body["text"]
     assert "mailto:" not in body["html"]
 
