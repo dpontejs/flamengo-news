@@ -269,3 +269,22 @@ def test_version_reports_the_build_commit(store, mailer, monkeypatch) -> None:
 
     assert response.json() == {"commit": "abc123"}
     assert response.headers["cache-control"] == "no-store"
+
+
+def test_get_subscribe_goes_back_to_the_form(client) -> None:
+    # Reloading the "check your inbox" page (or a link preview) issues a GET.
+    response = client.get("/subscribe", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/"
+
+
+def test_head_on_pages_for_link_previews(client) -> None:
+    assert client.head("/").status_code == 200
+
+
+def test_favicon_points_to_the_crest(client) -> None:
+    response = client.get("/favicon.ico", follow_redirects=False)
+
+    assert response.status_code in (301, 302, 307, 308)
+    assert response.headers["location"].endswith("/819.png")

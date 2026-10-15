@@ -15,7 +15,7 @@ from pathlib import Path
 from urllib.parse import urlencode
 
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from flanews.config import Settings, get_settings
@@ -30,6 +30,8 @@ SIGNUPS_PER_IP = 5
 SIGNUP_WINDOW = timedelta(hours=1)
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 MAX_EMAIL_LENGTH = 254
+
+CREST_URL = "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
@@ -84,9 +86,18 @@ def create_app(
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
-    @app.get("/", response_class=HTMLResponse)
+    @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
     def index(request: Request):
         return page(request, "index.html.j2")
+
+    @app.get("/subscribe")
+    def subscribe_reload():
+        # Reloading the "check your inbox" page, or a link preview, lands here.
+        return RedirectResponse("/", status_code=303)
+
+    @app.get("/favicon.ico")
+    def favicon():
+        return RedirectResponse(CREST_URL, status_code=301)
 
     @app.post("/subscribe", response_class=HTMLResponse)
     def subscribe(request: Request, email: str = Form(""), website: str = Form("")):
