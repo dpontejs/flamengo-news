@@ -231,6 +231,7 @@ Instruções para o modelo que for executar:
 
 ## Backlog futuro (não fazer agora)
 - [ ] Envio disparado N horas após o fim de cada jogo.
-- [ ] Persistência (SQLite) para não repetir notícias entre edições.
+- [ ] Banco de notícias: guardar artigos, tópicos e edições (SQLite ou o Postgres compartilhado do `infra`) para não repetir notícias entre edições, ter um arquivo das edições e servir de base para o classificador.
+- [ ] Imagens: foto de destaque das matérias (`og:image`) nos tópicos e gráfico de estatísticas da partida como PNG.
+- [ ] Classificador de relevância: modelo que decide se uma notícia é interessante antes do Gemini (ex.: Llama local na GPU de casa, via Cloudflare Tunnel do `infra`), avaliado com rótulos do banco de notícias.
 - [ ] Seções "Departamento médico" e "Mercado da bola".
-- [ ] Gráfico de estatísticas como imagem.

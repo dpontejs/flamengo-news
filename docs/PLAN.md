@@ -247,10 +247,11 @@ Upload do HTML gerado como artifact do workflow (auditoria).
 
 ## 11. Roadmap futuro (fora da v1)
 - Envio "smart": disparar X horas após o fim de cada jogo em vez de dias fixos.
-- Página de inscrição (Cloudflare Pages + Resend Audiences).
-- SQLite/Turso para histórico e evitar repetir notícias entre edições.
+- ~~Página de inscrição~~ (feita: FastAPI + SQLite na VPS, ver §12 e `docs/features/inscricao.md`).
+- Banco de notícias (artigos, tópicos e edições) para evitar repetir notícias, ter arquivo das edições e rótulos para o classificador.
+- Imagens: foto de destaque das matérias (`og:image`) e gráficos (matplotlib → PNG embutido).
+- Classificador de relevância das notícias antes do Gemini (ex.: Llama local na GPU de casa via Cloudflare Tunnel), economizando cota e tirando ruído.
 - Seção "Mercado da bola" e "Departamento médico".
-- Gráficos (matplotlib → PNG embutido).
 
 ---
 
