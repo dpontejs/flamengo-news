@@ -246,12 +246,15 @@ Upload do HTML gerado como artifact do workflow (auditoria).
 ---
 
 ## 11. Roadmap futuro (fora da v1)
-- Envio "smart": disparar X horas após o fim de cada jogo em vez de dias fixos.
+
+Lista priorizada em `docs/TASKS.md` (backlog futuro). Em resumo:
 - ~~Página de inscrição~~ (feita: FastAPI + SQLite na VPS, ver §12 e `docs/features/inscricao.md`).
-- Banco de notícias (artigos, tópicos e edições) para evitar repetir notícias, ter arquivo das edições e rótulos para o classificador.
-- Imagens: foto de destaque das matérias (`og:image`) e gráficos (matplotlib → PNG embutido).
-- Classificador de relevância das notícias antes do Gemini (ex.: Llama local na GPU de casa via Cloudflare Tunnel), economizando cota e tirando ruído.
-- Seção "Mercado da bola" e "Departamento médico".
+- Operação: backup dos inscritos, logs da página, tokens separados, imagem Docker menor.
+- Conteúdo: banco de notícias (sem repetir notícias), arquivo público das edições, imagens e gráficos,
+  envio após o jogo, seções "Departamento médico" e "Mercado da bola".
+- Comunidade: palpites entre os inscritos (vencedor, placar exato, autores dos gols) com pontuação
+  apurada pela ESPN e ranking na newsletter e numa página pública.
+- IA: classificador de relevância das notícias antes do Gemini (ex.: Llama local na GPU de casa).
 
 ---
 
