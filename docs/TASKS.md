@@ -132,7 +132,7 @@ Instruções para o modelo que for executar:
 - **Aceite:** testes com JSON fixtures (respostas reais salvas) via `respx`.
 - **Commit:** `feat: add espn stats client`
 
-### [ ] T13 — Comando `stats`
+### [x] T13 — Comando `stats`
 - **Arquivos:** `src/flanews/__main__.py`
 - **O que fazer:** imprime última partida, próximo jogo e classificação da edição.
 - **Aceite:** teste manual com a API real.
