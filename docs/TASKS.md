@@ -169,10 +169,10 @@ Instruções para o modelo que for executar:
 - **Aceite:** critérios de aceite da página da feature.
 - **Commit:** `feat: add data analysis section with match reading and team form`
 
-### [ ] T16 — Envio via Resend
+### [x] T16 — Envio via Resend
 - **Arquivos:** `src/flanews/send/resend_sender.py`, teste
 - **O que fazer:**
-  - `POST https://api.resend.com/emails` via `httpx` (sem SDK), `html` + `text`, assunto `"🔴⚫ Flamengo News — {label}: {manchete}"`.
+  - `POST https://api.resend.com/emails` via `httpx` (sem SDK), `html` + `text`, assunto `"Flamengo News — {label}: {manchete}"` (sem emojis, alinhado ao redesign).
   - Enviar com `to` = remetente e destinatários em `bcc` (ou um envio por destinatário se lista pequena).
   - Header `List-Unsubscribe` com `mailto:`.
   - `DRY_RUN=true` → não envia, só loga.
@@ -184,6 +184,14 @@ Instruções para o modelo que for executar:
 - **O que fazer:** `run --edition auto` = build + render + send; salva HTML em `out/`. Exit code ≠ 0 se não houver nenhuma notícia **e** nenhuma partida (não envia newsletter vazia).
 - **Aceite:** teste end-to-end com tudo mockado.
 - **Commit:** `feat: add run command for full newsletter delivery`
+
+### [ ] T17a — Seções "Saiba mais" e "Brasil afora"
+- **O que fazer (a detalhar em design curto antes de implementar):**
+  - "Saiba mais": lista configurável de extras (basquete, vôlei, futebol feminino...), uma busca Google News por extra; o LLM escolhe até 3 notícias mais interessantes entre todas (pode não haver nenhuma — a seção some).
+  - "Brasil afora": 1 RSS de futebol brasileiro; o LLM escolhe as ~5 melhores notícias do país (sem Flamengo).
+  - Sem chamadas extras ao LLM: seleção dentro da chamada de agrupamento e resumos (1 frase) dentro da chamada em lote. Só os escolhidos têm o texto extraído.
+- **Aceite:** testes com fixtures RSS; seções somem sem itens; orçamento continua em 4 chamadas ao LLM por edição.
+- **Commit:** `feat: add learn-more and around-brazil news sections`
 
 ---
 
