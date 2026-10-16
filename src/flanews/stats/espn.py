@@ -41,6 +41,8 @@ STAT_LABELS = {
     "saves": "Defesas",
     "totalPasses": "Passes",
     "accuratePasses": "Passes certos",
+    "effectiveTackles": "Desarmes",
+    "interceptions": "Interceptações",
     "yellowCards": "Cartões amarelos",
     "redCards": "Cartões vermelhos",
 }

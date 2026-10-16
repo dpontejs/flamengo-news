@@ -50,6 +50,22 @@ def test_extract_content_fills_text_and_published_at() -> None:
     assert len(result.content) <= MAX_CONTENT_CHARS
     assert result.published_at == datetime(2026, 10, 14, 13, 31, 39, tzinfo=UTC)
     assert result.summary_hint == "hint do RSS"
+    assert (
+        result.image_url
+        == "https://conteudo.imguol.com.br/c/esporte/2f/2026/03/23/jose-boto-diretor-de-futebol-do-flamengo-antes-de-partida-contra-o-corinthians-pelo-campeonato-brasileiro-1774235306838_v2_615x300.jpg"
+    )
+
+
+@respx.mock
+def test_extract_content_ignores_non_https_image() -> None:
+    html = (
+        '<html><head><meta property="og:image" content="http://insecure.com/pic.jpg">'
+        "</head><body><article><p>O Flamengo treinou forte.</p></article></body></html>"
+    )
+    respx.get(ARTICLE_URL).mock(return_value=httpx.Response(200, text=html))
+    with httpx.Client() as client:
+        result = extract_content(make_article(), client, no_wait_limiter())
+    assert result.image_url is None
 
 
 @respx.mock
