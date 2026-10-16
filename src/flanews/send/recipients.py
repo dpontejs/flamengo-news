@@ -119,3 +119,15 @@ def publish_latest_edition(
         headers={"Authorization": f"Bearer {settings.SUBSCRIBERS_API_TOKEN}"},
     )
     response.raise_for_status()
+
+
+def latest_edition_subject(settings: Settings, client: httpx.Client | None = None) -> str | None:
+    """Subject of the last edition published to the page, None if none. Raises httpx.HTTPError."""
+    url = settings.PUBLIC_URL.rstrip("/") + "/api/latest-edition"
+    response = (client or httpx.Client(timeout=TIMEOUT)).get(
+        url, headers={"Authorization": f"Bearer {settings.SUBSCRIBERS_API_TOKEN}"}
+    )
+    if response.status_code == 404:
+        return None
+    response.raise_for_status()
+    return response.json()["subject"]

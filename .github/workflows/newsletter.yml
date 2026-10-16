@@ -1,9 +1,10 @@
 name: Newsletter
 
 on:
+  # The VPS (infra: newsletter-trigger timer) dispatches at 08:00 BRT; this cron is the backup.
+  # GitHub drops scheduled runs under load, mostly on the hour, hence the odd minute.
   schedule:
-    - cron: "0 11 * * 1" # segunda 08:00 BRT
-    - cron: "0 11 * * 5" # sexta 08:00 BRT
+    - cron: "23 11 * * 1,5" # segunda e sexta 08:23 BRT
   workflow_dispatch:
     inputs:
       edition:
@@ -19,6 +20,10 @@ on:
         description: "Só simular (não envia e-mail)"
         type: boolean
         default: true
+      skip_if_sent:
+        description: "Não enviar se a edição já saiu (disparo automático)"
+        type: boolean
+        default: false
 
 # Least privilege: jobs that need more ask for it (the image job publishes to GHCR).
 permissions:
@@ -63,10 +68,13 @@ jobs:
           DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || (inputs.dry_run && 'true' || 'false') }}
           EDITION: ${{ inputs.edition || 'auto' }}
           REFERENCE_DATE: ${{ inputs.date }}
+          # Scheduled and VPS-triggered runs skip an edition another trigger already sent.
+          SKIP_IF_SENT: ${{ github.event_name == 'schedule' && 'true' || (inputs.skip_if_sent && 'true' || 'false') }}
         run: |
           args=(--edition "$EDITION")
+          if [ "$SKIP_IF_SENT" = "true" ]; then args+=(--skip-if-sent); fi
           if [ -n "$REFERENCE_DATE" ]; then args+=(--date "$REFERENCE_DATE"); fi
-          echo "DRY_RUN=$DRY_RUN edition=$EDITION date=${REFERENCE_DATE:-hoje}"
+          echo "DRY_RUN=$DRY_RUN SKIP_IF_SENT=$SKIP_IF_SENT edition=$EDITION date=${REFERENCE_DATE:-hoje}"
           uv run python -m flanews run "${args[@]}"
 
       - name: Upload rendered newsletter

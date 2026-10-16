@@ -6,7 +6,12 @@ import respx
 from tenacity import wait_none
 
 from flanews.config import Settings
-from flanews.send.recipients import Recipient, publish_latest_edition, resolve_recipients
+from flanews.send.recipients import (
+    Recipient,
+    latest_edition_subject,
+    publish_latest_edition,
+    resolve_recipients,
+)
 
 API = "https://news.test/api/subscribers"
 MAILTO = "mailto:news@fla.com?subject=Descadastrar"
@@ -107,3 +112,30 @@ def test_publish_latest_edition_raises_on_error() -> None:
 
     with pytest.raises(httpx.HTTPStatusError):
         publish_latest_edition(settings(), "A", "h", "t", client=httpx.Client())
+
+
+@respx.mock
+def test_latest_edition_subject_reads_it_with_the_token() -> None:
+    route = respx.get("https://news.test/api/latest-edition").mock(
+        return_value=httpx.Response(200, json={"subject": "Urubu News — Edição de Sexta"})
+    )
+
+    subject = latest_edition_subject(settings(), client=httpx.Client())
+
+    assert subject == "Urubu News — Edição de Sexta"
+    assert route.calls.last.request.headers["Authorization"] == "Bearer api-token"
+
+
+@respx.mock
+def test_latest_edition_subject_is_none_when_nothing_was_published() -> None:
+    respx.get("https://news.test/api/latest-edition").mock(return_value=httpx.Response(404))
+
+    assert latest_edition_subject(settings(), client=httpx.Client()) is None
+
+
+@respx.mock
+def test_latest_edition_subject_raises_on_error() -> None:
+    respx.get("https://news.test/api/latest-edition").mock(return_value=httpx.Response(500))
+
+    with pytest.raises(httpx.HTTPStatusError):
+        latest_edition_subject(settings(), client=httpx.Client())

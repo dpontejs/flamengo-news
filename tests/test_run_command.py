@@ -327,3 +327,64 @@ def test_publish_failure_keeps_the_sent_outcome(env, tmp_path) -> None:
     report = summary.read_text(encoding="utf-8")
     assert "**Resultado:** enviada para 1 destinatário" in report
     assert "latest edition" in report
+
+
+SENT_TODAY = "Urubu News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
+RUN_SKIPPING = ["run", "--edition", "monday", "--date", "2026-10-14", "--skip-if-sent"]
+
+
+@respx.mock
+def test_skip_if_sent_stops_before_building_when_the_edition_went_out(env, monkeypatch) -> None:
+    enable_subscriptions(env)
+    monkeypatch.setattr(pipeline, "get_llm_client", lambda settings: pytest.fail("built it"))
+    respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": SENT_TODAY}))
+    resend = respx.post(RESEND_URL)
+
+    result = CliRunner().invoke(cli.app, RUN_SKIPPING)
+
+    assert result.exit_code == 0, result.output
+    assert not resend.called
+    assert "já enviada" in result.output
+
+
+@respx.mock
+def test_skip_if_sent_sends_when_the_last_edition_is_older(env) -> None:
+    enable_subscriptions(env)
+    use(env, [ARTICLE], MATCH)
+    older = "Urubu News — Edição de Sexta — 09/10/2026: Outra"
+    respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": older}))
+    resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
+    respx.put(PUBLISH).mock(return_value=httpx.Response(204))
+
+    result = CliRunner().invoke(cli.app, RUN_SKIPPING)
+
+    assert result.exit_code == 0, result.output
+    assert resend.called
+
+
+@respx.mock
+def test_skip_if_sent_sends_when_the_page_is_unreachable(env) -> None:
+    enable_subscriptions(env)
+    use(env, [ARTICLE], MATCH)
+    respx.get(PUBLISH).mock(side_effect=httpx.ConnectError("down"))
+    resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
+    respx.put(PUBLISH).mock(return_value=httpx.Response(204))
+
+    result = CliRunner().invoke(cli.app, RUN_SKIPPING)
+
+    assert result.exit_code == 0, result.output
+    assert resend.called
+
+
+@respx.mock
+def test_without_skip_if_sent_a_manual_run_resends(env) -> None:
+    enable_subscriptions(env)
+    use(env, [ARTICLE], MATCH)
+    check = respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": SENT_TODAY}))
+    resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
+    respx.put(PUBLISH).mock(return_value=httpx.Response(204))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    assert resend.called and not check.called

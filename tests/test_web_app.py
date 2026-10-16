@@ -443,3 +443,20 @@ def test_page_explains_what_is_stored(client) -> None:
 
     assert "Privacidade" in html
     assert "só o seu e-mail" in html
+
+
+def test_latest_edition_subject_requires_token(client) -> None:
+    assert client.get("/api/latest-edition").status_code == 401
+
+
+def test_latest_edition_subject_is_404_until_published(client) -> None:
+    assert client.get("/api/latest-edition", headers=AUTH).status_code == 404
+
+
+def test_latest_edition_subject_after_publishing(client) -> None:
+    client.put("/api/latest-edition", json=EDITION, headers=AUTH)
+
+    response = client.get("/api/latest-edition", headers=AUTH)
+
+    assert response.status_code == 200
+    assert response.json() == {"subject": EDITION["subject"]}

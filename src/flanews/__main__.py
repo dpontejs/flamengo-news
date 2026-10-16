@@ -16,7 +16,11 @@ from flanews.edition import resolve_edition
 from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
-from flanews.send.recipients import publish_latest_edition, resolve_recipients
+from flanews.send.recipients import (
+    latest_edition_subject,
+    publish_latest_edition,
+    resolve_recipients,
+)
 from flanews.send.resend_sender import (
     UNSUBSCRIBE_PLACEHOLDER,
     ResendSender,
@@ -159,12 +163,23 @@ def preview(
 def run(
     edition: EditionOption = "auto",
     date: DateOption = None,
+    skip_if_sent: Annotated[
+        bool,
+        typer.Option(
+            "--skip-if-sent", help="Do nothing if the page already has this edition (retries)"
+        ),
+    ] = False,
 ) -> None:
     """Build, render, save to out/ and send the newsletter (respects DRY_RUN)."""
     _setup_logging()
     resolved = _resolve(edition, date)
     settings = get_settings()
     report = RunReport(edition=resolved.label, outcome="interrompida")
+    if skip_if_sent and _already_sent(settings, resolved.label):
+        report.outcome = "já enviada por outro disparo"
+        typer.echo(f"{resolved.label}: já enviada, nada a fazer.")
+        _publish_report(report)
+        return
     try:
         llm = pipeline.get_llm_client(settings)
     except LLMError:
@@ -225,6 +240,18 @@ def run(
                 report.output_tokens = usage.output_tokens
             report.problems = problems.messages
             _publish_report(report)
+
+
+def _already_sent(settings, label: str) -> bool:
+    """Whether the page's latest edition is this one; unknown counts as not sent."""
+    if not settings.SUBSCRIBERS_API_TOKEN:
+        return False
+    try:
+        subject = latest_edition_subject(settings)
+    except (httpx.HTTPError, ValueError, KeyError) as e:
+        logger.warning("Could not check whether the edition was already sent: %s", e)
+        return False
+    return subject is not None and f"— {label}" in subject
 
 
 def _logo(settings) -> str:

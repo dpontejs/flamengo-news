@@ -251,6 +251,16 @@ def create_app(
             for email in store.active()
         ]
 
+    @app.get("/api/latest-edition")
+    def latest_edition(request: Request):
+        # Lets a second trigger of the same run see that the edition already went out.
+        if not authorized(request):
+            return unauthorized()
+        edition = store.latest_edition()
+        if edition is None:
+            return JSONResponse({"detail": "no edition published"}, status_code=404)
+        return {"subject": edition.subject}
+
     @app.put("/api/latest-edition", status_code=204)
     def publish_edition(request: Request, edition: EditionIn):
         # Published by the newsletter run after each real send; sent to new subscribers.

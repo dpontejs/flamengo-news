@@ -11,7 +11,7 @@ Newsletter por e-mail, enviada **segunda** e **sexta** de manhã, com:
 
 ```mermaid
 flowchart LR
-    CRON["GitHub Actions cron (seg/sex 08:00 BRT)"] --> RUN["python -m flanews run"]
+    CRON["Timer na VPS dispara o Actions (seg/sex 08:00 BRT; cron do Actions às 08:23 de reserva)"] --> RUN["python -m flanews run"]
     RUN --> COL["Collectors (RSS + scraping)"]
     RUN --> STATS["Stats client (ESPN)"]
     COL --> NORM["Normalize + filtrar janela de datas + dedupe"]
@@ -233,14 +233,17 @@ uv run python -m flanews run      [--edition auto]                              
 
 ## 10. Agendamento
 
-GitHub Actions (cron em UTC; BRT = UTC-3):
+Disparo principal: timer do systemd na VPS (`infra`, `newsletter-trigger`) chama o
+`workflow_dispatch` às 08:00 BRT com `dry_run=false` e `skip_if_sent=true`.
+Reserva: cron do próprio Actions (em UTC; BRT = UTC-3), também com `--skip-if-sent`:
 ```yaml
 on:
   schedule:
-    - cron: "0 11 * * 1"   # seg 08:00 BRT
-    - cron: "0 11 * * 5"   # sex 08:00 BRT
+    - cron: "23 11 * * 1,5"   # seg e sex 08:23 BRT
   workflow_dispatch:
 ```
+`--skip-if-sent` consulta `GET /api/latest-edition` e encerra sem gerar nem enviar se a edição
+do dia já está lá; se a página não responder, envia (melhor repetir do que faltar).
 Upload do HTML gerado como artifact do workflow (auditoria).
 
 ---
@@ -273,3 +276,4 @@ Lista priorizada em `docs/TASKS.md` (backlog futuro). Em resumo:
 | 2026-10-15 | Seções "Saiba mais" (extras de outras modalidades) e "Brasil afora" escolhidas pelo LLM dentro das chamadas existentes | diferencial sem custo extra de LLM (4 chamadas por edição). "Brasil afora" usa ge (geral + Série A, porque o feed geral cobre só ~23h) e uma busca no Google News; exclui só notícias com Flamengo no título. Ver `docs/features/saiba-mais-brasil-afora.md` |
 | 2026-10-15 | Inscrição própria: app FastAPI + SQLite na VPS (`infra`), envio continua no Actions e lê `/api/subscribers` | lista de inscritos sem mexer em segredo do GitHub; usa a VPS que já existe. Um e-mail por pessoa (API de lote da Resend) para ter descadastro em um clique; se a API falhar, envia só para `NEWSLETTER_RECIPIENTS`. Ver `docs/features/inscricao.md` |
 | 2026-10-15 | Marca Urubu News e página em `urubunews.diegoponte.dev` | desvincular da marca do clube. O host antigo `flamengo.diegoponte.dev` continua servindo `/unsubscribe`, `/confirm`, `/static` e `/api` (e-mails já enviados e one-click do Gmail, que nem sempre segue redirecionamento); só `/` redireciona. Ver `docs/features/urubu-news.md` |
+| 2026-10-16 | Disparo principal pela VPS, cron do Actions como reserva, trava `--skip-if-sent` | o `schedule` do Actions é "melhor esforço": a edição de 16/10 (primeiro cron, minuto 0) foi descartada sem nenhuma execução. `workflow_dispatch` pela API entra na fila na hora. A trava usa a última edição publicada na página, porque a Idempotency-Key da Resend é por execução e não evitaria dois envios |
