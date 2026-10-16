@@ -393,3 +393,17 @@ def test_render_match_stats_bars() -> None:
     # Text retains plain representation
     assert "Posse de bola: 43.5% x 56.5%" in text
     assert "Finalizações: 17 x 12" in text
+
+
+def test_render_note_box_above_the_headline() -> None:
+    html, text = render(full_newsletter(), note="Agora com imagens & barras.")
+
+    assert "Novidades" in html and "Agora com imagens &amp; barras." in html
+    assert html.index("Agora com imagens") < html.index(full_newsletter().headline)
+    assert "== Novidades ==\nAgora com imagens & barras." in text
+
+
+def test_render_without_note_has_no_box() -> None:
+    html, text = render(full_newsletter())
+
+    assert "Novidades" not in html and "Novidades" not in text

@@ -405,3 +405,23 @@ def test_without_skip_if_sent_a_manual_run_resends(env) -> None:
 
     assert result.exit_code == 0, result.output
     assert resend.called and not check.called
+
+
+@respx.mock
+def test_run_with_note_adds_the_box_and_prefixes_the_subject(env) -> None:
+    enable_subscriptions(env)
+    use(env, [ARTICLE], MATCH)
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
+    publish = respx.put(PUBLISH).mock(return_value=httpx.Response(204))
+    args = ["run", "--edition", "monday", "--date", "2026-10-14", "--note", "Cara nova."]
+
+    result = CliRunner().invoke(cli.app, args)
+
+    assert result.exit_code == 0, result.output
+    [body] = json.loads(route.calls.last.request.content)
+    assert body["subject"].startswith("Novidades! Urubu News — Edição de Segunda")
+    assert "Cara nova." in body["html"] and "Cara nova." in body["text"]
+    published = json.loads(publish.calls.last.request.content)
+    assert published["subject"].startswith("Urubu News — Edição de Segunda")
+    assert "Cara nova." not in published["html"] and "Cara nova." not in published["text"]
+    assert UNSUBSCRIBE_PLACEHOLDER in published["html"]

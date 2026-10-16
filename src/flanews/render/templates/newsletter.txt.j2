@@ -1,5 +1,10 @@
 URUBU NEWS
 {{ n.edition.label }}
+{% if note %}
+
+== Novidades ==
+{{ note }}
+{% endif %}
 {% if n.headline %}
 
 {{ n.headline }}

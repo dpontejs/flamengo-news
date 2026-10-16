@@ -299,3 +299,17 @@ def test_collect_candidates_survives_failing_collector(monkeypatch) -> None:
     learn_more, brazil = pipeline.collect_candidates(EDITION, SETTINGS)
 
     assert learn_more == [] and len(brazil) == 1
+
+
+def test_preview_command_shows_the_note(monkeypatch, tmp_path) -> None:
+    newsletter = Newsletter(edition=EDITION, headline="Flamengo vence", intro="Abertura.")
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda edition, settings: newsletter)
+    monkeypatch.chdir(tmp_path)
+    args = ["preview", "--edition", "monday", "--date", "2026-10-14", "--note", "Cara nova."]
+
+    result = CliRunner().invoke(cli.app, args)
+
+    assert result.exit_code == 0, result.output
+    html = (tmp_path / "out" / "preview-2026-10-12.html").read_text(encoding="utf-8")
+    text = (tmp_path / "out" / "preview-2026-10-12.txt").read_text(encoding="utf-8")
+    assert "Cara nova." in html and "Cara nova." in text

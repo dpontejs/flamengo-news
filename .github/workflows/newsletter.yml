@@ -24,6 +24,10 @@ on:
         description: "Não enviar se a edição já saiu (disparo automático)"
         type: boolean
         default: false
+      note:
+        description: "Aviso no quadro \"Novidades\" (opcional; o assunto ganha \"Novidades!\")"
+        type: string
+        required: false
 
 # Least privilege: jobs that need more ask for it (the image job publishes to GHCR).
 permissions:
@@ -68,12 +72,14 @@ jobs:
           DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || (inputs.dry_run && 'true' || 'false') }}
           EDITION: ${{ inputs.edition || 'auto' }}
           REFERENCE_DATE: ${{ inputs.date }}
+          NOTE: ${{ inputs.note }}
           # Scheduled and VPS-triggered runs skip an edition another trigger already sent.
           SKIP_IF_SENT: ${{ github.event_name == 'schedule' && 'true' || (inputs.skip_if_sent && 'true' || 'false') }}
         run: |
           args=(--edition "$EDITION")
           if [ "$SKIP_IF_SENT" = "true" ]; then args+=(--skip-if-sent); fi
           if [ -n "$REFERENCE_DATE" ]; then args+=(--date "$REFERENCE_DATE"); fi
+          if [ -n "$NOTE" ]; then args+=(--note "$NOTE"); fi
           echo "DRY_RUN=$DRY_RUN SKIP_IF_SENT=$SKIP_IF_SENT edition=$EDITION date=${REFERENCE_DATE:-hoje}"
           uv run python -m flanews run "${args[@]}"
 

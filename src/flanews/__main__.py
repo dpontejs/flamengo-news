@@ -36,6 +36,9 @@ logger = logging.getLogger("flanews.run")
 app = typer.Typer(help="Urubu News CLI", no_args_is_help=True)
 
 EditionOption = Annotated[Literal["monday", "friday", "auto"], typer.Option(help="Edition kind")]
+NoteOption = Annotated[
+    str | None, typer.Option(help='Announcement shown in a "Novidades" box (manual sends)')
+]
 DateOption = Annotated[
     datetime | None,
     typer.Option(formats=["%Y-%m-%d"], help="Reference date (default: today)"),
@@ -140,6 +143,7 @@ def preview(
     open_browser: Annotated[
         bool, typer.Option("--open", help="Open the HTML in the browser")
     ] = False,
+    note: NoteOption = None,
 ) -> None:
     """Build the full newsletter without sending it and save HTML and text."""
     _setup_logging()
@@ -152,6 +156,7 @@ def preview(
         newsletter,
         unsubscribe_url=pipeline.unsubscribe_url(settings),
         logo_url=_logo(settings),
+        note=note,
     )
 
     html_path.write_text(html, encoding="utf-8")
@@ -171,6 +176,7 @@ def run(
             "--skip-if-sent", help="Do nothing if the page already has this edition (retries)"
         ),
     ] = False,
+    note: NoteOption = None,
 ) -> None:
     """Build, render, save to out/ and send the newsletter (respects DRY_RUN)."""
     _setup_logging()
@@ -198,12 +204,17 @@ def run(
 
             # The page link only shows up once subscriptions are live (API token configured).
             subscribe = settings.PUBLIC_URL.rstrip("/") if settings.SUBSCRIBERS_API_TOKEN else None
-            html, text = render(
-                newsletter,
-                unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER,
-                subscribe_url=subscribe,
-                logo_url=_logo(settings),
-            )
+
+            def render_edition(note: str | None) -> tuple[str, str]:
+                return render(
+                    newsletter,
+                    unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER,
+                    subscribe_url=subscribe,
+                    logo_url=_logo(settings),
+                    note=note,
+                )
+
+            html, text = render_edition(note)
             mailto = pipeline.unsubscribe_url(settings)
             html_path = Path("out") / f"newsletter-{resolved.end:%Y-%m-%d}.html"
             html_path.parent.mkdir(parents=True, exist_ok=True)
@@ -216,7 +227,9 @@ def run(
             recipients = resolved_recipients.recipients
             report.recipients = len(recipients)
             report.subscribers = resolved_recipients.from_api
-            subject = build_subject(newsletter)
+            # The page keeps the plain edition: new subscribers get no stale announcement.
+            plain_subject = build_subject(newsletter)
+            subject = f"Novidades! {plain_subject}" if note else plain_subject
             try:
                 ids = ResendSender.from_settings(settings).send(subject, html, text, recipients)
             except SendError as e:
@@ -225,7 +238,8 @@ def run(
                 raise typer.Exit(code=2) from e
             if ids and settings.SUBSCRIBERS_API_TOKEN:
                 try:
-                    publish_latest_edition(settings, subject, html, text)
+                    plain_html, plain_text = render_edition(None) if note else (html, text)
+                    publish_latest_edition(settings, plain_subject, plain_html, plain_text)
                 except httpx.HTTPError as e:
                     logger.warning(
                         "Could not publish the latest edition for new subscribers: %s", e

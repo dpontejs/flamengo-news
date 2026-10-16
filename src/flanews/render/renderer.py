@@ -93,10 +93,12 @@ def render(
     unsubscribe_url: str | None = None,
     subscribe_url: str | None = None,
     logo_url: str = DEFAULT_LOGO_URL,
+    note: str | None = None,
 ) -> tuple[str, str]:
-    """Render the newsletter as (html with inlined CSS, plain text)."""
+    """Render the newsletter as (html with inlined CSS, plain text); `note` adds a box."""
     context = {
         "n": newsletter,
+        "note": note,
         "logo_url": logo_url,
         "standings": standings_window(newsletter.standings),
         "unsubscribe_url": unsubscribe_url,
