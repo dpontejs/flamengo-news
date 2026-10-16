@@ -183,6 +183,30 @@ def test_preview_command_custom_out(monkeypatch, tmp_path) -> None:
     assert target.with_suffix(".txt").exists()
 
 
+def test_preview_command_renders_match_stats_bars(monkeypatch, tmp_path) -> None:
+    match = MatchStats(
+        fixture_id=1,
+        competition="Brasileirão",
+        date=datetime(2026, 10, 11, 17, 30, tzinfo=EDITION.start.tzinfo),
+        home="Flamengo",
+        away="Fluminense",
+        home_goals=1,
+        away_goals=0,
+        statistics={"Posse de bola": ("50%", "50%"), "Finalizações": ("10", "8")},
+    )
+    newsletter = Newsletter(edition=EDITION, intro="Abertura.", last_match=match)
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda edition, settings: newsletter)
+    monkeypatch.chdir(tmp_path)
+
+    result = CliRunner().invoke(cli.app, ["preview", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    html = (tmp_path / "out" / "preview-2026-10-12.html").read_text(encoding="utf-8")
+    assert "Posse de bola" in html
+    assert "Finalizações" in html
+    assert "Estatísticas" in html
+
+
 def test_build_newsletter_analysis_failure_keeps_moment() -> None:
     def respond(prompt: str, schema: type[BaseModel]) -> dict:
         if schema is AnalysisResponse:

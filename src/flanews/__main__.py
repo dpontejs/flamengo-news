@@ -146,12 +146,14 @@ def preview(
     resolved = _resolve(edition, date)
     settings = get_settings()
     newsletter = pipeline.build_newsletter(resolved, settings)
-    html, text = render(
-        newsletter, unsubscribe_url=pipeline.unsubscribe_url(settings), logo_url=_logo(settings)
-    )
-
     html_path = out or Path("out") / f"preview-{resolved.end:%Y-%m-%d}.html"
     html_path.parent.mkdir(parents=True, exist_ok=True)
+    html, text = render(
+        newsletter,
+        unsubscribe_url=pipeline.unsubscribe_url(settings),
+        logo_url=_logo(settings),
+    )
+
     html_path.write_text(html, encoding="utf-8")
     html_path.with_suffix(".txt").write_text(text, encoding="utf-8")
     typer.echo(f"Preview saved to {html_path} and {html_path.with_suffix('.txt')}")

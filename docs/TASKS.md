@@ -238,7 +238,7 @@ Em ordem de prioridade.
 - [ ] **Logs da página:** registrar no log os envios de confirmação e de boas-vindas que deram certo (hoje só os erros aparecem).
 - [ ] **Banco de notícias:** guardar artigos, tópicos e edições (SQLite ou o Postgres compartilhado do `infra`) para não repetir notícias entre edições, ter um arquivo das edições e servir de base para o classificador.
 - [ ] **Arquivo público das edições:** página `/edicoes` com as edições anteriores, para quem chega conhecer antes de se inscrever (usa o banco de notícias).
-- [ ] **Imagens:** foto de destaque das matérias (`og:image`) nos tópicos e gráfico de estatísticas da partida como PNG.
+- [x] **Imagens:** foto de destaque das matérias (`og:image`) nos tópicos e gráfico de estatísticas da partida como PNG.
 - [ ] **Palpites entre os inscritos:** antes de cada jogo, a edição traz um link pessoal (assinado, sem login) para palpitar até o apito inicial: vencedor ou empate, placar exato e quem marca. Pontos por acerto (ex.: vencedor 3, placar exato +5, cada autor de gol +2), apurados com os dados da ESPN depois do jogo. Apelido público escolhido pela pessoa (nunca o e-mail).
 - [ ] **Ranking dos palpites:** seção na newsletter (top 5 e a sua posição) e página pública com a classificação; ganhador por mês e por temporada.
 - [ ] **Classificador de relevância:** modelo que decide se uma notícia é interessante antes do Gemini (ex.: Llama local na GPU de casa, via Cloudflare Tunnel do `infra`), avaliado com rótulos do banco de notícias.

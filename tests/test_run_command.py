@@ -113,6 +113,23 @@ def test_run_builds_renders_saves_and_sends(env, tmp_path) -> None:
 
 
 @respx.mock
+def test_run_renders_match_stats_in_email(env, tmp_path) -> None:
+    match_with_stats = MATCH.model_copy(
+        update={"statistics": {"Posse de bola": ("50%", "50%"), "Finalizações": ("10", "8")}}
+    )
+    use(env, [ARTICLE], match_with_stats)
+    route = respx.post(RESEND_URL).mock(return_value=sent(["email_stats"]))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    [body] = json.loads(route.calls.last.request.content)
+    assert "Posse de bola" in body["html"]
+    assert "Finalizações" in body["html"]
+    assert "Estatísticas" in body["html"]
+
+
+@respx.mock
 def test_run_refuses_to_send_empty_newsletter(env, tmp_path) -> None:
     use(env, [], None)
     route = respx.post(RESEND_URL)

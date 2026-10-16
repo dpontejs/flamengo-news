@@ -16,7 +16,7 @@ from flanews.models import (
     TeamMoment,
     Topic,
 )
-from flanews.render.renderer import render, source_label
+from flanews.render.renderer import _stat_shares, render, source_label
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITION = Edition(
@@ -329,3 +329,67 @@ def test_render_footer_says_unofficial() -> None:
 
     assert "sem ligação oficial com o clube" in html
     assert "sem ligação oficial com o clube" in text
+
+
+def test_topic_uses_og_image_of_main_article() -> None:
+    newsletter = full_newsletter()
+    topic = Topic(
+        title="Vitória no clássico",
+        summary="O Flamengo venceu o Fluminense.",
+        articles=[
+            article("https://ge.globo.com/1", "ge").model_copy(
+                update={"image_url": "https://cdn.globo.com/foto-flamengo.jpg"}
+            ),
+            article("https://oglobo.globo.com/2", "google_news:O GLOBO").model_copy(
+                update={"image_url": "https://cdn.globo.com/outra-foto.jpg"}
+            ),
+        ],
+    )
+    assert topic.image_url == "https://cdn.globo.com/foto-flamengo.jpg"
+    newsletter.topics = [topic]
+
+    html, text = render(newsletter)
+
+    assert '<img src="https://cdn.globo.com/foto-flamengo.jpg" alt="Vitória no clássico"' in html
+    assert 'width="512"' in html
+    assert 'height="268"' in html
+    assert "Vitória no clássico" in text
+
+
+def test_topic_without_image_keeps_layout() -> None:
+    newsletter = full_newsletter()
+    assert newsletter.topics[0].image_url is None
+
+    html, text = render(newsletter)
+
+    assert "Vitória no clássico" in html
+    assert 'alt="Vitória no clássico"' not in html
+    assert "Fontes:" in html
+
+
+def test_stat_shares() -> None:
+    assert _stat_shares(("50%", "50%")) == (50, 50)
+    assert _stat_shares(("43.5%", "56.5%")) == (44, 56)
+    assert _stat_shares(("14", "7")) == (67, 33)
+    assert _stat_shares(("0", "0")) == (0, 0)
+    assert _stat_shares(("2", "0")) == (100, 0)
+    assert _stat_shares(("0", "3")) == (0, 100)
+    assert _stat_shares(("412 (84%)", "320 (78%)")) == (56, 44)
+
+
+def test_render_match_stats_bars() -> None:
+    newsletter = full_newsletter()
+    html, text = render(newsletter)
+
+    # HTML contains the comparative stats table and bars
+    assert "Estatísticas" in html
+    assert "Posse de bola" in html
+    assert "43.5%" in html and "56.5%" in html
+    assert "Finalizações" in html
+    assert "17" in html and "12" in html
+    # Proportional bar widths for 43.5% vs 56.5% -> 44% vs 56%
+    assert 'width="44%"' in html
+    assert 'width="56%"' in html
+    # Text retains plain representation
+    assert "Posse de bola: 43.5% x 56.5%" in text
+    assert "Finalizações: 17 x 12" in text

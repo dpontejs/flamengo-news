@@ -13,6 +13,7 @@ class Article(BaseModel):
     published_at: datetime
     summary_hint: str | None = None
     content: str | None = None
+    image_url: str | None = None
     # flamengo: main news; saiba_mais: other Flamengo sports; brasil: Brazilian football
     section: Literal["flamengo", "saiba_mais", "brasil"] = "flamengo"
     category: str | None = None
@@ -35,6 +36,13 @@ class Topic(BaseModel):
     summary: str
     articles: list[Article] = Field(default_factory=list)
     importance: int = 1
+    image_url: str | None = None
+
+    def model_post_init(self, __context: object) -> None:
+        if self.image_url is None and self.articles:
+            main_image = self.articles[0].image_url
+            if main_image and main_image.startswith("https://"):
+                self.image_url = main_image
 
 
 class MatchEvent(BaseModel):

@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -40,6 +41,32 @@ def _performance(row: StandingRow) -> str:
     return f"{round(100 * row.points / (3 * row.played))}%"
 
 
+def _parse_stat_value(val: str) -> float:
+    cleaned = val.replace("%", "").replace(",", ".").strip()
+    match = re.search(r"[-+]?\d*\.?\d+", cleaned)
+    if not match:
+        return 0.0
+    try:
+        return float(match.group())
+    except ValueError:
+        return 0.0
+
+
+def _stat_shares(values: tuple[str, str]) -> tuple[int, int]:
+    """Compute (home_pct, away_pct) integers summing to 100 (or (0, 0) if both zero)."""
+    h_val = _parse_stat_value(values[0])
+    a_val = _parse_stat_value(values[1])
+    total = h_val + a_val
+    if total <= 0:
+        return (0, 0)
+    home_pct = round(100 * h_val / total)
+    if h_val > 0 and home_pct == 0:
+        home_pct = 1
+    elif a_val > 0 and home_pct == 100:
+        home_pct = 99
+    return (home_pct, 100 - home_pct)
+
+
 def _environment() -> Environment:
     env = Environment(
         loader=FileSystemLoader(TEMPLATES_DIR),
@@ -48,7 +75,13 @@ def _environment() -> Environment:
         trim_blocks=True,
         lstrip_blocks=True,
     )
-    env.filters.update(source=source_label, when=_when, minute=_minute, performance=_performance)
+    env.filters.update(
+        source=source_label,
+        when=_when,
+        minute=_minute,
+        performance=_performance,
+        stat_shares=_stat_shares,
+    )
     return env
 
 

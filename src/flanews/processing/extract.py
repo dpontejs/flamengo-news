@@ -32,6 +32,22 @@ PUBLISHED_PATTERNS = (
     re.compile(r'"datePublished"\s*:\s*"([^"]+)"'),
 )
 
+IMAGE_PATTERNS = (
+    re.compile(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']', re.I),
+    re.compile(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']', re.I),
+)
+
+
+def _extract_og_image(html: str) -> str | None:
+    for pattern in IMAGE_PATTERNS:
+        match = pattern.search(html)
+        if not match:
+            continue
+        url = match.group(1).strip()
+        if url.startswith("https://"):
+            return url
+    return None
+
 
 class DomainRateLimiter:
     """Thread-safe limiter enforcing a minimum interval between requests per domain."""
@@ -118,6 +134,9 @@ def extract_content(article: Article, client: httpx.Client, limiter: DomainRateL
     published_at = _extract_published_at(html)
     if published_at is not None:
         update["published_at"] = published_at
+    image_url = _extract_og_image(html)
+    if image_url is not None:
+        update["image_url"] = image_url
     return article.model_copy(update=update)
 
 
