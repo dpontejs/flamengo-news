@@ -354,7 +354,11 @@ RUN_SKIPPING = ["run", "--edition", "monday", "--date", "2026-10-14", "--skip-if
 def test_skip_if_sent_stops_before_building_when_the_edition_went_out(env, monkeypatch) -> None:
     enable_subscriptions(env)
     monkeypatch.setattr(pipeline, "get_llm_client", lambda settings: pytest.fail("built it"))
-    respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": SENT_TODAY}))
+    respx.get(PUBLISH).mock(
+        return_value=httpx.Response(
+            200, json={"subject": SENT_TODAY, "published_at": "2026-10-12T08:05:00-03:00"}
+        )
+    )
     resend = respx.post(RESEND_URL)
 
     result = CliRunner().invoke(cli.app, RUN_SKIPPING)
@@ -369,7 +373,11 @@ def test_skip_if_sent_sends_when_the_last_edition_is_older(env) -> None:
     enable_subscriptions(env)
     use(env, [ARTICLE], MATCH)
     older = "Urubu News — Edição de Sexta — 09/10/2026: Outra"
-    respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": older}))
+    respx.get(PUBLISH).mock(
+        return_value=httpx.Response(
+            200, json={"subject": older, "published_at": "2026-10-09T08:05:00-03:00"}
+        )
+    )
     resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     respx.put(PUBLISH).mock(return_value=httpx.Response(204))
 
@@ -397,7 +405,11 @@ def test_skip_if_sent_sends_when_the_page_is_unreachable(env) -> None:
 def test_without_skip_if_sent_a_manual_run_resends(env) -> None:
     enable_subscriptions(env)
     use(env, [ARTICLE], MATCH)
-    check = respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": SENT_TODAY}))
+    check = respx.get(PUBLISH).mock(
+        return_value=httpx.Response(
+            200, json={"subject": SENT_TODAY, "published_at": "2026-10-12T08:05:00-03:00"}
+        )
+    )
     resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     respx.put(PUBLISH).mock(return_value=httpx.Response(204))
 

@@ -17,7 +17,7 @@ from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
 from flanews.send.recipients import (
-    latest_edition_subject,
+    latest_edition,
     publish_latest_edition,
     resolve_recipients,
 )
@@ -263,11 +263,11 @@ def _already_sent(settings, label: str) -> bool:
     if not settings.SUBSCRIBERS_API_TOKEN:
         return False
     try:
-        subject = latest_edition_subject(settings)
-    except (httpx.HTTPError, ValueError, KeyError) as e:
+        edition = latest_edition(settings)
+    except (httpx.HTTPError, ValueError) as e:
         logger.warning("Could not check whether the edition was already sent: %s", e)
         return False
-    return subject is not None and f"— {label}" in subject
+    return edition is not None and f"— {label}" in edition.subject
 
 
 def _logo(settings) -> str:

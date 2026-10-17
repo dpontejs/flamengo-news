@@ -43,6 +43,7 @@ class Edition:
     subject: str
     html: str
     text: str
+    published_at: datetime
 
 
 @dataclass(frozen=True)
@@ -150,8 +151,11 @@ class SubscriberStore:
         )
 
     def latest_edition(self) -> Edition | None:
-        rows = self._run("SELECT subject, html, text FROM editions WHERE id = 1")
-        return Edition(*rows[0]) if rows else None
+        rows = self._run("SELECT subject, html, text, published_at FROM editions WHERE id = 1")
+        if not rows:
+            return None
+        subject, html, text, published_at = rows[0]
+        return Edition(subject, html, text, datetime.fromisoformat(published_at))
 
     def confirmations_sent_since(self, since: datetime) -> int:
         rows = self._run(
