@@ -21,6 +21,11 @@ from flanews.schedule import Fixture
 
 logger = logging.getLogger(__name__)
 
+
+class StatsUnavailable(Exception):
+    """ESPN answered none of the schedule requests: the calendar is unknown, not empty."""
+
+
 ESPN_SITE_URL = "https://site.api.espn.com/apis/site/v2/sports/soccer"
 ESPN_STANDINGS_URL = "https://site.api.espn.com/apis/v2/sports/soccer"
 # ESPN's WAF rejects the collectors' User-Agent (the "(+contato@...)" part) with 403.
@@ -139,20 +144,26 @@ class ESPNStatsClient:
         )
 
     def get_fixtures(self, now: datetime) -> list[Fixture]:
-        """Flamengo's matches in every tracked competition from a week ago on, once each."""
+        """Flamengo's matches in every tracked competition from a week ago on, once each.
+
+        Raises StatsUnavailable when every schedule request failed (unknown is not empty).
+        """
         fixtures: dict[str, Fixture] = {}
+        answered = 0
         for league in LEAGUES:
             for params in ({"season": str(now.year)}, {"fixture": "true"}):
-                for event in self._schedule(league, params):
+                events = self._schedule(league, params)
+                answered += (league, tuple(sorted(params.items()))) in self._schedules
+                for event in events:
                     try:
                         fixture = self._parse_fixture(event, league)
                     except (KeyError, StopIteration, ValueError) as e:
-                        logger.warning(
-                            "Skipping unreadable ESPN fixture %s: %s", event.get("id"), e
-                        )
+                        logger.warning("Skipping ESPN fixture %s: %s", event.get("id"), e)
                         continue
                     if fixture.kickoff >= now - FIXTURES_LOOKBACK:
                         fixtures[fixture.match_id] = fixture
+        if not answered:
+            raise StatsUnavailable("no ESPN schedule could be loaded")
         return sorted(fixtures.values(), key=lambda f: f.kickoff)
 
     def get_preview(self, match_id: str, league: str) -> MatchPreview | None:

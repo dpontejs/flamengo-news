@@ -13,6 +13,7 @@ from flanews.stats.espn import (
     ESPN_STANDINGS_URL,
     LEAGUES,
     ESPNStatsClient,
+    StatsUnavailable,
     standings_gap,
 )
 
@@ -339,3 +340,11 @@ def test_get_preview_returns_none_on_error(espn: respx.MockRouter) -> None:
     )
 
     assert make_client().get_preview("9", "bra.1") is None
+
+
+@respx.mock
+def test_get_fixtures_raises_when_espn_answers_nothing() -> None:
+    respx.get(url__startswith=ESPN_SITE_URL).mock(return_value=httpx.Response(503))
+
+    with pytest.raises(StatsUnavailable):
+        make_client().get_fixtures(datetime(2026, 10, 14, 18, tzinfo=TZ))

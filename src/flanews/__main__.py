@@ -1,7 +1,7 @@
 import logging
 import os
 import webbrowser
-from datetime import datetime
+from datetime import datetime, time
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -12,10 +12,12 @@ from rich.table import Table
 
 from flanews import __version__, pipeline
 from flanews.config import get_settings
-from flanews.edition import resolve_edition
+from flanews.edition import resolve_edition, resolve_match_edition
 from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
+from flanews.schedule import LABELS, TZ, Fixture, plan
+from flanews.schedule import due as due_slot
 from flanews.send.recipients import (
     latest_edition,
     publish_latest_edition,
@@ -27,7 +29,7 @@ from flanews.send.resend_sender import (
     SendError,
     build_subject,
 )
-from flanews.stats.espn import ESPNStatsClient
+from flanews.stats.espn import ESPNStatsClient, StatsUnavailable
 from flanews.stats.table import standings_window
 from flanews.summarizer.client import LLMError
 
@@ -35,7 +37,9 @@ logger = logging.getLogger("flanews.run")
 
 app = typer.Typer(help="Urubu News CLI", no_args_is_help=True)
 
-EditionOption = Annotated[Literal["monday", "friday", "auto"], typer.Option(help="Edition kind")]
+EditionOption = Annotated[
+    Literal["monday", "friday", "auto", "pre", "post", "news"], typer.Option(help="Edition kind")
+]
 NoteOption = Annotated[
     str | None, typer.Option(help='Announcement shown in a "Novidades" box (manual sends)')
 ]
@@ -164,6 +168,22 @@ def preview(
     typer.echo(f"Preview saved to {html_path} and {html_path.with_suffix('.txt')}")
     if open_browser:
         webbrowser.open(html_path.resolve().as_uri())
+
+
+@app.command()
+def due() -> None:
+    """Print the edition due now as "kind<TAB>YYYY-MM-DD<TAB>label", or nothing."""
+    _setup_logging()
+    settings = get_settings()
+    now = _now()
+    try:
+        fixtures = _fixtures(settings, now)
+    except StatsUnavailable as e:
+        logger.error("Calendar unavailable, nothing is due: %s", e)
+        return
+    slot = due_slot(plan(fixtures, now, _last_sent(settings)), now)
+    if slot is not None:
+        typer.echo(f"{slot.kind}\t{slot.send_at:%Y-%m-%d}\t{slot.label}")
 
 
 @app.command()
@@ -303,8 +323,42 @@ def _setup_logging() -> None:
 
 def _resolve(edition: str, date: datetime | None) -> Edition:
     settings = get_settings()
+    if edition in LABELS:
+        day = date.date() if date else _now().date()
+        now = datetime.combine(day, time(0, 0), tzinfo=TZ)
+        try:
+            fixtures = _fixtures(settings, now)
+        except StatsUnavailable as e:
+            typer.echo(f"Agenda da ESPN indisponível: {e}")
+            raise typer.Exit(code=1) from e
+        resolved = resolve_match_edition(edition, day, fixtures, _last_sent(settings))  # type: ignore[arg-type]
+        if resolved is None:
+            typer.echo(f"Nenhuma edição {LABELS[edition]} prevista em {day:%d/%m/%Y}.")
+            raise typer.Exit(code=1)
+        return resolved
     now = date.replace(hour=12) if date else None
     return resolve_edition(edition, now=now, tz_name=settings.TIMEZONE)  # type: ignore[arg-type]
+
+
+def _now() -> datetime:
+    return datetime.now(TZ)
+
+
+def _fixtures(settings, now: datetime) -> list[Fixture]:
+    client = ESPNStatsClient(team_id=settings.FLAMENGO_TEAM_ID, tz_name=settings.TIMEZONE)
+    return client.get_fixtures(now)
+
+
+def _last_sent(settings) -> datetime | None:
+    """When the page's latest edition went out; unknown (no token, page down) is None."""
+    if not settings.SUBSCRIBERS_API_TOKEN:
+        return None
+    try:
+        edition = latest_edition(settings)
+    except (httpx.HTTPError, ValueError) as e:
+        logger.warning("Could not read the latest edition, planning without it: %s", e)
+        return None
+    return edition.published_at if edition else None
 
 
 if __name__ == "__main__":

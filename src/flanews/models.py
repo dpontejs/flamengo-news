@@ -143,10 +143,12 @@ class TeamMoment(BaseModel):
 class Edition(BaseModel):
     """Newsletter edition temporal window and description."""
 
-    kind: Literal["monday", "friday", "auto"]
+    kind: Literal["monday", "friday", "auto", "pre", "post", "news"]
     start: datetime
     end: datetime
     label: str
+    match_id: str | None = None  # pre/post: the ESPN event
+    league: str | None = None
 
 
 class Newsletter(BaseModel):
