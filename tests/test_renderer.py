@@ -407,3 +407,80 @@ def test_render_without_note_has_no_box() -> None:
     html, text = render(full_newsletter())
 
     assert "Novidades" not in html and "Novidades" not in text
+
+
+def pre_game(lineups: str = "", tips: list[str] | None = None) -> Newsletter:
+    from flanews.models import Edition, FormResult, MatchPreview, NextMatch
+
+    def result(r: str, score: str, opponent: str) -> FormResult:
+        return FormResult(
+            result=r,
+            opponent=opponent,
+            score=score,
+            competition="Brasileiro Serie A",
+            date=datetime(2026, 4, 19, tzinfo=TZ),
+        )
+
+    return Newsletter(
+        edition=Edition(
+            kind="pre",
+            start=datetime(2026, 10, 16, 19, tzinfo=TZ),
+            end=datetime(2026, 10, 18, 12, 30, tzinfo=TZ),
+            label="Pré-jogo — 18/10/2026",
+        ),
+        headline="Flamengo visita o Bahia",
+        intro="Jorginho volta. Jogo na Fonte Nova.",
+        next_match=NextMatch(
+            opponent="Bahia",
+            competition="Brasileirão",
+            date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+            venue="Arena Fonte Nova",
+            is_home=False,
+        ),
+        preview=MatchPreview(
+            opponent="Bahia",
+            flamengo_form=[result("E", "0-0", "Estudiantes de La Plata")],
+            opponent_form=[result("V", "1-0", "Mirassol")],
+            head_to_head=[result("V", "2-0", "Bahia"), result("D", "0-1", "Bahia")],
+        ),
+        lineups=lineups,
+        tips=tips or [],
+        topics=[
+            Topic(
+                title="Jorginho de volta",
+                summary="O volante volta ao time.",
+                importance=4,
+                articles=[article("https://ge.globo.com/9", "ge")],
+            )
+        ],
+    )
+
+
+def test_pre_game_renders_form_head_to_head_lineups_and_tips() -> None:
+    newsletter = pre_game(lineups="Flamengo: Rossi; Varela", tips=["ge, Fulano: Flamengo 2 x 1"])
+
+    html, text = render(newsletter)
+
+    for output in (html, text):
+        order = [
+            output.index("O jogo"),
+            output.index("Momento dos times"),
+            output.index("Últimos confrontos"),
+            output.index("Prováveis escalações"),
+            output.index("Palpites"),
+            output.index("Jorginho de volta"),
+        ]
+        assert order == sorted(order)
+        assert "Bahia x Flamengo" in output and "Arena Fonte Nova" in output
+        assert "Flamengo: Rossi; Varela" in output and "ge, Fulano: Flamengo 2 x 1" in output
+        assert "Estudiantes de La Plata" in output and "Mirassol" in output
+    assert "Próximo jogo" not in html  # the match is already at the top
+    assert "1 vitória do Flamengo, 0 empates e 1 do Bahia" in text
+
+
+def test_pre_game_hides_lineups_and_tips_when_absent() -> None:
+    html, text = render(pre_game())
+
+    for output in (html, text):
+        assert "Prováveis escalações" not in output and "Palpites" not in output
+        assert "Últimos confrontos" in output

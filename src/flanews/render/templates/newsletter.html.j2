@@ -165,6 +165,46 @@
   </td></tr>
   {% endif %}
 
+  {% if n.edition.kind == "pre" and n.next_match %}{% set x = n.next_match %}{% set pv = n.preview %}
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      <p class="card-title">O jogo</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+        {% if x.opponent_logo %}<td width="56" valign="middle"><img src="{{ x.opponent_logo }}" alt="{{ x.opponent }}" width="44" height="44" style="display: block; border: 0;"></td>{% endif %}
+        <td valign="middle">
+          <p class="next-name">{% if x.is_home %}Flamengo x {{ x.opponent }}{% else %}{{ x.opponent }} x Flamengo{% endif %}</p>
+          <p class="muted">{{ x.competition }} · {{ x.date | when }}{% if x.venue %} · {{ x.venue }}{% endif %}</p>
+        </td>
+      </tr></table>
+      {% if pv and (pv.flamengo_form or pv.opponent_form) %}
+      <p class="subhead">Momento dos times</p>
+      {% for team, form in [("Flamengo", pv.flamengo_form), (pv.opponent, pv.opponent_form)] if form %}
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top: 6px;"><tr>
+        <td class="text" style="padding-right: 8px; font-weight: 700;">{{ team }}</td>
+        {% for f in form %}<td class="chip chip-{{ f.result }}" align="center" title="{{ f.score }} {{ f.opponent }}">{{ f.result }}</td><td width="6"></td>{% endfor %}
+      </tr></table>
+      <p class="muted" style="margin-top: 4px;">{% for f in form %}{{ f.score }} {{ f.opponent }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+      {% endfor %}
+      {% endif %}
+      {% if pv and pv.head_to_head %}
+      <p class="subhead">Últimos confrontos</p>
+      <p class="muted">{{ pv | h2h }}</p>
+      {% for f in pv.head_to_head %}
+      <p class="text" style="margin: 4px 0 0 0;"><span class="chip chip-{{ f.result }}" style="display: inline-block; width: 18px;">{{ f.result }}</span> Flamengo {{ f.score | replace("-", " x ") }} {{ f.opponent }} <span class="muted">· {{ f.date.strftime("%d/%m/%Y") }} · {{ f.competition }}</span></p>
+      {% endfor %}
+      {% endif %}
+      {% if n.lineups %}
+      <p class="subhead">Prováveis escalações</p>
+      <p class="text">{{ n.lineups }}</p>
+      {% endif %}
+      {% if n.tips %}
+      <p class="subhead">Palpites</p>
+      {% for tip in n.tips %}<p class="text" style="margin: 4px 0 0 0;">· {{ tip }}</p>{% endfor %}
+      {% endif %}
+    </td></tr></table>
+  </td></tr>
+  {% endif %}
+
   {% set mo = n.moment %}
   {% set leaders = n.last_match.leaders if n.last_match else {} %}
   {% if n.analysis or (mo and (mo.form or mo.standing or mo.rankings)) or leaders %}
@@ -236,7 +276,7 @@
   </td></tr>
   {% endfor %}
 
-  {% if n.next_match %}{% set x = n.next_match %}
+  {% if n.next_match and n.edition.kind != "pre" %}{% set x = n.next_match %}
   <tr><td class="block font">
     <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
       <p class="card-title">Próximo jogo</p>
