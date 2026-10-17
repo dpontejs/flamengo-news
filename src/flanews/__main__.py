@@ -1,7 +1,7 @@
 import logging
 import os
 import webbrowser
-from datetime import datetime, time
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -12,11 +12,11 @@ from rich.table import Table
 
 from flanews import __version__, pipeline
 from flanews.config import get_settings
-from flanews.edition import resolve_edition, resolve_match_edition
+from flanews.edition import edition_from_slot, resolve_match_edition
 from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
-from flanews.schedule import LABELS, TZ, Fixture, label_of, plan
+from flanews.schedule import LABELS, TZ, Fixture, Slot, label_of, plan
 from flanews.schedule import due as due_slot
 from flanews.send.recipients import (
     LatestEdition,
@@ -39,7 +39,8 @@ logger = logging.getLogger("flanews.run")
 app = typer.Typer(help="Urubu News CLI", no_args_is_help=True)
 
 EditionOption = Annotated[
-    Literal["monday", "friday", "auto", "pre", "post", "news"], typer.Option(help="Edition kind")
+    Literal["auto", "pre", "post", "news"],
+    typer.Option(help="Edition kind; auto = the one the match calendar has due now"),
 ]
 NoteOption = Annotated[
     str | None, typer.Option(help='Announcement shown in a "Novidades" box (manual sends)')
@@ -339,24 +340,38 @@ def _setup_logging() -> None:
 
 
 def _resolve(edition: str, date: datetime | None) -> Edition:
+    """`auto`: the slot due now (none: exit 0); a kind: its slot on `date` (default today)."""
     settings = get_settings()
-    if edition in LABELS:
-        day = date.date() if date else _now().date()
-        now = datetime.combine(day, time(0, 0), tzinfo=TZ)
-        try:
-            fixtures = _fixtures(settings, now)
-        except StatsUnavailable as e:
-            typer.echo(f"Agenda da ESPN indisponível: {e}")
-            raise typer.Exit(code=1) from e
-        latest = _latest(settings)
-        last_sent = latest.published_at if latest else None
-        resolved = resolve_match_edition(edition, day, fixtures, last_sent)  # type: ignore[arg-type]
-        if resolved is None:
-            typer.echo(f"Nenhuma edição {LABELS[edition]} prevista em {day:%d/%m/%Y}.")
-            raise typer.Exit(code=1)
-        return resolved
-    now = date.replace(hour=12) if date else None
-    return resolve_edition(edition, now=now, tz_name=settings.TIMEZONE)  # type: ignore[arg-type]
+    now = _now()
+    try:
+        fixtures = _fixtures(settings, now)
+    except StatsUnavailable as e:
+        typer.echo(f"Agenda da ESPN indisponível: {e}")
+        raise typer.Exit(code=0 if edition == "auto" else 1) from e
+    latest = _latest(settings)
+    if edition == "auto":
+        sent_at, sent_label = (
+            (latest.published_at, label_of(latest.subject)) if latest else (None, None)
+        )
+        slot = due_slot(plan(fixtures, now, sent_at, sent_label), now)
+        if slot is None:
+            typer.echo("Nenhuma edição agendada agora.")
+            raise typer.Exit(code=0)
+        return edition_from_slot(slot)
+    day = date.date() if date else now.date()
+    last_sent = latest.published_at if latest else None
+    resolved = resolve_match_edition(edition, day, fixtures, last_sent)  # type: ignore[arg-type]
+    if resolved is None:
+        typer.echo(f"Nenhuma edição {LABELS[edition]} prevista em {day:%d/%m/%Y}.")
+        raise typer.Exit(code=1)
+    return resolved
+
+
+def _due(fixtures: list[Fixture], now: datetime, latest: LatestEdition | None) -> Slot | None:
+    """The slot due now, planned from the real last send (and its label, against reschedules)."""
+    if latest is None:
+        return due_slot(plan(fixtures, now, None), now)
+    return due_slot(plan(fixtures, now, latest.published_at, label_of(latest.subject)), now)
 
 
 def _now() -> datetime:

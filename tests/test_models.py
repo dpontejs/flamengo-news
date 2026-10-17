@@ -50,7 +50,7 @@ def test_models_instantiation() -> None:
         goals_diff=25,
         is_flamengo=True,
     )
-    edition = Edition(kind="monday", start=now, end=now, label="Edição de Segunda")
+    edition = Edition(kind="news", start=now, end=now, label="Edição de Segunda")
     newsletter = Newsletter(
         edition=edition,
         intro="Resumo da rodada",

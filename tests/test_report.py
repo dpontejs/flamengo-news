@@ -5,7 +5,7 @@ from flanews.report import ProblemCollector, RunReport
 
 def test_report_markdown_lists_counts_problems_and_outcome() -> None:
     report = RunReport(
-        edition="Edição de Segunda — 12/10/2026",
+        edition="Notícias — 12/10/2026",
         articles_by_source={"google_news": 9, "ge": 3, "flamengo_oficial": 1},
         candidates={"saiba_mais": 37, "brasil": 17},
         topics=["Fla-Flu", "Lesão do Danilo"],
@@ -25,7 +25,7 @@ def test_report_markdown_lists_counts_problems_and_outcome() -> None:
 
     md = report.to_markdown()
 
-    assert md.startswith("## Urubu News — Edição de Segunda — 12/10/2026")
+    assert md.startswith("## Urubu News — Notícias — 12/10/2026")
     assert "**Resultado:** enviada (id=abc)" in md
     assert "| google_news | 9 |" in md and "| **total** | 13 |" in md
     assert "Saiba mais: 3 de 37 candidatos" in md

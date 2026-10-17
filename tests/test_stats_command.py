@@ -78,7 +78,7 @@ class FakeStatsClient:
 def test_stats_command_prints_match_next_and_table(monkeypatch) -> None:
     monkeypatch.setattr(cli, "ESPNStatsClient", lambda **kwargs: FakeStatsClient())
 
-    result = CliRunner().invoke(cli.app, ["stats", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["stats", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     out = result.output
@@ -106,7 +106,7 @@ def test_stats_command_without_data(monkeypatch) -> None:
 
     monkeypatch.setattr(cli, "ESPNStatsClient", lambda **kwargs: Empty())
 
-    result = CliRunner().invoke(cli.app, ["stats", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["stats", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     assert "Nenhuma partida" in result.output

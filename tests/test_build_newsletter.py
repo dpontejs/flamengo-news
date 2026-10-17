@@ -30,10 +30,10 @@ from flanews.summarizer.pipeline import (
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITION = Edition(
-    kind="monday",
+    kind="news",
     start=datetime(2026, 10, 9, 8, tzinfo=TZ),
     end=datetime(2026, 10, 12, 8, tzinfo=TZ),
-    label="Edição de Segunda — 12/10/2026",
+    label="Notícias — 12/10/2026",
 )
 SETTINGS = Settings(NEWSLETTER_FROM="Flamengo News <news@fla.com>", GEMINI_API_KEY="k")
 ARTICLE = Article(
@@ -176,7 +176,7 @@ def test_preview_command_writes_html_and_text(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(pipeline, "build_newsletter", fake_build)
     monkeypatch.chdir(tmp_path)
 
-    result = CliRunner().invoke(cli.app, ["preview", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["preview", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     html = (tmp_path / "out" / "preview-2026-10-12.html").read_text(encoding="utf-8")
@@ -191,7 +191,8 @@ def test_preview_command_custom_out(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
 
     target = tmp_path / "x" / "minha.html"
-    result = CliRunner().invoke(cli.app, ["preview", "--out", str(target)])
+    args = ["preview", "--edition", "news", "--date", "2026-10-12", "--out", str(target)]
+    result = CliRunner().invoke(cli.app, args)
 
     assert result.exit_code == 0, result.output
     assert target.exists()
@@ -213,7 +214,7 @@ def test_preview_command_renders_match_stats_bars(monkeypatch, tmp_path) -> None
     monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
     monkeypatch.chdir(tmp_path)
 
-    result = CliRunner().invoke(cli.app, ["preview", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["preview", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     html = (tmp_path / "out" / "preview-2026-10-12.html").read_text(encoding="utf-8")
@@ -320,7 +321,7 @@ def test_preview_command_shows_the_note(monkeypatch, tmp_path) -> None:
     newsletter = Newsletter(edition=EDITION, headline="Flamengo vence", intro="Abertura.")
     monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
     monkeypatch.chdir(tmp_path)
-    args = ["preview", "--edition", "monday", "--date", "2026-10-14", "--note", "Cara nova."]
+    args = ["preview", "--edition", "news", "--date", "2026-10-12", "--note", "Cara nova."]
 
     result = CliRunner().invoke(cli.app, args)
 

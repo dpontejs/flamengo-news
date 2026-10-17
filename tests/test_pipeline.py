@@ -12,10 +12,10 @@ from flanews.processing.extract import DomainRateLimiter
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITION = Edition(
-    kind="monday",
+    kind="news",
     start=datetime(2026, 10, 9, 8, 0, tzinfo=TZ),
     end=datetime(2026, 10, 12, 8, 0, tzinfo=TZ),
-    label="Edição de Segunda — 12/10/2026",
+    label="Notícias — 12/10/2026",
 )
 
 
@@ -138,10 +138,10 @@ def test_collect_command_prints_table(monkeypatch) -> None:
         return [make_article("https://ge.globo.com/1", "Flamengo vence o Palmeiras", "ge")]
 
     monkeypatch.setattr(pipeline, "collect_articles", fake_collect)
-    result = CliRunner().invoke(app, ["collect", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(app, ["collect", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
-    assert captured["edition"].label == "Edição de Segunda — 12/10/2026"
+    assert captured["edition"].label == "Notícias — 12/10/2026"
     assert "Flamengo vence o Palmeiras" in result.output
     assert "ge" in result.output
     assert "10/10" in result.output

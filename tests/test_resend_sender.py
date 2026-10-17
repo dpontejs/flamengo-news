@@ -19,10 +19,10 @@ from flanews.send.resend_sender import (
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITION = Edition(
-    kind="monday",
+    kind="news",
     start=datetime(2026, 10, 9, 8, tzinfo=TZ),
     end=datetime(2026, 10, 12, 8, tzinfo=TZ),
-    label="Edição de Segunda — 12/10/2026",
+    label="Notícias — 12/10/2026",
 )
 FROM = "Flamengo News <news@fla.com>"
 UNSUBSCRIBE = "mailto:news@fla.com?subject=Descadastrar"
@@ -51,10 +51,10 @@ def ok(count: int) -> httpx.Response:
 def test_build_subject_with_and_without_headline() -> None:
     with_headline = Newsletter(edition=EDITION, intro="", headline="Flamengo vence o Fla-Flu")
     assert build_subject(with_headline) == (
-        "Urubu News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
+        "Urubu News — Notícias — 12/10/2026: Flamengo vence o Fla-Flu"
     )
     assert build_subject(Newsletter(edition=EDITION, intro="")) == (
-        "Urubu News — Edição de Segunda — 12/10/2026"
+        "Urubu News — Notícias — 12/10/2026"
     )
 
 

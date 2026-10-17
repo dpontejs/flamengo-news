@@ -143,7 +143,7 @@ class TeamMoment(BaseModel):
 class Edition(BaseModel):
     """Newsletter edition temporal window and description."""
 
-    kind: Literal["monday", "friday", "auto", "pre", "post", "news"]
+    kind: Literal["pre", "post", "news"]
     start: datetime
     end: datetime
     label: str
