@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 MAX_TOPICS = 8
 MAX_PREVIEW_CHARS = 6000  # per article: line-ups often sit at the end of the piece
-MAX_PREVIEW_ARTICLES = 8
+MAX_PREVIEW_ARTICLES = 12
 MAX_ARTICLES_PER_TOPIC = 5
 LEARN_MORE_PICKS = 3
 BRAZIL_PICKS = 5

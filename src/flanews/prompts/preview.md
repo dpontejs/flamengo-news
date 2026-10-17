@@ -22,8 +22,10 @@ Com base apenas nesses dados e nas matérias abaixo, preencha:
   (ex.: "Flamengo: Rossi; Varela, Léo Ortiz..."); se houver desfalques, uma linha final
   "Desfalques: ...". Vazio se nenhuma matéria trouxer escalação.
 - `tips`: até 6 palpites de jornalistas, comentaristas ou veículos para {{ match_name }}, cada um
-  "Fonte ou nome: palpite" (ex.: "ge, Fulano: Flamengo 2 x 1"). Matérias com palpites da rodada
-  inteira trazem vários jogos: use só os de {{ match_name }}. Lista vazia se não houver.
+  "Fonte ou nome: palpite" (ex.: "ge, Fulano: Flamengo 2 x 1"). Vale também o resultado de uma
+  enquete entre comentaristas (ex.: "Palpite ge, 8 comentaristas: 3 Flamengo, 3 empate, 2 Bahia").
+  Matérias com palpites da rodada inteira trazem vários jogos: use só os de {{ match_name }}.
+  Lista vazia se não houver.
 
 Regras:
 - Use só o que está escrito acima; não invente nomes, placares, canais nem palpites.

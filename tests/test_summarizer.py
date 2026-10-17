@@ -328,3 +328,22 @@ def test_summary_prompt_keeps_each_article_to_4000_chars() -> None:
 
     summary_prompt = llm.prompts[1]
     assert "início" in summary_prompt and "FIM-DO-TEXTO" not in summary_prompt
+
+
+def test_preview_reads_up_to_twelve_articles_and_accepts_pundit_polls() -> None:
+    from flanews.models import NextMatch
+    from flanews.summarizer.pipeline import PreviewResponse, write_preview
+
+    articles = [make_article(i, f"Texto {i}") for i in range(1, 14)]
+    bahia = NextMatch(
+        opponent="Bahia",
+        competition="Brasileirão",
+        date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        is_home=False,
+    )
+    llm = FakeLLMClient(lambda prompt, schema: PreviewResponse())
+
+    write_preview(articles, bahia, llm)
+
+    assert "Texto 12" in llm.prompts[0] and "Texto 13" not in llm.prompts[0]
+    assert "enquete" in llm.prompts[0]
