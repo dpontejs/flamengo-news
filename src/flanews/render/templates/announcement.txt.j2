@@ -1,0 +1,16 @@
+{{ a.subject }}
+
+{% for block in a.blocks %}
+{% for line in block %}
+{{ plain(line) }}
+{% endfor %}
+
+{% endfor %}
+--
+Feito por um torcedor, sem ligação oficial com o clube.
+{% if subscribe_url %}
+Recebeu de alguém? Inscreva-se em {{ subscribe_url }}
+{% endif %}
+{% if unsubscribe_url %}
+Para se descadastrar: {{ unsubscribe_url }}
+{% endif %}

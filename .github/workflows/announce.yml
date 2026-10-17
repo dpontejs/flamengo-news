@@ -1,0 +1,64 @@
+name: Announcement
+
+# One-off e-mail to every subscriber (format changes, notices). Not an edition: the page and
+# the schedule are left as they are.
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Arquivo do aviso (announcements/*.md)"
+        type: string
+        required: true
+      dry_run:
+        description: "Só simular (não envia e-mail)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: newsletter
+  cancel-in-progress: false
+
+jobs:
+  send:
+    name: Send announcement
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Send
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NEWSLETTER_FROM: ${{ secrets.NEWSLETTER_FROM }}
+          NEWSLETTER_RECIPIENTS: ${{ secrets.NEWSLETTER_RECIPIENTS }}
+          SUBSCRIBERS_API_TOKEN: ${{ secrets.SUBSCRIBERS_API_TOKEN }}
+          PUBLIC_URL: ${{ vars.PUBLIC_URL || 'https://urubunews.diegoponte.dev' }}
+          DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+          FILE: ${{ inputs.file }}
+        run: |
+          echo "DRY_RUN=$DRY_RUN file=$FILE"
+          uv run python -m flanews announce "$FILE"
+
+      - name: Upload rendered announcement
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: announcement-${{ github.run_id }}
+          path: out/
+          if-no-files-found: ignore
+          retention-days: 30
