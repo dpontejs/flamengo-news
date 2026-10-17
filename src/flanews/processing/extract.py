@@ -1,3 +1,4 @@
+import html as html_lib
 import logging
 import re
 import threading
@@ -47,7 +48,7 @@ def _extract_og_image(html: str) -> str | None:
         match = pattern.search(html)
         if not match:
             continue
-        url = match.group(1).strip()
+        url = html_lib.unescape(match.group(1).strip())  # "&amp;" in the meta tag is a "&"
         host = urlsplit(url).hostname or ""
         if url.startswith("https://") and not host.endswith(BLOCKED_IMAGE_HOSTS):
             return url
