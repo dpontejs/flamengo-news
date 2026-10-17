@@ -1,6 +1,7 @@
 import logging
 from collections import Counter
 from collections.abc import Callable
+from datetime import timedelta
 from typing import Protocol
 
 import httpx
@@ -80,6 +81,27 @@ def collect_articles(
     return sorted(result, key=lambda a: a.published_at, reverse=True)
 
 
+MATCH_SEARCH_DAYS = 3  # pre-game pieces (tips, line-ups) appear up to two days ahead
+MATCH_QUERIES = ("palpite", "escalação")
+
+
+def collect_match_articles(
+    edition: Edition, match: NextMatch, settings: Settings | None = None
+) -> list[Article]:
+    """Google News searches for this match's tips and line-ups, from three days before the send."""
+    from flanews.collectors.google_news import GoogleNewsCollector, google_news_url
+
+    home, away = ("Flamengo", match.opponent) if match.is_home else (match.opponent, "Flamengo")
+    window = edition.model_copy(
+        update={"start": edition.end - timedelta(days=MATCH_SEARCH_DAYS), "end": edition.end}
+    )
+    collectors = [
+        GoogleNewsCollector(rss_url=google_news_url(f'"{home} x {away}" {query}'))
+        for query in MATCH_QUERIES
+    ]
+    return collect_articles(window, settings, collectors=collectors)
+
+
 def collect_candidates(
     edition: Edition, settings: Settings | None = None
 ) -> tuple[list[Article], list[Article]]:
@@ -119,6 +141,7 @@ def build_newsletter(
     extract: Callable[[list[Article]], list[Article]] | None = None,
     report: RunReport | None = None,
     published_topics: list[str] | None = None,
+    match_collect: Callable[[Edition, NextMatch, Settings], list[Article]] | None = None,
 ) -> Newsletter:
     """Collect news and stats for the edition and summarize them into a Newsletter.
 
@@ -180,9 +203,10 @@ def build_newsletter(
             logger.error("Match analysis failed, keeping the numbers only: %s", e)
 
     notes = PreviewResponse()
-    if pre_game and next_match is not None and llm is not None and articles:
+    if pre_game and next_match is not None and llm is not None:
+        match_articles = (match_collect or collect_match_articles)(edition, next_match, settings)
         try:
-            notes = write_preview(articles, next_match, llm)
+            notes = write_preview([*match_articles, *articles], next_match, llm)
         except LLMError as e:
             logger.error("Line-ups and tips failed, sending the preview without them: %s", e)
 

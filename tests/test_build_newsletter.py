@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from fakes import FakeLLMClient
@@ -373,6 +373,7 @@ def build_kind(kind: str, llm: FakeLLMClient, stats: FakeStats, used: list) -> N
         stats_client=stats,
         llm=llm,
         candidates=candidates,
+        match_collect=lambda edition, match, settings: [],
     )
 
 
@@ -444,3 +445,50 @@ def test_pre_game_with_only_the_preview_is_not_empty() -> None:
 
     assert not pipeline.is_empty(newsletter)
     assert pipeline.is_empty(Newsletter(edition=edition("news"), intro=""))
+
+
+TIP = Article(
+    url="https://ge.globo.com/palpite",
+    title="Palpites para Bahia x Flamengo",
+    source="google_news:ge",
+    published_at=datetime(2026, 10, 16, 20, tzinfo=TZ),
+    content="Comentarista: Flamengo 2 x 1. " + "x" * 3000 + " Bahia: Marcos Felipe; Gilberto...",
+)
+
+
+def test_pre_game_preview_reads_match_articles_first_and_whole() -> None:
+    llm = match_llm()
+
+    pipeline.build_newsletter(
+        edition("pre"),
+        SETTINGS,
+        collect=lambda edition, settings: [ARTICLE],
+        stats_client=FakeStats(),
+        llm=llm,
+        candidates=lambda edition, settings: ([], []),
+        match_collect=lambda edition, match, settings: [TIP],
+    )
+
+    preview = llm.prompts[-1]
+    assert preview.index("Palpites para Bahia x Flamengo") < preview.index("O Flamengo venceu.")
+    assert "Bahia: Marcos Felipe" in preview  # the second line-up sits far into the text
+
+
+def test_collect_match_articles_searches_the_match_in_the_last_three_days(monkeypatch) -> None:
+    seen = {}
+
+    def fake_collect(edition, settings, collectors):
+        seen["window"] = (edition.start, edition.end)
+        seen["urls"] = [c.rss_url for c in collectors]
+        return [TIP]
+
+    monkeypatch.setattr(pipeline, "collect_articles", fake_collect)
+    away = NEXT.model_copy(update={"opponent": "Bahia", "is_home": False})
+
+    articles = pipeline.collect_match_articles(edition("pre"), away, SETTINGS)
+
+    assert articles == [TIP]
+    end = edition("pre").end
+    assert seen["window"] == (end - timedelta(days=3), end)
+    assert any("Bahia+x+Flamengo%22+palpite" in u for u in seen["urls"])
+    assert any("Bahia+x+Flamengo%22+escala%C3%A7%C3%A3o" in u for u in seen["urls"])

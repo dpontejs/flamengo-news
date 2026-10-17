@@ -11,7 +11,8 @@ from flanews.summarizer.client import LLMClient, LLMError
 logger = logging.getLogger(__name__)
 
 MAX_TOPICS = 8
-MAX_PREVIEW_CHARS = 1500  # per article in the pre-game call
+MAX_PREVIEW_CHARS = 6000  # per article: line-ups often sit at the end of the piece
+MAX_PREVIEW_ARTICLES = 8
 MAX_ARTICLES_PER_TOPIC = 5
 LEARN_MORE_PICKS = 3
 BRAZIL_PICKS = 5
@@ -208,11 +209,15 @@ def write_intro(
 
 
 def write_preview(articles: list[Article], match: NextMatch, llm: LLMClient) -> PreviewResponse:
-    """Probable line-ups and the press's predictions, read from the pre-game articles' text."""
+    """Probable line-ups and the press's predictions, read from the pre-game articles' text.
+
+    Articles come in priority order (match searches first); repeated URLs are dropped.
+    """
+    unique = list({a.url: a for a in reversed(articles) if a.content}.values())[::-1]
     prompt = render_prompt(
         "preview",
         match=match,
-        articles=[a for a in articles if a.content],
+        articles=unique[:MAX_PREVIEW_ARTICLES],
         max_chars=MAX_PREVIEW_CHARS,
     )
     response = llm.generate_json(prompt, PreviewResponse)
