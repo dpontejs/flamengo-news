@@ -31,8 +31,8 @@ sem jogo, então a agenda é recalculada a partir da ESPN, sem dias fixos. Todos
   vai para as 08:00 do dia mais próximo. Sem jogo conhecido nos próximos 14 dias: uma por semana,
   segunda às 08:00; quando um jogo entra no horizonte, vale a regra do intervalo. *(decisão minha)*
 - **Âncora no que já saiu** *(decisão minha)*: o intervalo e a janela de notícias partem do **último
-  envio real** (`editions.published_at`, lido pelo `due` direto no SQLite do container; no Actions, por
-  `GET /api/latest-edition`, que passa a devolver `published_at`). Remarcações só movem slots futuros.
+  envio real** (`GET /api/latest-edition`, que passa a devolver `published_at`; usado pelo `due` e
+  pelo `run`). Remarcações só movem slots futuros.
 - Sem pós-jogo (adiado), o intervalo parte do último envio real; jogo com horário "a definir" conta
   como próximo jogo, com o pré-jogo previsto às 08:00 do dia dele. *(decisão minha)*
 - **Janela de notícias** de cada edição: do último envio real até o envio dela.
@@ -45,7 +45,8 @@ sem jogo, então a agenda é recalculada a partir da ESPN, sem dias fixos. Todos
 - **Pós-jogo:** a edição atual sem "Saiba mais" e "Brasil afora".
 - **Notícias:** tópicos, "Saiba mais", "Brasil afora", próximo jogo e tabela.
 - Assunto: `Urubu News — <Pré-jogo|Pós-jogo|Notícias> — dd/mm/aaaa: <manchete>`; continua com no máximo
-  4 chamadas ao LLM (escalações e palpites entram na chamada de agrupamento do pré-jogo).
+  4 chamadas ao LLM (o pré-jogo troca a chamada de análise por uma de escalações e palpites, que lê o
+  texto das matérias de pré-jogo).
 
 ## Contratos
 
