@@ -399,7 +399,12 @@ def test_preview_keeps_the_round_tips_ahead_of_other_games() -> None:
     )
     llm = FakeLLMClient(lambda prompt, schema: PreviewResponse())
 
-    write_preview([*noise, round_tips, lineup], bahia, llm)
+    tv = make_article(52, "Bahia x Flamengo: Premiere").model_copy(
+        update={"title": "Brasileirão 2026: veja onde assistir ao vivo aos jogos da 31ª rodada"}
+    )
 
+    write_preview([*noise, round_tips, lineup, tv], bahia, llm)
+
+    assert "Bahia x Flamengo: Premiere" in llm.prompts[0]
     assert "três apostam no Flamengo" in llm.prompts[0]
     assert "Flamengo: Rossi; Varela" in llm.prompts[0]
