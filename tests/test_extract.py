@@ -3,6 +3,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import httpx
+import pytest
 import respx
 
 from flanews.models import Article
@@ -60,6 +61,25 @@ def test_extract_content_fills_text_and_published_at() -> None:
 def test_extract_content_ignores_non_https_image() -> None:
     html = (
         '<html><head><meta property="og:image" content="http://insecure.com/pic.jpg">'
+        "</head><body><article><p>O Flamengo treinou forte.</p></article></body></html>"
+    )
+    respx.get(ARTICLE_URL).mock(return_value=httpx.Response(200, text=html))
+    with httpx.Client() as client:
+        result = extract_content(make_article(), client, no_wait_limiter())
+    assert result.image_url is None
+
+
+@pytest.mark.parametrize(
+    "image",
+    [
+        "https://scontent.cdninstagram.com/v/t51/1_n.jpg?stp=x",
+        "https://scontent-gru2-1.xx.fbcdn.net/v/t39/2_n.jpg",
+    ],
+)
+@respx.mock
+def test_extract_content_ignores_images_that_block_hotlinking(image) -> None:
+    html = (
+        f'<html><head><meta property="og:image" content="{image}">'
         "</head><body><article><p>O Flamengo treinou forte.</p></article></body></html>"
     )
     respx.get(ARTICLE_URL).mock(return_value=httpx.Response(200, text=html))

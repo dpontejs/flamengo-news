@@ -38,13 +38,18 @@ IMAGE_PATTERNS = (
 )
 
 
+# Hosts whose image links answer 403 outside their own site (signed, anti-hotlinking).
+BLOCKED_IMAGE_HOSTS = ("cdninstagram.com", "fbcdn.net")
+
+
 def _extract_og_image(html: str) -> str | None:
     for pattern in IMAGE_PATTERNS:
         match = pattern.search(html)
         if not match:
             continue
         url = match.group(1).strip()
-        if url.startswith("https://"):
+        host = urlsplit(url).hostname or ""
+        if url.startswith("https://") and not host.endswith(BLOCKED_IMAGE_HOSTS):
             return url
     return None
 
