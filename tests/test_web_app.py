@@ -10,6 +10,7 @@ from flanews.web.app import create_app
 from flanews.web.mailer import MailError
 from flanews.web.store import SubscriberStore
 from flanews.web.tokens import make_token, read_token
+from flanews.web.welcome import WELCOME_TITLE
 
 NOW = datetime(2026, 10, 15, 12, 0, tzinfo=UTC)
 SECRET = "test-secret"
@@ -179,6 +180,8 @@ def test_confirm_activates_and_is_idempotent(client, store, mailer) -> None:
 
     assert first.status_code == second.status_code == 200
     assert "Inscrição confirmada" in first.text
+    assert "antes e depois de cada jogo" in first.text
+    assert "segunda ou na sexta" not in first.text
     assert store.active() == ["ana@example.com"]
 
 
@@ -355,7 +358,8 @@ def test_first_confirmation_sends_the_latest_edition(client, mailer) -> None:
     [(email, subject, html, text, unsubscribe_url)] = mailer.editions
     assert email == "ana@example.com"
     assert subject == "Boas-vindas! Flamengo News — Edição de Segunda"
-    assert (html, text) == (EDITION["html"], EDITION["text"])
+    assert html == EDITION["html"]  # no header stripe in this fixture: no box
+    assert text.startswith(WELCOME_TITLE) and text.endswith(EDITION["text"])
     token = token_from(unsubscribe_url)
     assert unsubscribe_url.startswith("https://news.test/unsubscribe?token=")
     assert read_token(SECRET, "unsubscribe", token, NOW) == "ana@example.com"

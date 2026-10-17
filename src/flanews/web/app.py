@@ -25,6 +25,7 @@ from flanews.send.resend_sender import UNSUBSCRIBE_PLACEHOLDER
 from flanews.web.mailer import Mailer, MailError, mailer_from_settings
 from flanews.web.store import RequestResult, SubscriberStore, normalize
 from flanews.web.tokens import make_token, read_token
+from flanews.web.welcome import add_welcome
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +177,7 @@ def create_app(
         # Only the first click welcomes: reopening the link must not resend the edition.
         first_time = before is not None and before.status == "pending"
         welcomed = first_time and send_latest_edition(email)
-        text = "Pronto: a próxima edição chega na segunda ou na sexta, às 8h."
+        text = "Pronto: você vai receber a Urubu News antes e depois de cada jogo do Flamengo."
         if welcomed:
             text += " Mandamos a última edição para o seu e-mail para você já ir lendo."
         return message(request, "Inscrição confirmada!", text + " Saudações rubro-negras!")
@@ -186,11 +187,12 @@ def create_app(
         if edition is None:
             return False
         try:
+            html, text = add_welcome(edition.html, edition.text)
             mailer.send_edition(
                 email,
                 WELCOME_PREFIX + edition.subject,
-                edition.html,
-                edition.text,
+                html,
+                text,
                 link("/unsubscribe", "unsubscribe", email),
             )
         except MailError as e:
