@@ -54,10 +54,12 @@ sem jogo, então a agenda é recalculada a partir da ESPN, sem dias fixos. Todos
 # flanews.schedule (puro, sem rede)
 class Slot(BaseModel):
     kind: Literal["pre", "post", "news"]
-    send_at: datetime          # aware, America/Sao_Paulo
-    window_start: datetime     # janela de notícias
-    match_id: str | None       # evento da ESPN (pre/post)
-    label: str                 # "Pré-jogo — 18/10/2026"; chave de deduplicação
+    send_at: datetime  # aware, America/Sao_Paulo
+    window_start: datetime  # janela de notícias
+    match_id: str | None  # evento da ESPN (pre/post)
+    label: str  # "Pré-jogo — 18/10/2026"; chave de deduplicação
+
+
 def plan(fixtures: list[Fixture], now: datetime) -> list[Slot]: ...
 def due(slots: list[Slot], now: datetime, grace: timedelta = timedelta(hours=3)) -> Slot | None: ...
 ```
