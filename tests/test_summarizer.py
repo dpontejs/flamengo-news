@@ -373,3 +373,33 @@ def test_preview_puts_articles_about_this_match_first() -> None:
     write_preview([*other_games, ours], bahia, llm)
 
     assert "Bahia: Ronaldo; Gilberto" in llm.prompts[0]
+
+
+def test_preview_keeps_the_round_tips_ahead_of_other_games() -> None:
+    from flanews.models import NextMatch
+    from flanews.summarizer.pipeline import PreviewResponse, write_preview
+
+    noise = [
+        make_article(i, f"Outro {i}").model_copy(
+            update={"title": f"Mirassol x Internacional: onde assistir {i}"}
+        )
+        for i in range(1, 15)
+    ]
+    round_tips = make_article(50, "Bahia x Flamengo: três apostam no Flamengo").model_copy(
+        update={"title": "Palpite ge 2026: veja as apostas de apresentadores e comentaristas"}
+    )
+    lineup = make_article(51, "Flamengo: Rossi; Varela").model_copy(
+        update={"title": "Escalação do Flamengo: Jorginho volta ao time"}
+    )
+    bahia = NextMatch(
+        opponent="Bahia",
+        competition="Brasileirão",
+        date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        is_home=False,
+    )
+    llm = FakeLLMClient(lambda prompt, schema: PreviewResponse())
+
+    write_preview([*noise, round_tips, lineup], bahia, llm)
+
+    assert "três apostam no Flamengo" in llm.prompts[0]
+    assert "Flamengo: Rossi; Varela" in llm.prompts[0]

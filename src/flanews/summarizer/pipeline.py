@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 MAX_TOPICS = 8
 MAX_PREVIEW_CHARS = 6000  # per article: line-ups often sit at the end of the piece
 MAX_PREVIEW_ARTICLES = 12
+STANDARD_PREVIEW_TITLES = ("palpite ge", "escalação do flamengo")
 MAX_ARTICLES_PER_TOPIC = 5
 LEARN_MORE_PICKS = 3
 BRAZIL_PICKS = 5
@@ -249,9 +250,16 @@ def write_preview(
     home, away = ("Flamengo", match.opponent) if match.is_home else (match.opponent, "Flamengo")
     match_name = f"{home} x {away}"
     unique = list({a.url: a for a in reversed(articles) if a.content}.values())[::-1]
-    # Broad searches also bring other games' previews: pieces naming both teams go first.
-    about_match = [a for a in unique if match.opponent.lower() in a.title.lower()]
-    unique = [*about_match, *(a for a in unique if a not in about_match)]
+
+    # Broad searches also bring other games' previews: this match first, then the standard
+    # pieces that cover it without naming the opponent (round tips, Flamengo's line-up), the rest.
+    def priority(article: Article) -> int:
+        title = article.title.lower()
+        if match.opponent.lower() in title:
+            return 0
+        return 1 if any(key in title for key in STANDARD_PREVIEW_TITLES) else 2
+
+    unique.sort(key=priority)  # stable: keeps the search order inside each group
     excerpts = [
         (a, _match_excerpt(a.content or "", match_name, MAX_PREVIEW_CHARS))
         for a in unique[:MAX_PREVIEW_ARTICLES]
