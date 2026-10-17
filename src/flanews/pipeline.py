@@ -99,6 +99,8 @@ def collect_match_articles(
         f"{home} {away} palpite",
         f'"{home} x {away}" escalação',
         f'"{home} x {away}" onde assistir',
+        f'"{home} x {away}" "prováveis escalações"',
+        '"Escalação do Flamengo"',  # ge's standard piece before every match
     ]
     if match.competition == "Brasileirão":
         queries.append(ROUND_TIPS_QUERY)

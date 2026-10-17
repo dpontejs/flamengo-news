@@ -494,6 +494,11 @@ def test_collect_match_articles_searches_the_match_in_the_last_three_days(monkey
     assert any("q=Bahia+Flamengo+palpite&" in u for u in seen["urls"])
     assert any("Bahia+x+Flamengo%22+escala%C3%A7%C3%A3o" in u for u in seen["urls"])
     assert any("Bahia+x+Flamengo%22+onde+assistir" in u for u in seen["urls"])
+    # Line-up pieces that load from datacenter IPs (ge's standard one, regional portals).
+    assert any("q=%22Escala%C3%A7%C3%A3o+do+Flamengo%22&" in u for u in seen["urls"])
+    assert any(
+        "Bahia+x+Flamengo%22+%22prov%C3%A1veis+escala%C3%A7%C3%B5es%22" in u for u in seen["urls"]
+    )
     assert not any("Palpite+ge" in u for u in seen["urls"])  # NEXT is a Libertadores match
 
 
