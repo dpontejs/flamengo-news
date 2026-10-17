@@ -256,6 +256,7 @@ def write_preview(
         (a, _match_excerpt(a.content or "", match_name, MAX_PREVIEW_CHARS))
         for a in unique[:MAX_PREVIEW_ARTICLES]
     ]
+    logger.info("Pre-game reads %d articles: %s", len(excerpts), [a.title for a, _ in excerpts])
     prompt = render_prompt(
         "preview", match=match, match_name=match_name, excerpts=excerpts, preview=preview
     )
