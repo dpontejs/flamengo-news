@@ -16,9 +16,10 @@ from flanews.edition import resolve_edition, resolve_match_edition
 from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
-from flanews.schedule import LABELS, TZ, Fixture, plan
+from flanews.schedule import LABELS, TZ, Fixture, label_of, plan
 from flanews.schedule import due as due_slot
 from flanews.send.recipients import (
+    LatestEdition,
     latest_edition,
     publish_latest_edition,
     resolve_recipients,
@@ -181,7 +182,11 @@ def due() -> None:
     except StatsUnavailable as e:
         logger.error("Calendar unavailable, nothing is due: %s", e)
         return
-    slot = due_slot(plan(fixtures, now, _last_sent(settings)), now)
+    latest = _latest(settings)
+    sent_at, sent_label = (
+        (latest.published_at, label_of(latest.subject)) if latest else (None, None)
+    )
+    slot = due_slot(plan(fixtures, now, sent_at, sent_label), now)
     if slot is not None:
         typer.echo(f"{slot.kind}\t{slot.send_at:%Y-%m-%d}\t{slot.label}")
 
@@ -335,7 +340,9 @@ def _resolve(edition: str, date: datetime | None) -> Edition:
         except StatsUnavailable as e:
             typer.echo(f"Agenda da ESPN indisponível: {e}")
             raise typer.Exit(code=1) from e
-        resolved = resolve_match_edition(edition, day, fixtures, _last_sent(settings))  # type: ignore[arg-type]
+        latest = _latest(settings)
+        last_sent = latest.published_at if latest else None
+        resolved = resolve_match_edition(edition, day, fixtures, last_sent)  # type: ignore[arg-type]
         if resolved is None:
             typer.echo(f"Nenhuma edição {LABELS[edition]} prevista em {day:%d/%m/%Y}.")
             raise typer.Exit(code=1)
@@ -353,16 +360,15 @@ def _fixtures(settings, now: datetime) -> list[Fixture]:
     return client.get_fixtures(now)
 
 
-def _last_sent(settings) -> datetime | None:
-    """When the page's latest edition went out; unknown (no token, page down) is None."""
+def _latest(settings) -> LatestEdition | None:
+    """The page's latest edition (subject, send time); unknown (no token, page down) is None."""
     if not settings.SUBSCRIBERS_API_TOKEN:
         return None
     try:
-        edition = latest_edition(settings)
+        return latest_edition(settings)
     except (httpx.HTTPError, ValueError) as e:
         logger.warning("Could not read the latest edition, planning without it: %s", e)
         return None
-    return edition.published_at if edition else None
 
 
 if __name__ == "__main__":

@@ -454,7 +454,7 @@ def test_post_without_finished_match_sends_nothing(env, monkeypatch) -> None:
         away="Flamengo",
     )
     monkeypatch.setattr(cli, "_fixtures", lambda settings, now: [game])
-    monkeypatch.setattr(cli, "_last_sent", lambda settings: None)
+    monkeypatch.setattr(cli, "_latest", lambda settings: None)
     resend = respx.post(RESEND_URL)
 
     result = CliRunner().invoke(cli.app, ["run", "--edition", "post", "--date", "2026-10-19"])

@@ -4,6 +4,7 @@ Pure functions (no network): the ESPN client supplies the fixtures and the subsc
 supplies when the last edition was really sent. See docs/features/edicoes-por-jogo.md.
 """
 
+import re
 from datetime import date, datetime, time, timedelta
 from typing import Literal
 from zoneinfo import ZoneInfo
@@ -95,20 +96,49 @@ def _mondays(start: datetime, until: datetime) -> list[datetime]:
     return days
 
 
-def plan(fixtures: list[Fixture], now: datetime, last_sent: datetime | None) -> list[Slot]:
-    """Every slot after the last real send, in order; `window_start` is the previous send."""
+_LABEL_PATTERN = re.compile(rf"(?:{'|'.join(LABELS.values())}) — \d{{2}}/\d{{2}}/\d{{4}}")
+
+
+def label_of(subject: str) -> str | None:
+    """The slot label inside an edition subject ("… — Pré-jogo — 18/10/2026: …")."""
+    match = _LABEL_PATTERN.search(subject)
+    return match.group(0) if match else None
+
+
+def _label(kind: Kind, send_at: datetime) -> str:
+    return f"{LABELS[kind]} — {send_at.astimezone(TZ):%d/%m/%Y}"
+
+
+def plan(
+    fixtures: list[Fixture],
+    now: datetime,
+    last_sent: datetime | None,
+    sent_label: str | None = None,
+) -> list[Slot]:
+    """Every slot after the last real send, in order; `window_start` is the previous send.
+
+    `sent_label` is the last edition's label: a reschedule that moves that slot later
+    does not make it due again.
+    """
     anchor = last_sent or now - DEFAULT_WINDOW
     match_slots: list[tuple[Kind, datetime, Fixture]] = []
+    previous_post: datetime | None = None
     for match in sorted(fixtures, key=lambda f: f.kickoff):
         if match.state == "postponed":
             continue
-        match_slots += [("pre", _pre_game(match), match), ("post", _post_game(match), match)]
+        pre, post = _pre_game(match), _post_game(match)
+        # Games on consecutive days: the post-game (with the next match card) wins.
+        if previous_post is None or pre > previous_post:
+            match_slots.append(("pre", pre, match))
+        match_slots.append(("post", post, match))
+        previous_post = post
+    match_slots.sort(key=lambda slot: slot[1])
 
     timeline: list[tuple[Kind, datetime, Fixture | None]] = []
     previous = anchor
     for kind, send_at, match in match_slots:
-        if send_at <= anchor:
-            previous = max(previous, send_at)
+        if send_at <= anchor or _label(kind, send_at) == sent_label:
+            previous = max(previous, min(send_at, anchor))
             continue
         if kind == "pre":
             if send_at - previous <= HORIZON:
@@ -131,7 +161,7 @@ def plan(fixtures: list[Fixture], now: datetime, last_sent: datetime | None) -> 
                 window_start=start,
                 match_id=match.match_id if match else None,
                 league=match.league if match else None,
-                label=f"{LABELS[kind]} — {send_at.astimezone(TZ):%d/%m/%Y}",
+                label=_label(kind, send_at),
             )
         )
         start = send_at

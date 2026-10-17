@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from flanews.schedule import Fixture, Slot, due, plan
+from flanews.schedule import Fixture, Slot, due, label_of, plan
 
 TZ = ZoneInfo("America/Sao_Paulo")
 UTC = ZoneInfo("UTC")
@@ -180,3 +180,44 @@ def test_weekly_news_after_the_last_known_match() -> None:
     news = [d for k, d in summary(plan(games, NOW, LAST_SENT)) if k == "news"]
 
     assert news == ["26/10 08:00", "02/11 08:00", "09/11 08:00"]
+
+
+def test_rescheduled_kickoff_does_not_resend_the_pre_game() -> None:
+    # 18/11 had no time: the pre-game went out at 08:04. ESPN then confirms 20:00 (pre-game 14:00).
+    confirmed = fixture(datetime(2026, 11, 18, 23, 0, tzinfo=UTC), "athletico")
+    sent_at = at("18/11/2026", "08:04")
+
+    slots = plan([confirmed], at("18/11/2026", "14:05"), sent_at, "Pré-jogo — 18/11/2026")
+
+    assert due(slots, at("18/11/2026", "14:05")) is None
+    assert slots[0].kind == "post" and slots[0].window_start == sent_at
+
+
+def test_back_to_back_days_keep_the_post_game_and_drop_the_next_pre_game() -> None:
+    games = [fixture(at("24/10/2026", "18:30"), "a"), fixture(at("25/10/2026", "13:00"), "b")]
+
+    slots = until_last_match(plan(games, at("23/10/2026"), at("23/10/2026")))
+
+    assert summary(slots) == [
+        ("pre", "24/10 12:30"),
+        ("post", "25/10 08:00"),
+        ("post", "26/10 08:00"),
+    ]
+    assert [s.match_id for s in slots] == ["a", "a", "b"]
+
+
+def test_morning_kickoff_the_day_after_a_game_also_drops_its_pre_game() -> None:
+    games = [fixture(at("24/10/2026", "18:30"), "a"), fixture(at("25/10/2026", "10:00"), "b")]
+
+    slots = until_last_match(plan(games, at("23/10/2026"), at("23/10/2026")))
+
+    assert [(s.kind, s.match_id) for s in slots] == [("pre", "a"), ("post", "a"), ("post", "b")]
+    assert all(b.window_start < b.send_at for b in slots)
+
+
+def test_label_of_reads_the_label_from_a_subject() -> None:
+    assert (
+        label_of("Novidades! Urubu News — Pré-jogo — 18/10/2026: Bahia") == "Pré-jogo — 18/10/2026"
+    )
+    assert label_of("Urubu News — Notícias — 21/10/2026") == "Notícias — 21/10/2026"
+    assert label_of("Urubu News — Edição de Sexta — 16/10/2026: x") is None
