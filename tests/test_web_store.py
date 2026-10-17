@@ -94,6 +94,7 @@ def test_publishing_an_edition_replaces_the_previous_one(tmp_path) -> None:
     edition = SubscriberStore(tmp_path / "subscribers.db").latest_edition()
 
     assert (edition.subject, edition.html, edition.text) == ("Nova", "<p>n</p>", "n")
+    assert edition.published_at == NOW + timedelta(days=4)
 
 
 def test_confirmations_sent_since_counts_recent_requests(store: SubscriberStore) -> None:

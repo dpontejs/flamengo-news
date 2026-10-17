@@ -407,3 +407,110 @@ def test_render_without_note_has_no_box() -> None:
     html, text = render(full_newsletter())
 
     assert "Novidades" not in html and "Novidades" not in text
+
+
+def pre_game(
+    lineups: str = "", tips: list[str] | None = None, outlook: str = "", broadcast: str = ""
+) -> Newsletter:
+    from flanews.models import Edition, FormResult, MatchPreview, NextMatch
+
+    def result(r: str, score: str, opponent: str) -> FormResult:
+        return FormResult(
+            result=r,
+            opponent=opponent,
+            score=score,
+            competition="Brasileiro Serie A",
+            date=datetime(2026, 4, 19, tzinfo=TZ),
+        )
+
+    return Newsletter(
+        edition=Edition(
+            kind="pre",
+            start=datetime(2026, 10, 16, 19, tzinfo=TZ),
+            end=datetime(2026, 10, 18, 12, 30, tzinfo=TZ),
+            label="Pré-jogo — 18/10/2026",
+        ),
+        headline="Flamengo visita o Bahia",
+        intro="Jorginho volta. Jogo na Fonte Nova.",
+        next_match=NextMatch(
+            opponent="Bahia",
+            competition="Brasileirão",
+            date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+            venue="Arena Fonte Nova",
+            is_home=False,
+        ),
+        preview=MatchPreview(
+            opponent="Bahia",
+            flamengo_form=[result("E", "0-0", "Estudiantes de La Plata")],
+            opponent_form=[result("V", "1-0", "Mirassol")],
+            head_to_head=[result("V", "2-0", "Bahia"), result("D", "0-1", "Bahia")],
+        ),
+        lineups=lineups,
+        tips=tips or [],
+        outlook=outlook,
+        broadcast=broadcast,
+        topics=[
+            Topic(
+                title="Jorginho de volta",
+                summary="O volante volta ao time.",
+                importance=4,
+                articles=[article("https://ge.globo.com/9", "ge")],
+            )
+        ],
+    )
+
+
+def test_pre_game_renders_form_head_to_head_lineups_and_tips() -> None:
+    newsletter = pre_game(lineups="Flamengo: Rossi; Varela", tips=["ge, Fulano: Flamengo 2 x 1"])
+
+    html, text = render(newsletter)
+
+    for output in (html, text):
+        order = [
+            output.index("O jogo"),
+            output.index("Momento dos times"),
+            output.index("Últimos confrontos"),
+            output.index("Prováveis escalações"),
+            output.index("Palpites"),
+            output.index("Jorginho de volta"),
+        ]
+        assert order == sorted(order)
+        assert "Arena Fonte Nova" in output
+        assert "Flamengo: Rossi; Varela" in output and "ge, Fulano: Flamengo 2 x 1" in output
+        assert "Estudiantes de La Plata" in output and "Mirassol" in output
+    assert "Próximo jogo" not in html  # the match is already at the top
+    assert "Bahia x Flamengo" in text
+    board = html[html.index("O jogo") : html.index("Últimos confrontos")]
+    assert board.index(">Bahia<") < board.index("18:30") < board.index(">Flamengo<")  # home left
+    assert "1 vitória do Flamengo, 0 empates e 1 do Bahia" in text
+
+
+def test_pre_game_hides_lineups_and_tips_when_absent() -> None:
+    html, text = render(pre_game())
+
+    for output in (html, text):
+        assert "Prováveis escalações" not in output and "Palpites" not in output
+        assert "Últimos confrontos" in output
+
+
+def test_pre_game_shows_outlook_first_and_where_to_watch_on_the_board() -> None:
+    newsletter = pre_game(
+        lineups="Flamengo: Rossi",
+        outlook="Duelo de líder contra time em alta.",
+        broadcast="Globo e Premiere",
+    )
+
+    html, text = render(newsletter)
+
+    for output in (html, text):
+        assert output.index("O que esperar") < output.index("Últimos confrontos")
+        assert "Duelo de líder contra time em alta." in output
+        assert "Onde assistir" in output and "Globo e Premiere" in output
+    assert html.index("Globo e Premiere") < html.index("Últimos confrontos")  # on the board
+
+
+def test_pre_game_hides_outlook_and_where_to_watch_when_absent() -> None:
+    html, text = render(pre_game())
+
+    for output in (html, text):
+        assert "O que esperar" not in output and "Onde assistir" not in output

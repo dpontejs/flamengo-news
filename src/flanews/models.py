@@ -113,6 +113,15 @@ class FormResult(BaseModel):
     date: datetime
 
 
+class MatchPreview(BaseModel):
+    """Pre-game numbers: both teams' last five and the last head-to-head games, newest first."""
+
+    opponent: str
+    flamengo_form: list[FormResult] = Field(default_factory=list)
+    opponent_form: list[FormResult] = Field(default_factory=list)
+    head_to_head: list[FormResult] = Field(default_factory=list)
+
+
 class PlayerRanking(BaseModel):
     """A Flamengo player's position in a league leaderboard."""
 
@@ -134,10 +143,12 @@ class TeamMoment(BaseModel):
 class Edition(BaseModel):
     """Newsletter edition temporal window and description."""
 
-    kind: Literal["monday", "friday", "auto"]
+    kind: Literal["monday", "friday", "auto", "pre", "post", "news"]
     start: datetime
     end: datetime
     label: str
+    match_id: str | None = None  # pre/post: the ESPN event
+    league: str | None = None
 
 
 class Newsletter(BaseModel):
@@ -154,3 +165,8 @@ class Newsletter(BaseModel):
     last_match: MatchStats | None = None
     next_match: NextMatch | None = None
     standings: list[StandingRow] = Field(default_factory=list)
+    preview: MatchPreview | None = None  # pre-game only
+    lineups: str = ""  # pre-game: probable line-ups, from the news
+    tips: list[str] = Field(default_factory=list)  # pre-game: the press's predictions
+    outlook: str = ""  # pre-game: "O que esperar"
+    broadcast: str = ""  # pre-game: where to watch

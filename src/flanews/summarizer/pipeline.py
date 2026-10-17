@@ -5,12 +5,22 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pydantic import BaseModel, Field
 
-from flanews.models import Article, Brief, MatchStats, TeamMoment, Topic
+from flanews.models import (
+    Article,
+    Brief,
+    MatchPreview,
+    MatchStats,
+    NextMatch,
+    TeamMoment,
+    Topic,
+)
 from flanews.summarizer.client import LLMClient, LLMError
 
 logger = logging.getLogger(__name__)
 
 MAX_TOPICS = 8
+MAX_PREVIEW_CHARS = 6000  # per article: line-ups often sit at the end of the piece
+MAX_PREVIEW_ARTICLES = 12
 MAX_ARTICLES_PER_TOPIC = 5
 LEARN_MORE_PICKS = 3
 BRAZIL_PICKS = 5
@@ -57,6 +67,13 @@ class IntroResponse(BaseModel):
     intro: str
 
 
+class PreviewResponse(BaseModel):
+    lineups: str = ""
+    tips: list[str] = Field(default_factory=list)
+    outlook: str = ""
+    broadcast: str = ""
+
+
 class AnalysisResponse(BaseModel):
     analysis: str
 
@@ -94,6 +111,9 @@ def group_articles(
     llm: LLMClient,
     learn_more: list[Article] | None = None,
     brazil: list[Article] | None = None,
+    max_topics: int = MAX_TOPICS,
+    published: list[str] | None = None,
+    focus: NextMatch | None = None,
 ) -> Selection:
     """Group articles into topics and pick candidates for the short sections (1 call).
 
@@ -107,7 +127,9 @@ def group_articles(
         articles=articles,
         learn_more=learn_more,
         brazil=brazil,
-        max_topics=MAX_TOPICS,
+        max_topics=max_topics,
+        published=published or [],
+        focus=focus,
         learn_more_picks=LEARN_MORE_PICKS,
         brazil_picks=BRAZIL_PICKS,
         start=min(dates).strftime("%d/%m/%Y"),
@@ -132,7 +154,7 @@ def group_articles(
         )
     topics.sort(key=lambda t: t.importance, reverse=True)
     return Selection(
-        topics=topics[:MAX_TOPICS],
+        topics=topics[:max_topics],
         learn_more=_pick(response.learn_more_ids, learn_more, LEARN_MORE_PICKS),
         brazil=_pick(response.brazil_ids, brazil, BRAZIL_PICKS),
     )
@@ -183,10 +205,64 @@ def summarize_selection(
 
 
 def write_intro(
-    topics: list[Topic], last_match: MatchStats | None, llm: LLMClient, label: str
+    topics: list[Topic],
+    last_match: MatchStats | None,
+    llm: LLMClient,
+    label: str,
+    next_match: NextMatch | None = None,
 ) -> IntroResponse:
-    prompt = render_prompt("intro", topics=topics, last_match=last_match, label=label)
+    """`next_match` is set for the pre-game edition: the opening presents that match."""
+    prompt = render_prompt(
+        "intro", topics=topics, last_match=last_match, label=label, next_match=next_match
+    )
     return llm.generate_json(prompt, IntroResponse)
+
+
+def _match_excerpt(content: str, match_name: str, max_chars: int) -> str:
+    """The part of a long text about this match (round-wide pieces list every game)."""
+    at = content.find(match_name)
+    if len(content) <= max_chars or at < max_chars // 2:
+        return content[:max_chars]
+    start = max(0, at - max_chars // 4)
+    return "…" + content[start : start + max_chars]
+
+
+def flamengo_first(lineups: str) -> str:
+    """Flamengo's line first, then the opponent's, then anything else (absences)."""
+    lines = [line.strip() for line in lineups.splitlines() if line.strip()]
+    ours = [line for line in lines if line.lower().startswith("flamengo")]
+    others = [line for line in lines if line not in ours]
+    teams = [line for line in others if not line.lower().startswith("desfalque")]
+    return "\n".join([*ours, *teams, *[line for line in others if line not in teams]])
+
+
+def write_preview(
+    articles: list[Article],
+    match: NextMatch,
+    llm: LLMClient,
+    preview: MatchPreview | None = None,
+) -> PreviewResponse:
+    """Outlook, where to watch, probable line-ups and the press's predictions for the match.
+
+    Articles come in priority order (match searches first); repeated URLs are dropped.
+    """
+    home, away = ("Flamengo", match.opponent) if match.is_home else (match.opponent, "Flamengo")
+    match_name = f"{home} x {away}"
+    unique = list({a.url: a for a in reversed(articles) if a.content}.values())[::-1]
+    excerpts = [
+        (a, _match_excerpt(a.content or "", match_name, MAX_PREVIEW_CHARS))
+        for a in unique[:MAX_PREVIEW_ARTICLES]
+    ]
+    prompt = render_prompt(
+        "preview", match=match, match_name=match_name, excerpts=excerpts, preview=preview
+    )
+    response = llm.generate_json(prompt, PreviewResponse)
+    return PreviewResponse(
+        lineups=flamengo_first(response.lineups),
+        tips=[t.strip() for t in response.tips if t.strip()],
+        outlook=response.outlook.strip(),
+        broadcast=response.broadcast.strip(),
+    )
 
 
 def write_analysis(match: MatchStats, moment: TeamMoment | None, llm: LLMClient) -> str:
@@ -209,6 +285,9 @@ def summarize_edition(
     learn_more: list[Article] | None = None,
     brazil: list[Article] | None = None,
     extract: Callable[[list[Article]], list[Article]] | None = None,
+    max_topics: int = MAX_TOPICS,
+    next_match: NextMatch | None = None,
+    published: list[str] | None = None,
 ) -> EditionSummary:
     """Group, pick short items, summarize everything and write the opening (3 LLM calls).
 
@@ -218,7 +297,9 @@ def summarize_edition(
     """
     selection = Selection()
     if articles or learn_more or brazil:
-        selection = group_articles(articles, llm, learn_more, brazil)
+        selection = group_articles(
+            articles, llm, learn_more, brazil, max_topics, published=published, focus=next_match
+        )
         picks = [*selection.learn_more, *selection.brazil]
         if picks and extract is not None:
             extracted = extract(picks)
@@ -236,12 +317,12 @@ def summarize_edition(
         except LLMError as e:
             logger.error("Summaries failed, keeping titles and sources: %s", e)
 
-    if not topics and last_match is None:
+    if not topics and last_match is None and next_match is None:
         return EditionSummary(learn_more=lm_briefs, around_brazil=br_briefs)
 
     sections = {"topics": topics, "learn_more": lm_briefs, "around_brazil": br_briefs}
     try:
-        intro = write_intro(topics, last_match, llm, label)
+        intro = write_intro(topics, last_match, llm, label, next_match)
     except LLMError as e:
         logger.error("Opening failed: %s", e)
         return EditionSummary(**sections)

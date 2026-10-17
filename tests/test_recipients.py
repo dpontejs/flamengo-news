@@ -8,7 +8,7 @@ from tenacity import wait_none
 from flanews.config import Settings
 from flanews.send.recipients import (
     Recipient,
-    latest_edition_subject,
+    latest_edition,
     publish_latest_edition,
     resolve_recipients,
 )
@@ -115,14 +115,16 @@ def test_publish_latest_edition_raises_on_error() -> None:
 
 
 @respx.mock
-def test_latest_edition_subject_reads_it_with_the_token() -> None:
+def test_latest_edition_reads_subject_and_send_time_with_the_token() -> None:
+    body = {"subject": "Urubu News — Edição de Sexta", "published_at": "2026-10-16T19:11:00-03:00"}
     route = respx.get("https://news.test/api/latest-edition").mock(
-        return_value=httpx.Response(200, json={"subject": "Urubu News — Edição de Sexta"})
+        return_value=httpx.Response(200, json=body)
     )
 
-    subject = latest_edition_subject(settings(), client=httpx.Client())
+    edition = latest_edition(settings(), client=httpx.Client())
 
-    assert subject == "Urubu News — Edição de Sexta"
+    assert edition.subject == "Urubu News — Edição de Sexta"
+    assert edition.published_at.isoformat() == "2026-10-16T19:11:00-03:00"
     assert route.calls.last.request.headers["Authorization"] == "Bearer api-token"
 
 
@@ -130,7 +132,7 @@ def test_latest_edition_subject_reads_it_with_the_token() -> None:
 def test_latest_edition_subject_is_none_when_nothing_was_published() -> None:
     respx.get("https://news.test/api/latest-edition").mock(return_value=httpx.Response(404))
 
-    assert latest_edition_subject(settings(), client=httpx.Client()) is None
+    assert latest_edition(settings(), client=httpx.Client()) is None
 
 
 @respx.mock
@@ -138,4 +140,17 @@ def test_latest_edition_subject_raises_on_error() -> None:
     respx.get("https://news.test/api/latest-edition").mock(return_value=httpx.Response(500))
 
     with pytest.raises(httpx.HTTPStatusError):
-        latest_edition_subject(settings(), client=httpx.Client())
+        latest_edition(settings(), client=httpx.Client())
+
+
+def test_latest_edition_topic_titles_come_from_the_news_section() -> None:
+    from flanews.send.recipients import LatestEdition
+
+    text = (
+        "URUBU NEWS\n\n== Notícias ==\n\n* Empate em La Plata\nResumo.\n  - ge: https://x\n\n"
+        "* Jorginho volta\nResumo.\n\n== Saiba mais ==\n\n* [Basquete] Título\n"
+    )
+    edition = LatestEdition(subject="s", published_at="2026-10-16T19:11:00-03:00", text=text)
+
+    assert edition.topic_titles == ["Empate em La Plata", "Jorginho volta"]
+    assert LatestEdition(subject="s", published_at="2026-10-16T19:11:00-03:00").topic_titles == []

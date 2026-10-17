@@ -1,7 +1,7 @@
 import logging
 import os
 import webbrowser
-from datetime import datetime
+from datetime import datetime, time
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -12,12 +12,15 @@ from rich.table import Table
 
 from flanews import __version__, pipeline
 from flanews.config import get_settings
-from flanews.edition import resolve_edition
+from flanews.edition import resolve_edition, resolve_match_edition
 from flanews.models import Edition, Newsletter
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
+from flanews.schedule import LABELS, TZ, Fixture, label_of, plan
+from flanews.schedule import due as due_slot
 from flanews.send.recipients import (
-    latest_edition_subject,
+    LatestEdition,
+    latest_edition,
     publish_latest_edition,
     resolve_recipients,
 )
@@ -27,7 +30,7 @@ from flanews.send.resend_sender import (
     SendError,
     build_subject,
 )
-from flanews.stats.espn import ESPNStatsClient
+from flanews.stats.espn import ESPNStatsClient, StatsUnavailable
 from flanews.stats.table import standings_window
 from flanews.summarizer.client import LLMError
 
@@ -35,7 +38,9 @@ logger = logging.getLogger("flanews.run")
 
 app = typer.Typer(help="Urubu News CLI", no_args_is_help=True)
 
-EditionOption = Annotated[Literal["monday", "friday", "auto"], typer.Option(help="Edition kind")]
+EditionOption = Annotated[
+    Literal["monday", "friday", "auto", "pre", "post", "news"], typer.Option(help="Edition kind")
+]
 NoteOption = Annotated[
     str | None, typer.Option(help='Announcement shown in a "Novidades" box (manual sends)')
 ]
@@ -149,7 +154,9 @@ def preview(
     _setup_logging()
     resolved = _resolve(edition, date)
     settings = get_settings()
-    newsletter = pipeline.build_newsletter(resolved, settings)
+    newsletter = pipeline.build_newsletter(
+        resolved, settings, published_topics=_published_topics(settings)
+    )
     html_path = out or Path("out") / f"preview-{resolved.end:%Y-%m-%d}.html"
     html_path.parent.mkdir(parents=True, exist_ok=True)
     html, text = render(
@@ -164,6 +171,26 @@ def preview(
     typer.echo(f"Preview saved to {html_path} and {html_path.with_suffix('.txt')}")
     if open_browser:
         webbrowser.open(html_path.resolve().as_uri())
+
+
+@app.command()
+def due() -> None:
+    """Print the edition due now as "kind<TAB>YYYY-MM-DD<TAB>label", or nothing."""
+    _setup_logging()
+    settings = get_settings()
+    now = _now()
+    try:
+        fixtures = _fixtures(settings, now)
+    except StatsUnavailable as e:
+        logger.error("Calendar unavailable, nothing is due: %s", e)
+        return
+    latest = _latest(settings)
+    sent_at, sent_label = (
+        (latest.published_at, label_of(latest.subject)) if latest else (None, None)
+    )
+    slot = due_slot(plan(fixtures, now, sent_at, sent_label), now)
+    if slot is not None:
+        typer.echo(f"{slot.kind}\t{slot.send_at:%Y-%m-%d}\t{slot.label}")
 
 
 @app.command()
@@ -195,8 +222,18 @@ def run(
 
     with ProblemCollector() as problems:
         try:
-            newsletter = pipeline.build_newsletter(resolved, settings, llm=llm, report=report)
+            newsletter = pipeline.build_newsletter(
+                resolved,
+                settings,
+                llm=llm,
+                report=report,
+                published_topics=_published_topics(settings),
+            )
             _fill_report(report, newsletter)
+            if resolved.kind == "post" and newsletter.last_match is None:
+                report.outcome = "não enviada: partida não encerrada"
+                typer.echo(f"{resolved.label}: partida não encerrada, nada a enviar.")
+                return
             if pipeline.is_empty(newsletter):
                 report.outcome = "nada para enviar (sem notícias e sem partida)"
                 typer.echo(f"Nada para enviar em {resolved.label}: sem notícias e sem partida.")
@@ -263,11 +300,11 @@ def _already_sent(settings, label: str) -> bool:
     if not settings.SUBSCRIBERS_API_TOKEN:
         return False
     try:
-        subject = latest_edition_subject(settings)
-    except (httpx.HTTPError, ValueError, KeyError) as e:
+        edition = latest_edition(settings)
+    except (httpx.HTTPError, ValueError) as e:
         logger.warning("Could not check whether the edition was already sent: %s", e)
         return False
-    return subject is not None and f"— {label}" in subject
+    return edition is not None and f"— {label}" in edition.subject
 
 
 def _logo(settings) -> str:
@@ -303,8 +340,49 @@ def _setup_logging() -> None:
 
 def _resolve(edition: str, date: datetime | None) -> Edition:
     settings = get_settings()
+    if edition in LABELS:
+        day = date.date() if date else _now().date()
+        now = datetime.combine(day, time(0, 0), tzinfo=TZ)
+        try:
+            fixtures = _fixtures(settings, now)
+        except StatsUnavailable as e:
+            typer.echo(f"Agenda da ESPN indisponível: {e}")
+            raise typer.Exit(code=1) from e
+        latest = _latest(settings)
+        last_sent = latest.published_at if latest else None
+        resolved = resolve_match_edition(edition, day, fixtures, last_sent)  # type: ignore[arg-type]
+        if resolved is None:
+            typer.echo(f"Nenhuma edição {LABELS[edition]} prevista em {day:%d/%m/%Y}.")
+            raise typer.Exit(code=1)
+        return resolved
     now = date.replace(hour=12) if date else None
     return resolve_edition(edition, now=now, tz_name=settings.TIMEZONE)  # type: ignore[arg-type]
+
+
+def _now() -> datetime:
+    return datetime.now(TZ)
+
+
+def _fixtures(settings, now: datetime) -> list[Fixture]:
+    client = ESPNStatsClient(team_id=settings.FLAMENGO_TEAM_ID, tz_name=settings.TIMEZONE)
+    return client.get_fixtures(now)
+
+
+def _published_topics(settings) -> list[str]:
+    """Topics of the edition already sent, so the model does not repeat them."""
+    latest = _latest(settings)
+    return latest.topic_titles if latest else []
+
+
+def _latest(settings) -> LatestEdition | None:
+    """The page's latest edition (subject, send time); unknown (no token, page down) is None."""
+    if not settings.SUBSCRIBERS_API_TOKEN:
+        return None
+    try:
+        return latest_edition(settings)
+    except (httpx.HTTPError, ValueError) as e:
+        logger.warning("Could not read the latest edition, planning without it: %s", e)
+        return None
 
 
 if __name__ == "__main__":

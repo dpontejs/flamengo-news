@@ -6,10 +6,11 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
 from premailer import Premailer
 
-from flanews.models import MatchEvent, Newsletter, StandingRow
+from flanews.models import MatchEvent, MatchPreview, Newsletter, StandingRow
 from flanews.stats.table import standings_window
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+FLAMENGO_LOGO = "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
 DEFAULT_LOGO_URL = "https://urubunews.diegoponte.dev/static/logo-email.png"
 WEEKDAYS = ("segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo")
 SOURCE_LABELS = {
@@ -67,6 +68,16 @@ def _stat_shares(values: tuple[str, str]) -> tuple[int, int]:
     return (home_pct, 100 - home_pct)
 
 
+def head_to_head_summary(preview: MatchPreview) -> str:
+    """ "2 vitórias do Flamengo, 1 empate e 2 do Bahia" over the listed head-to-head games."""
+    results = [f.result for f in preview.head_to_head]
+    wins, draws, losses = (results.count(r) for r in ("V", "E", "D"))
+    return (
+        f"{wins} {'vitória' if wins == 1 else 'vitórias'} do Flamengo, "
+        f"{draws} {'empate' if draws == 1 else 'empates'} e {losses} do {preview.opponent}"
+    )
+
+
 def _environment() -> Environment:
     env = Environment(
         loader=FileSystemLoader(TEMPLATES_DIR),
@@ -76,6 +87,7 @@ def _environment() -> Environment:
         lstrip_blocks=True,
     )
     env.filters.update(
+        h2h=head_to_head_summary,
         source=source_label,
         when=_when,
         minute=_minute,
@@ -99,6 +111,7 @@ def render(
     context = {
         "n": newsletter,
         "note": note,
+        "flamengo_logo": FLAMENGO_LOGO,
         "logo_url": logo_url,
         "standings": standings_window(newsletter.standings),
         "unsubscribe_url": unsubscribe_url,

@@ -6,6 +6,7 @@ is published back so new subscribers get it right after confirming.
 
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 from email.utils import parseaddr
 
 import httpx
@@ -121,8 +122,25 @@ def publish_latest_edition(
     response.raise_for_status()
 
 
-def latest_edition_subject(settings: Settings, client: httpx.Client | None = None) -> str | None:
-    """Subject of the last edition published to the page, None if none. Raises httpx.HTTPError."""
+class LatestEdition(BaseModel):
+    subject: str
+    published_at: datetime
+    text: str = ""
+
+    @property
+    def topic_titles(self) -> list[str]:
+        """The "* title" lines of the plain-text "Notícias" section."""
+        titles, in_news = [], False
+        for line in self.text.splitlines():
+            if line.startswith("== "):
+                in_news = line.strip() == "== Notícias =="
+            elif in_news and line.startswith("* "):
+                titles.append(line[2:].strip())
+        return titles
+
+
+def latest_edition(settings: Settings, client: httpx.Client | None = None) -> LatestEdition | None:
+    """Subject and send time of the page's last edition, None if none. Raises httpx.HTTPError."""
     url = settings.PUBLIC_URL.rstrip("/") + "/api/latest-edition"
     response = (client or httpx.Client(timeout=TIMEOUT)).get(
         url, headers={"Authorization": f"Bearer {settings.SUBSCRIBERS_API_TOKEN}"}
@@ -130,4 +148,4 @@ def latest_edition_subject(settings: Settings, client: httpx.Client | None = Non
     if response.status_code == 404:
         return None
     response.raise_for_status()
-    return response.json()["subject"]
+    return LatestEdition.model_validate(response.json())

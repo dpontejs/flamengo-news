@@ -242,6 +242,7 @@ def test_run_sends_to_api_subscribers_with_one_click_unsubscribe(env, tmp_path) 
     env.setenv("GITHUB_STEP_SUMMARY", str(summary))
     env.setenv("SUBSCRIBERS_API_TOKEN", "api-token")
     env.setenv("PUBLIC_URL", "https://news.test")
+    respx.get("https://news.test/api/latest-edition").mock(return_value=httpx.Response(404))
     get_settings.cache_clear()
     use(env, [ARTICLE], MATCH)
     respx.get(API).mock(
@@ -271,6 +272,7 @@ def test_run_survives_subscribers_api_failure(env, tmp_path, monkeypatch) -> Non
     env.setenv("GITHUB_STEP_SUMMARY", str(summary))
     env.setenv("SUBSCRIBERS_API_TOKEN", "api-token")
     env.setenv("PUBLIC_URL", "https://news.test")
+    respx.get("https://news.test/api/latest-edition").mock(return_value=httpx.Response(404))
     get_settings.cache_clear()
     use(env, [ARTICLE], MATCH)
     monkeypatch.setattr("flanews.send.recipients.FETCH_ATTEMPTS", 1)
@@ -296,6 +298,7 @@ def enable_subscriptions(env) -> None:
     env.setenv("PUBLIC_URL", "https://news.test")
     get_settings.cache_clear()
     respx.get(API).mock(return_value=httpx.Response(200, json=[]))
+    respx.get(PUBLISH).mock(return_value=httpx.Response(404))
 
 
 @respx.mock
@@ -354,7 +357,11 @@ RUN_SKIPPING = ["run", "--edition", "monday", "--date", "2026-10-14", "--skip-if
 def test_skip_if_sent_stops_before_building_when_the_edition_went_out(env, monkeypatch) -> None:
     enable_subscriptions(env)
     monkeypatch.setattr(pipeline, "get_llm_client", lambda settings: pytest.fail("built it"))
-    respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": SENT_TODAY}))
+    respx.get(PUBLISH).mock(
+        return_value=httpx.Response(
+            200, json={"subject": SENT_TODAY, "published_at": "2026-10-12T08:05:00-03:00"}
+        )
+    )
     resend = respx.post(RESEND_URL)
 
     result = CliRunner().invoke(cli.app, RUN_SKIPPING)
@@ -369,7 +376,11 @@ def test_skip_if_sent_sends_when_the_last_edition_is_older(env) -> None:
     enable_subscriptions(env)
     use(env, [ARTICLE], MATCH)
     older = "Urubu News — Edição de Sexta — 09/10/2026: Outra"
-    respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": older}))
+    respx.get(PUBLISH).mock(
+        return_value=httpx.Response(
+            200, json={"subject": older, "published_at": "2026-10-09T08:05:00-03:00"}
+        )
+    )
     resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     respx.put(PUBLISH).mock(return_value=httpx.Response(204))
 
@@ -397,14 +408,19 @@ def test_skip_if_sent_sends_when_the_page_is_unreachable(env) -> None:
 def test_without_skip_if_sent_a_manual_run_resends(env) -> None:
     enable_subscriptions(env)
     use(env, [ARTICLE], MATCH)
-    check = respx.get(PUBLISH).mock(return_value=httpx.Response(200, json={"subject": SENT_TODAY}))
+    check = respx.get(PUBLISH).mock(
+        return_value=httpx.Response(
+            200, json={"subject": SENT_TODAY, "published_at": "2026-10-12T08:05:00-03:00"}
+        )
+    )
     resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     respx.put(PUBLISH).mock(return_value=httpx.Response(204))
 
     result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
 
     assert result.exit_code == 0, result.output
-    assert resend.called and not check.called
+    # The page is read for the previous topics, but without the flag the edition still goes out.
+    assert resend.called and check.called
 
 
 @respx.mock
@@ -425,3 +441,49 @@ def test_run_with_note_adds_the_box_and_prefixes_the_subject(env) -> None:
     assert published["subject"].startswith("Urubu News — Edição de Segunda")
     assert "Cara nova." not in published["html"] and "Cara nova." not in published["text"]
     assert UNSUBSCRIBE_PLACEHOLDER in published["html"]
+
+
+@respx.mock
+def test_post_without_finished_match_sends_nothing(env, monkeypatch) -> None:
+    from flanews.schedule import Fixture
+
+    use(env, [ARTICLE], None)
+    game = Fixture(
+        match_id="m",
+        league="bra.1",
+        kickoff=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        time_valid=True,
+        state="in",
+        home="Bahia",
+        away="Flamengo",
+    )
+    monkeypatch.setattr(cli, "_fixtures", lambda settings, now: [game])
+    monkeypatch.setattr(cli, "_latest", lambda settings: None)
+    resend = respx.post(RESEND_URL)
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "post", "--date", "2026-10-19"])
+
+    assert result.exit_code == 0, result.output
+    assert not resend.called
+    assert "partida não encerrada" in result.output
+
+
+@respx.mock
+def test_run_tells_the_model_what_the_previous_edition_covered(env, monkeypatch) -> None:
+    enable_subscriptions(env)
+    use(env, [ARTICLE], MATCH)
+    llm = FakeLLMClient(respond)
+    monkeypatch.setattr(pipeline, "get_llm_client", lambda settings: llm)
+    previous = {
+        "subject": "Urubu News — Edição de Sexta — 09/10/2026: x",
+        "published_at": "2026-10-09T08:05:00-03:00",
+        "text": "== Notícias ==\n\n* Velho assunto\nResumo.\n",
+    }
+    respx.get(PUBLISH).mock(return_value=httpx.Response(200, json=previous))
+    respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
+    respx.put(PUBLISH).mock(return_value=httpx.Response(204))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+
+    assert result.exit_code == 0, result.output
+    assert "- Velho assunto" in llm.prompts[0]

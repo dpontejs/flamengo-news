@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from fakes import FakeLLMClient
@@ -11,6 +11,8 @@ from flanews.config import Settings
 from flanews.models import (
     Article,
     Edition,
+    FormResult,
+    MatchPreview,
     MatchStats,
     Newsletter,
     NextMatch,
@@ -22,6 +24,7 @@ from flanews.summarizer.pipeline import (
     AnalysisResponse,
     GroupResponse,
     IntroResponse,
+    PreviewResponse,
     SummaryResponse,
 )
 
@@ -67,6 +70,14 @@ STANDINGS = [
 ]
 
 MOMENT = TeamMoment(gap="1 ponto à frente do Palmeiras")
+WIN = FormResult(
+    result="V",
+    opponent="Bahia",
+    score="2-0",
+    competition="Brasileiro Serie A",
+    date=datetime(2026, 4, 19, tzinfo=TZ),
+)
+PREVIEW = MatchPreview(opponent="Estudiantes", flamengo_form=[WIN], head_to_head=[WIN])
 
 
 class FakeStats:
@@ -87,6 +98,10 @@ class FakeStats:
     def get_moment(self, end: datetime, standings: list[StandingRow]) -> TeamMoment | None:
         self.calls["moment"] = (end, standings)
         return MOMENT
+
+    def get_preview(self, match_id: str, league: str):
+        self.calls["preview"] = (match_id, league)
+        return PREVIEW
 
 
 def good_llm() -> FakeLLMClient:
@@ -154,7 +169,7 @@ def test_preview_command_writes_html_and_text(monkeypatch, tmp_path) -> None:
     newsletter = Newsletter(edition=EDITION, headline="Flamengo vence", intro="Abertura.")
     seen = {}
 
-    def fake_build(edition: Edition, settings: Settings) -> Newsletter:
+    def fake_build(edition: Edition, settings: Settings, **kwargs) -> Newsletter:
         seen["edition"] = edition
         return newsletter
 
@@ -173,7 +188,7 @@ def test_preview_command_writes_html_and_text(monkeypatch, tmp_path) -> None:
 
 def test_preview_command_custom_out(monkeypatch, tmp_path) -> None:
     newsletter = Newsletter(edition=EDITION, intro="Abertura.")
-    monkeypatch.setattr(pipeline, "build_newsletter", lambda edition, settings: newsletter)
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
 
     target = tmp_path / "x" / "minha.html"
     result = CliRunner().invoke(cli.app, ["preview", "--out", str(target)])
@@ -195,7 +210,7 @@ def test_preview_command_renders_match_stats_bars(monkeypatch, tmp_path) -> None
         statistics={"Posse de bola": ("50%", "50%"), "Finalizações": ("10", "8")},
     )
     newsletter = Newsletter(edition=EDITION, intro="Abertura.", last_match=match)
-    monkeypatch.setattr(pipeline, "build_newsletter", lambda edition, settings: newsletter)
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
     monkeypatch.chdir(tmp_path)
 
     result = CliRunner().invoke(cli.app, ["preview", "--edition", "monday", "--date", "2026-10-14"])
@@ -303,7 +318,7 @@ def test_collect_candidates_survives_failing_collector(monkeypatch) -> None:
 
 def test_preview_command_shows_the_note(monkeypatch, tmp_path) -> None:
     newsletter = Newsletter(edition=EDITION, headline="Flamengo vence", intro="Abertura.")
-    monkeypatch.setattr(pipeline, "build_newsletter", lambda edition, settings: newsletter)
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
     monkeypatch.chdir(tmp_path)
     args = ["preview", "--edition", "monday", "--date", "2026-10-14", "--note", "Cara nova."]
 
@@ -313,3 +328,209 @@ def test_preview_command_shows_the_note(monkeypatch, tmp_path) -> None:
     html = (tmp_path / "out" / "preview-2026-10-12.html").read_text(encoding="utf-8")
     text = (tmp_path / "out" / "preview-2026-10-12.txt").read_text(encoding="utf-8")
     assert "Cara nova." in html and "Cara nova." in text
+
+
+def edition(kind: str) -> Edition:
+    return Edition(
+        kind=kind,
+        start=datetime(2026, 10, 19, 8, tzinfo=TZ),
+        end=datetime(2026, 10, 22, 15, 30, tzinfo=TZ),
+        label=f"{kind} — 22/10/2026",
+        match_id="401912521" if kind != "news" else None,
+        league="conmebol.libertadores" if kind != "news" else None,
+    )
+
+
+def match_llm(topics: int = 1) -> FakeLLMClient:
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is GroupResponse:
+            return {
+                "topics": [
+                    {"title": f"Tópico {i}", "article_ids": [1], "importance": 3}
+                    for i in range(topics)
+                ]
+            }
+        if schema is SummaryResponse:
+            return {"summaries": [{"topic_id": 1, "summary": "Resumo."}]}
+        if schema is IntroResponse:
+            return {"headline": "Flamengo encara o Estudiantes", "intro": "Semifinal. Volta."}
+        if schema is PreviewResponse:
+            return {"lineups": "Flamengo: Rossi; Varela...", "tips": ["ge: Flamengo 2 x 0"]}
+        raise AssertionError(f"unexpected call: {schema.__name__}")
+
+    return FakeLLMClient(respond)
+
+
+def build_kind(kind: str, llm: FakeLLMClient, stats: FakeStats, used: list) -> Newsletter:
+    def candidates(edition, settings):
+        used.append(edition.kind)
+        return [], []
+
+    return pipeline.build_newsletter(
+        edition(kind),
+        SETTINGS,
+        collect=lambda edition, settings: [ARTICLE],
+        stats_client=stats,
+        llm=llm,
+        candidates=candidates,
+        match_collect=lambda edition, match, settings: [],
+    )
+
+
+def test_pre_game_builds_preview_without_extras_or_analysis() -> None:
+    stats, llm, used = FakeStats(), match_llm(), []
+
+    newsletter = build_kind("pre", llm, stats, used)
+
+    assert newsletter.preview == PREVIEW
+    assert stats.calls["preview"] == ("401912521", "conmebol.libertadores")
+    assert newsletter.lineups == "Flamengo: Rossi; Varela..."
+    assert newsletter.tips == ["ge: Flamengo 2 x 0"]
+    assert newsletter.last_match is None and newsletter.analysis == ""
+    assert "last" not in stats.calls and used == []
+    assert newsletter.next_match == NEXT
+    assert len(llm.prompts) <= 4
+    assert "O Flamengo venceu." in llm.prompts[-1]  # the preview call reads the article text
+    intro = next(p for p in llm.prompts if "abertura" in p)
+    assert "Estudiantes" in intro
+
+
+def test_pre_game_caps_topics_at_four() -> None:
+    newsletter = build_kind("pre", match_llm(topics=6), FakeStats(), [])
+
+    assert len(newsletter.topics) == 4
+
+
+def test_pre_game_without_lineups_or_tips_keeps_the_rest() -> None:
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is PreviewResponse:
+            raise LLMError("quota")
+        return match_llm().responder(prompt, schema)
+
+    newsletter = build_kind("pre", FakeLLMClient(respond), FakeStats(), [])
+
+    assert (newsletter.lineups, newsletter.tips) == ("", [])
+    assert newsletter.preview == PREVIEW and newsletter.topics
+
+
+def test_post_game_has_no_extras() -> None:
+    stats, used = FakeStats(), []
+
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is AnalysisResponse:
+            return {"analysis": "Leitura."}
+        return match_llm().responder(prompt, schema)
+
+    newsletter = build_kind("post", FakeLLMClient(respond), stats, used)
+
+    assert used == [] and newsletter.last_match == MATCH and newsletter.analysis == "Leitura."
+    assert newsletter.preview is None
+
+
+def test_news_has_extras() -> None:
+    used = []
+
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is AnalysisResponse:
+            return {"analysis": "Leitura."}
+        return match_llm().responder(prompt, schema)
+
+    build_kind("news", FakeLLMClient(respond), FakeStats(), used)
+
+    assert used == ["news"]
+
+
+def test_pre_game_with_only_the_preview_is_not_empty() -> None:
+    newsletter = Newsletter(edition=edition("pre"), intro="", next_match=NEXT, preview=PREVIEW)
+
+    assert not pipeline.is_empty(newsletter)
+    assert pipeline.is_empty(Newsletter(edition=edition("news"), intro=""))
+
+
+TIP = Article(
+    url="https://ge.globo.com/palpite",
+    title="Palpites para Bahia x Flamengo",
+    source="google_news:ge",
+    published_at=datetime(2026, 10, 16, 20, tzinfo=TZ),
+    content="Comentarista: Flamengo 2 x 1. " + "x" * 3000 + " Bahia: Marcos Felipe; Gilberto...",
+)
+
+
+def test_pre_game_preview_reads_match_articles_first_and_whole() -> None:
+    llm = match_llm()
+
+    pipeline.build_newsletter(
+        edition("pre"),
+        SETTINGS,
+        collect=lambda edition, settings: [ARTICLE],
+        stats_client=FakeStats(),
+        llm=llm,
+        candidates=lambda edition, settings: ([], []),
+        match_collect=lambda edition, match, settings: [TIP],
+    )
+
+    preview = llm.prompts[-1]
+    assert preview.index("Palpites para Bahia x Flamengo") < preview.index("O Flamengo venceu.")
+    assert "Bahia: Marcos Felipe" in preview  # the second line-up sits far into the text
+
+
+def test_collect_match_articles_searches_the_match_in_the_last_three_days(monkeypatch) -> None:
+    seen = {}
+
+    def fake_collect(edition, settings, collectors):
+        seen["window"] = (edition.start, edition.end)
+        seen["urls"] = [c.rss_url for c in collectors]
+        return [TIP]
+
+    monkeypatch.setattr(pipeline, "collect_articles", fake_collect)
+    away = NEXT.model_copy(update={"opponent": "Bahia", "is_home": False})
+
+    articles = pipeline.collect_match_articles(edition("pre"), away, SETTINGS)
+
+    assert articles == [TIP]
+    end = edition("pre").end
+    assert seen["window"] == (end - timedelta(days=3), end)
+    assert any("q=Bahia+Flamengo+palpite&" in u for u in seen["urls"])
+    assert any("Bahia+x+Flamengo%22+escala%C3%A7%C3%A3o" in u for u in seen["urls"])
+    assert any("Bahia+x+Flamengo%22+onde+assistir" in u for u in seen["urls"])
+    assert not any("Palpite+ge" in u for u in seen["urls"])  # NEXT is a Libertadores match
+
+
+def test_collect_match_articles_adds_the_round_tips_for_brasileirao(monkeypatch) -> None:
+    seen = {}
+
+    def fake_collect(edition, settings, collectors):
+        seen["urls"] = [c.rss_url for c in collectors]
+        return []
+
+    monkeypatch.setattr(pipeline, "collect_articles", fake_collect)
+    league = NEXT.model_copy(update={"opponent": "Bahia", "competition": "Brasileirão"})
+
+    pipeline.collect_match_articles(edition("pre"), league, SETTINGS)
+
+    assert any("q=%22Palpite+ge%22&" in u for u in seen["urls"])
+
+
+def test_pre_game_keeps_outlook_and_where_to_watch() -> None:
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is PreviewResponse:
+            return {
+                "lineups": "Bahia: Ronaldo; Gilberto\nFlamengo: Rossi; Varela\nDesfalques: Danilo",
+                "tips": [],
+                "outlook": "Jogo equilibrado na Fonte Nova.",
+                "broadcast": "Premiere (pay-per-view)",
+            }
+        return match_llm().responder(prompt, schema)
+
+    llm = FakeLLMClient(respond)
+    newsletter = build_kind("pre", llm, FakeStats(), [])
+
+    assert newsletter.outlook == "Jogo equilibrado na Fonte Nova."
+    assert newsletter.broadcast == "Premiere (pay-per-view)"
+    assert newsletter.lineups.splitlines() == [
+        "Flamengo: Rossi; Varela",
+        "Bahia: Ronaldo; Gilberto",
+        "Desfalques: Danilo",
+    ]
+    preview_prompt = llm.prompts[-1]
+    assert "Últimos confrontos" in preview_prompt and "2-0 Bahia" in preview_prompt

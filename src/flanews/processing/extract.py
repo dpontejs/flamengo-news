@@ -1,3 +1,4 @@
+import html as html_lib
 import logging
 import re
 import threading
@@ -21,7 +22,7 @@ from flanews.processing.dedupe import (
 
 logger = logging.getLogger(__name__)
 
-MAX_CONTENT_CHARS = 4000
+MAX_CONTENT_CHARS = 20000  # round-wide pieces ("Palpite ge") reach their match late; prompts cut
 MAX_WORKERS = 5
 DEFAULT_MIN_INTERVAL = 1.0
 TZ = ZoneInfo("America/Sao_Paulo")
@@ -38,13 +39,18 @@ IMAGE_PATTERNS = (
 )
 
 
+# Hosts whose image links answer 403 outside their own site (signed, anti-hotlinking).
+BLOCKED_IMAGE_HOSTS = ("cdninstagram.com", "fbcdn.net")
+
+
 def _extract_og_image(html: str) -> str | None:
     for pattern in IMAGE_PATTERNS:
         match = pattern.search(html)
         if not match:
             continue
-        url = match.group(1).strip()
-        if url.startswith("https://"):
+        url = html_lib.unescape(match.group(1).strip())  # "&amp;" in the meta tag is a "&"
+        host = urlsplit(url).hostname or ""
+        if url.startswith("https://") and not host.endswith(BLOCKED_IMAGE_HOSTS):
             return url
     return None
 

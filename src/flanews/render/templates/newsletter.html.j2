@@ -44,6 +44,7 @@
   .fla td { font-weight: 800; color: #A51C24; }
   .subhead { font-size: 13px; font-weight: 700; color: #141414; margin: 14px 0 6px 0; }
   .chip { width: 28px; height: 28px; font-size: 13px; font-weight: 800; color: #ffffff; }
+  .chip-sm { width: 20px; height: 20px; font-size: 11px; }
   .chip-V { background-color: #1E8E3E; }
   .chip-E { background-color: #8A8A8A; }
   .chip-D { background-color: #A51C24; }
@@ -165,6 +166,70 @@
   </td></tr>
   {% endif %}
 
+  {% if n.edition.kind == "pre" and n.next_match %}{% set x = n.next_match %}{% set pv = n.preview %}
+  {% set fla = {"name": "Flamengo", "logo": flamengo_logo, "form": pv.flamengo_form if pv else []} %}
+  {% set opp = {"name": x.opponent, "logo": x.opponent_logo, "form": pv.opponent_form if pv else []} %}
+  {% set sides = [fla, opp] if x.is_home else [opp, fla] %}
+  <tr><td class="block font">
+    <p class="card-title" style="margin-top: 8px;">O jogo</p>
+    <table role="presentation" class="scoreboard" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td class="scoreboard-body">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          {% for side in sides %}
+          {% if loop.index == 2 %}
+          <td width="30%" align="center" valign="middle">
+            <div class="score" style="font-size: 30px; line-height: 34px;">{{ x.date.strftime("%H:%M") }}</div>
+            <div class="match-info" style="padding: 4px 0 0 0;">{{ x.date | when }}</div>
+          </td>
+          {% endif %}
+          <td width="35%" align="center" valign="top">
+            {% if side.logo %}<img src="{{ side.logo }}" alt="{{ side.name }}" width="56" height="56" style="display: block; border: 0; margin: 0 auto;">{% endif %}
+            <div class="team-name">{{ side.name }}</div>
+            {% if side.form %}
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin-top: 8px;"><tr>
+              {% for f in side.form %}<td class="chip chip-sm chip-{{ f.result }}" align="center" title="{{ f.score }} {{ f.opponent }}">{{ f.result }}</td>{% if not loop.last %}<td width="3"></td>{% endif %}{% endfor %}
+            </tr></table>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr></table>
+      </td></tr>
+      <tr><td class="match-info" align="center">{{ x.competition }}{% if x.venue %} · {{ x.venue }}{% endif %}{% if n.broadcast %}<br><span style="color: #ffffff; font-weight: 700;">Onde assistir:</span> {{ n.broadcast }}{% endif %}{% if pv and (pv.flamengo_form or pv.opponent_form) %}<br><span style="font-size: 11px;">Momento dos times: últimos jogos, do mais recente ao mais antigo</span>{% endif %}</td></tr>
+    </table>
+  </td></tr>
+  {% if (pv and pv.head_to_head) or n.lineups or n.tips or n.outlook %}
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      {% if n.outlook %}
+      <p class="card-title">O que esperar</p>
+      <p class="text" style="margin: 0 0 18px 0;">{{ n.outlook }}</p>
+      {% endif %}
+      {% if pv and pv.head_to_head %}
+      <p class="card-title">Últimos confrontos</p>
+      <p class="muted" style="margin: 0 0 8px 0;">{{ pv | h2h }}</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        {% for f in pv.head_to_head %}
+        <tr>
+          <td width="26" valign="middle" style="padding: 3px 0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td class="chip chip-sm chip-{{ f.result }}" align="center">{{ f.result }}</td></tr></table></td>
+          <td class="text" valign="middle" style="padding: 3px 0;">Flamengo {{ f.score | replace("-", " x ") }} {{ f.opponent }}</td>
+          <td class="muted" valign="middle" align="right" style="padding: 3px 0; white-space: nowrap;">{{ f.date.strftime("%d/%m/%Y") }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+      {% if n.lineups %}
+      <p class="card-title" style="margin-top: 18px;">Prováveis escalações</p>
+      {% for line in n.lineups.splitlines() if line.strip() %}<p class="text" style="margin: 0 0 6px 0;">{{ line }}</p>{% endfor %}
+      {% endif %}
+      {% if n.tips %}
+      <p class="card-title" style="margin-top: 18px;">Palpites</p>
+      {% for tip in n.tips %}<p class="text" style="margin: 0 0 6px 0;">· {{ tip }}</p>{% endfor %}
+      {% endif %}
+    </td></tr></table>
+  </td></tr>
+  {% endif %}
+  {% endif %}
+
   {% set mo = n.moment %}
   {% set leaders = n.last_match.leaders if n.last_match else {} %}
   {% if n.analysis or (mo and (mo.form or mo.standing or mo.rankings)) or leaders %}
@@ -236,7 +301,7 @@
   </td></tr>
   {% endfor %}
 
-  {% if n.next_match %}{% set x = n.next_match %}
+  {% if n.next_match and n.edition.kind != "pre" %}{% set x = n.next_match %}
   <tr><td class="block font">
     <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
       <p class="card-title">Próximo jogo</p>

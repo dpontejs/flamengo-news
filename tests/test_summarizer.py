@@ -257,3 +257,93 @@ def test_group_prompt_requires_accented_titles() -> None:
 
     assert "acentuação" in llm.prompts[0]
     assert "nunca remova nem substitua acentos" in llm.prompts[0]
+
+
+def test_group_prompt_lists_topics_already_published() -> None:
+    llm = FakeLLMClient(responder(TWO_TOPICS))
+
+    summarize_edition(ARTICLES, llm, published=["Flamengo empata com o Estudiantes"])
+
+    group = llm.prompts[0]
+    assert "Já publicado na edição anterior" in group
+    assert "- Flamengo empata com o Estudiantes" in group
+
+
+def test_group_prompt_has_no_published_block_without_history() -> None:
+    llm = FakeLLMClient(responder(TWO_TOPICS))
+
+    summarize_edition(ARTICLES, llm)
+
+    assert "Já publicado" not in llm.prompts[0]
+
+
+def test_pre_game_group_prompt_focuses_on_the_next_match() -> None:
+    from flanews.models import NextMatch
+
+    bahia = NextMatch(
+        opponent="Bahia",
+        competition="Brasileirão",
+        date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        is_home=False,
+    )
+    llm = FakeLLMClient(responder(TWO_TOPICS))
+
+    summarize_edition(ARTICLES, llm, next_match=bahia)
+
+    group = llm.prompts[0]
+    assert "edição de pré-jogo de Bahia x Flamengo" in group
+    assert "O jogo anterior só entra com fato novo" in group
+
+
+def test_preview_reads_the_match_section_of_a_long_round_article() -> None:
+    from flanews.models import NextMatch
+    from flanews.summarizer.pipeline import PreviewResponse, write_preview
+
+    round_tips = make_article(
+        9,
+        "Palpites da rodada. "
+        + "Outro jogo: 1 x 0. " * 800
+        + "Bahia x Flamengo: Fulano crava 2 x 1.",
+    )
+    bahia = NextMatch(
+        opponent="Bahia",
+        competition="Brasileirão",
+        date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        is_home=False,
+    )
+    llm = FakeLLMClient(lambda prompt, schema: PreviewResponse())
+
+    write_preview([round_tips], bahia, llm)
+
+    assert "Fulano crava 2 x 1" in llm.prompts[0]
+
+
+def test_summary_prompt_keeps_each_article_to_4000_chars() -> None:
+    long_article = make_article(1, "início " + "a" * 9000 + " FIM-DO-TEXTO")
+    llm = FakeLLMClient(
+        responder({"topics": [{"title": "T", "article_ids": [1], "importance": 3}]})
+    )
+
+    summarize_edition([long_article], llm)
+
+    summary_prompt = llm.prompts[1]
+    assert "início" in summary_prompt and "FIM-DO-TEXTO" not in summary_prompt
+
+
+def test_preview_reads_up_to_twelve_articles_and_accepts_pundit_polls() -> None:
+    from flanews.models import NextMatch
+    from flanews.summarizer.pipeline import PreviewResponse, write_preview
+
+    articles = [make_article(i, f"Texto {i}") for i in range(1, 14)]
+    bahia = NextMatch(
+        opponent="Bahia",
+        competition="Brasileirão",
+        date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        is_home=False,
+    )
+    llm = FakeLLMClient(lambda prompt, schema: PreviewResponse())
+
+    write_preview(articles, bahia, llm)
+
+    assert "Texto 12" in llm.prompts[0] and "Texto 13" not in llm.prompts[0]
+    assert "enquete" in llm.prompts[0]

@@ -12,7 +12,7 @@ Regras:
 === [T{{ loop.index }}] {{ topic.title }}
 {% for article in topic.articles %}
 --- {{ article.title }} ({{ article.source }})
-{{ (article.content or article.summary_hint or "(sem texto, use apenas o título)") | striptags }}
+{{ (article.content or article.summary_hint or "(sem texto, use apenas o título)") | striptags | truncate(4000) }}
 {% endfor %}
 
 {% endfor %}

@@ -3,6 +3,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import httpx
+import pytest
 import respx
 
 from flanews.models import Article
@@ -68,13 +69,48 @@ def test_extract_content_ignores_non_https_image() -> None:
     assert result.image_url is None
 
 
+@pytest.mark.parametrize(
+    "image",
+    [
+        "https://scontent.cdninstagram.com/v/t51/1_n.jpg?stp=x",
+        "https://scontent-gru2-1.xx.fbcdn.net/v/t39/2_n.jpg",
+    ],
+)
+@respx.mock
+def test_extract_content_ignores_images_that_block_hotlinking(image) -> None:
+    html = (
+        f'<html><head><meta property="og:image" content="{image}">'
+        "</head><body><article><p>O Flamengo treinou forte.</p></article></body></html>"
+    )
+    respx.get(ARTICLE_URL).mock(return_value=httpx.Response(200, text=html))
+    with httpx.Client() as client:
+        result = extract_content(make_article(), client, no_wait_limiter())
+    assert result.image_url is None
+
+
+@respx.mock
+def test_extract_content_decodes_html_entities_in_the_image_url() -> None:
+    html = (
+        '<html><head><meta property="og:image" '
+        'content="https://www.estadao.com.br/resizer/v2/X.jpg?quality=80&amp;auth=abc&amp;width=1200">'
+        "</head><body><article><p>O Flamengo treinou forte.</p></article></body></html>"
+    )
+    respx.get(ARTICLE_URL).mock(return_value=httpx.Response(200, text=html))
+    with httpx.Client() as client:
+        result = extract_content(make_article(), client, no_wait_limiter())
+    assert (
+        result.image_url
+        == "https://www.estadao.com.br/resizer/v2/X.jpg?quality=80&auth=abc&width=1200"
+    )
+
+
 @respx.mock
 def test_extract_content_truncates_long_text() -> None:
     paragraphs = "".join(
         f"<p>Parágrafo {i}: "
         + "O Flamengo treinou forte nesta manhã no Ninho do Urubu. " * 20
         + "</p>"
-        for i in range(10)
+        for i in range(40)  # ~46k chars, above MAX_CONTENT_CHARS
     )
     html = f"<html><body><article><h1>Título</h1>{paragraphs}</article></body></html>"
     respx.get(ARTICLE_URL).mock(return_value=httpx.Response(200, text=html))

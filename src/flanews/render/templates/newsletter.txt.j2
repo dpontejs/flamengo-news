@@ -27,6 +27,47 @@ URUBU NEWS
 {% endfor %}
 {% endif %}
 {% endif %}
+{% if n.edition.kind == "pre" and n.next_match %}{% set x = n.next_match %}{% set pv = n.preview %}
+
+== O jogo ==
+{% if x.is_home %}Flamengo x {{ x.opponent }}{% else %}{{ x.opponent }} x Flamengo{% endif %}
+
+{{ x.competition }} · {{ x.date | when }}{% if x.venue %} · {{ x.venue }}{% endif %}
+
+{% if n.broadcast %}
+Onde assistir: {{ n.broadcast }}
+{% endif %}
+{% if n.outlook %}
+
+O que esperar
+{{ n.outlook }}
+{% endif %}
+{% if pv and (pv.flamengo_form or pv.opponent_form) %}
+
+Momento dos times
+{% for team, form in [("Flamengo", pv.flamengo_form), (pv.opponent, pv.opponent_form)] if form %}
+{{ team }}: {{ form | map(attribute="result") | join(" ") }} ({% for f in form %}{{ f.score }} {{ f.opponent }}{% if not loop.last %}, {% endif %}{% endfor %})
+{% endfor %}
+{% endif %}
+{% if pv and pv.head_to_head %}
+
+Últimos confrontos: {{ pv | h2h }}
+{% for f in pv.head_to_head %}
+{{ f.result }} Flamengo {{ f.score | replace("-", " x ") }} {{ f.opponent }} ({{ f.date.strftime("%d/%m/%Y") }}, {{ f.competition }})
+{% endfor %}
+{% endif %}
+{% if n.lineups %}
+
+Prováveis escalações
+{{ n.lineups }}
+{% endif %}
+{% if n.tips %}
+
+Palpites
+{% for tip in n.tips %}- {{ tip }}
+{% endfor %}
+{% endif %}
+{% endif %}
 {% set mo = n.moment %}
 {% set leaders = n.last_match.leaders if n.last_match else {} %}
 {% if n.analysis or (mo and (mo.form or mo.standing or mo.rankings)) or leaders %}
@@ -76,7 +117,7 @@ Destaques: {% for label, player, value in leaders["Flamengo"] %}{{ label }} {{ p
   {{ b.url }}
 {% endfor %}
 {% endfor %}
-{% if n.next_match %}{% set x = n.next_match %}
+{% if n.next_match and n.edition.kind != "pre" %}{% set x = n.next_match %}
 
 == Próximo jogo ==
 {% if x.is_home %}Flamengo x {{ x.opponent }}{% else %}{{ x.opponent }} x Flamengo{% endif %}

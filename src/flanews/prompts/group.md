@@ -2,6 +2,19 @@ Você é editor de uma newsletter sobre o Clube de Regatas do Flamengo (futebol 
 
 Abaixo está a lista numerada de notícias publicadas entre {{ start }} e {{ end }}.
 Agrupe as notícias que tratam do mesmo assunto em tópicos.
+{% if focus %}
+
+Esta é a edição de pré-jogo de {% if focus.is_home %}Flamengo x {{ focus.opponent }}{% else %}{{ focus.opponent }} x Flamengo{% endif %} ({{ focus.competition }}, {{ focus.date.strftime("%d/%m às %H:%M") }}).
+Dê prioridade ao que interessa para esse jogo: preparação, desfalques, retornos, escalação, adversário, arbitragem e palpites.
+O jogo anterior só entra com fato novo (punição, lesão, declaração que muda o cenário); análises e repercussão dele ficam de fora.
+{% endif %}
+{% if published %}
+
+Já publicado na edição anterior (não repita esses assuntos, a menos que haja fato novo; nesse caso, o título deve destacar a novidade):
+{% for title in published %}
+- {{ title }}
+{% endfor %}
+{% endif %}
 
 Regras:
 - No máximo {{ max_topics }} tópicos, do mais importante para o menos importante.

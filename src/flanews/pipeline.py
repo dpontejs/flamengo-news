@@ -1,6 +1,7 @@
 import logging
 from collections import Counter
 from collections.abc import Callable
+from datetime import timedelta
 from typing import Protocol
 
 import httpx
@@ -11,6 +12,7 @@ from flanews.config import Settings, get_settings
 from flanews.models import (
     Article,
     Edition,
+    MatchPreview,
     MatchStats,
     Newsletter,
     NextMatch,
@@ -23,9 +25,18 @@ from flanews.report import RunReport
 from flanews.send.recipients import mailto_unsubscribe
 from flanews.stats.espn import ESPNStatsClient
 from flanews.summarizer.client import LLMClient, LLMError, get_llm_client
-from flanews.summarizer.pipeline import EditionSummary, summarize_edition, write_analysis
+from flanews.summarizer.pipeline import (
+    MAX_TOPICS,
+    EditionSummary,
+    PreviewResponse,
+    summarize_edition,
+    write_analysis,
+    write_preview,
+)
 
 logger = logging.getLogger(__name__)
+
+PRE_GAME_TOPICS = 4  # the pre-game is about the match: fewer news topics
 
 
 def collect_articles(
@@ -70,6 +81,31 @@ def collect_articles(
     return sorted(result, key=lambda a: a.published_at, reverse=True)
 
 
+MATCH_SEARCH_DAYS = 3  # pre-game pieces (tips, line-ups) appear up to two days ahead
+ROUND_TIPS_QUERY = '"Palpite ge"'  # ge's pundits' picks for every Brasileirão match of the round
+
+
+def collect_match_articles(
+    edition: Edition, match: NextMatch, settings: Settings | None = None
+) -> list[Article]:
+    """Google News searches for this match's tips and line-ups, from three days before the send."""
+    from flanews.collectors.google_news import GoogleNewsCollector, google_news_url
+
+    home, away = ("Flamengo", match.opponent) if match.is_home else (match.opponent, "Flamengo")
+    window = edition.model_copy(
+        update={"start": edition.end - timedelta(days=MATCH_SEARCH_DAYS), "end": edition.end}
+    )
+    queries = [
+        f"{home} {away} palpite",
+        f'"{home} x {away}" escalação',
+        f'"{home} x {away}" onde assistir',
+    ]
+    if match.competition == "Brasileirão":
+        queries.append(ROUND_TIPS_QUERY)
+    collectors = [GoogleNewsCollector(rss_url=google_news_url(q)) for q in queries]
+    return collect_articles(window, settings, collectors=collectors)
+
+
 def collect_candidates(
     edition: Edition, settings: Settings | None = None
 ) -> tuple[list[Article], list[Article]]:
@@ -96,6 +132,7 @@ class StatsClient(Protocol):
     def get_next_match(self, now) -> NextMatch | None: ...
     def get_standings(self, league: str = "bra.1") -> list[StandingRow]: ...
     def get_moment(self, end, standings: list[StandingRow]) -> TeamMoment | None: ...
+    def get_preview(self, match_id: str, league: str) -> MatchPreview | None: ...
 
 
 def build_newsletter(
@@ -107,6 +144,8 @@ def build_newsletter(
     candidates: Callable[[Edition, Settings], tuple[list[Article], list[Article]]] | None = None,
     extract: Callable[[list[Article]], list[Article]] | None = None,
     report: RunReport | None = None,
+    published_topics: list[str] | None = None,
+    match_collect: Callable[[Edition, NextMatch, Settings], list[Article]] | None = None,
 ) -> Newsletter:
     """Collect news and stats for the edition and summarize them into a Newsletter.
 
@@ -119,17 +158,28 @@ def build_newsletter(
         team_id=settings.FLAMENGO_TEAM_ID, tz_name=settings.TIMEZONE
     )
 
+    pre_game = edition.kind == "pre"
+    # The short sections ("Saiba mais", "Brasil afora") belong to the news editions only.
+    with_extras = edition.kind not in ("pre", "post")
+
     articles = collect(edition, settings)
-    learn_more, brazil = (candidates or collect_candidates)(edition, settings)
+    learn_more, brazil = (
+        (candidates or collect_candidates)(edition, settings) if with_extras else ([], [])
+    )
     if report is not None:
         report.articles_by_source = dict(
             Counter(a.source.split(":", 1)[0] for a in articles).most_common()
         )
         report.candidates = {"saiba_mais": len(learn_more), "brasil": len(brazil)}
-    last_match = stats_client.get_last_match(edition.start, edition.end)
+    last_match = None if pre_game else stats_client.get_last_match(edition.start, edition.end)
     next_match = stats_client.get_next_match(edition.end)
     standings = stats_client.get_standings("bra.1")
-    moment = stats_client.get_moment(edition.end, standings)
+    moment = None if pre_game else stats_client.get_moment(edition.end, standings)
+    preview = (
+        stats_client.get_preview(edition.match_id, edition.league)
+        if pre_game and edition.match_id and edition.league
+        else None
+    )
 
     try:
         llm = llm or get_llm_client(settings)
@@ -141,6 +191,9 @@ def build_newsletter(
             learn_more=learn_more,
             brazil=brazil,
             extract=extract or _extract_picks,
+            max_topics=PRE_GAME_TOPICS if pre_game else MAX_TOPICS,
+            next_match=next_match if pre_game else None,
+            published=published_topics,
         )
     except LLMError as e:
         logger.error("Summarization failed, sending stats only: %s", e)
@@ -152,6 +205,14 @@ def build_newsletter(
             analysis = write_analysis(last_match, moment, llm)
         except LLMError as e:
             logger.error("Match analysis failed, keeping the numbers only: %s", e)
+
+    notes = PreviewResponse()
+    if pre_game and next_match is not None and llm is not None:
+        match_articles = (match_collect or collect_match_articles)(edition, next_match, settings)
+        try:
+            notes = write_preview([*match_articles, *articles], next_match, llm, preview)
+        except LLMError as e:
+            logger.error("Line-ups and tips failed, sending the preview without them: %s", e)
 
     return Newsletter(
         edition=edition,
@@ -165,12 +226,17 @@ def build_newsletter(
         last_match=last_match,
         next_match=next_match,
         standings=standings,
+        preview=preview,
+        lineups=notes.lineups,
+        tips=notes.tips,
+        outlook=notes.outlook,
+        broadcast=notes.broadcast,
     )
 
 
 def is_empty(newsletter: Newsletter) -> bool:
     """True when there is neither news nor a match: such an edition is not sent."""
-    return not newsletter.topics and newsletter.last_match is None
+    return not newsletter.topics and newsletter.last_match is None and newsletter.preview is None
 
 
 def unsubscribe_url(settings: Settings) -> str:

@@ -259,7 +259,11 @@ def create_app(
         edition = store.latest_edition()
         if edition is None:
             return JSONResponse({"detail": "no edition published"}, status_code=404)
-        return {"subject": edition.subject}
+        return {
+            "subject": edition.subject,
+            "published_at": edition.published_at.isoformat(),
+            "text": edition.text,  # the next run reads its topics to avoid repeating them
+        }
 
     @app.put("/api/latest-edition", status_code=204)
     def publish_edition(request: Request, edition: EditionIn):
