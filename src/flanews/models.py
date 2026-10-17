@@ -113,6 +113,15 @@ class FormResult(BaseModel):
     date: datetime
 
 
+class MatchPreview(BaseModel):
+    """Pre-game numbers: both teams' last five and the last head-to-head games, newest first."""
+
+    opponent: str
+    flamengo_form: list[FormResult] = Field(default_factory=list)
+    opponent_form: list[FormResult] = Field(default_factory=list)
+    head_to_head: list[FormResult] = Field(default_factory=list)
+
+
 class PlayerRanking(BaseModel):
     """A Flamengo player's position in a league leaderboard."""
 

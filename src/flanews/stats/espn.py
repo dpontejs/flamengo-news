@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import httpx
@@ -10,12 +10,14 @@ from flanews.collectors.base import DEFAULT_TIMEOUT
 from flanews.models import (
     FormResult,
     MatchEvent,
+    MatchPreview,
     MatchStats,
     NextMatch,
     PlayerRanking,
     StandingRow,
     TeamMoment,
 )
+from flanews.schedule import Fixture
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +30,12 @@ LEAGUES = {
     "bra.1": "Brasileirão",
     "conmebol.libertadores": "Libertadores",
     "bra.copa_do_brazil": "Copa do Brasil",
+    "bra.camp.carioca": "Carioca",
+    "bra.supercopa_do_brazil": "Supercopa",
+    "fifa.cwc": "Mundial de Clubes",
 }
+FIXTURES_LOOKBACK = timedelta(days=7)  # a match played last week may still have its post-game due
+POSTPONED = {"STATUS_POSTPONED", "STATUS_CANCELED", "STATUS_ABANDONED"}
 
 # ESPN stat name -> pt-BR label, in display order.
 STAT_LABELS = {
@@ -131,6 +138,46 @@ class ESPNStatsClient:
             opponent_logo=_logo(theirs["team"]),
         )
 
+    def get_fixtures(self, now: datetime) -> list[Fixture]:
+        """Flamengo's matches in every tracked competition from a week ago on, once each."""
+        fixtures: dict[str, Fixture] = {}
+        for league in LEAGUES:
+            for params in ({"season": str(now.year)}, {"fixture": "true"}):
+                for event in self._schedule(league, params):
+                    try:
+                        fixture = self._parse_fixture(event, league)
+                    except (KeyError, StopIteration, ValueError) as e:
+                        logger.warning(
+                            "Skipping unreadable ESPN fixture %s: %s", event.get("id"), e
+                        )
+                        continue
+                    if fixture.kickoff >= now - FIXTURES_LOOKBACK:
+                        fixtures[fixture.match_id] = fixture
+        return sorted(fixtures.values(), key=lambda f: f.kickoff)
+
+    def get_preview(self, match_id: str, league: str) -> MatchPreview | None:
+        """Both teams' last five and the head-to-head series, from the match summary."""
+        try:
+            summary = self._get(f"{ESPN_SITE_URL}/{league}/summary", {"event": match_id})
+            teams = {str(t["team"]["id"]): t for t in summary.get("lastFiveGames", [])}
+            ours = teams.pop(str(self.team_id), {"events": []})
+            theirs = next(iter(teams.values()), None)
+            competitors = summary["header"]["competitions"][0]["competitors"]
+            opponent = next(c for c in competitors if c["team"]["id"] != str(self.team_id))
+            series = next(
+                (s for s in summary.get("seasonseries", []) if s.get("type") == "head-to-head"),
+                {"events": []},
+            )
+            return MatchPreview(
+                opponent=opponent["team"]["displayName"],
+                flamengo_form=self._last_five(ours),
+                opponent_form=self._last_five(theirs) if theirs else [],
+                head_to_head=[self._head_to_head(e) for e in series["events"]],  # newest first
+            )
+        except Exception as e:
+            logger.warning("Failed to load ESPN preview %s: %s", match_id, e)
+            return None
+
     def get_moment(self, end: datetime, standings: list[StandingRow]) -> TeamMoment | None:
         """Form in the last matches up to `end`, league campaign and player rankings."""
         played: list[tuple[datetime, str, dict]] = []
@@ -201,6 +248,53 @@ class ESPNStatsClient:
             score=f"{goals_for}-{goals_against}",
             competition=LEAGUES[league],
             date=kickoff.astimezone(self.tz),
+        )
+
+    def _parse_fixture(self, event: dict, league: str) -> Fixture:
+        competition = event["competitions"][0]
+        status = competition["status"]["type"]
+        home = next(c for c in competition["competitors"] if c["homeAway"] == "home")
+        away = next(c for c in competition["competitors"] if c is not home)
+        state = "postponed" if status["name"] in POSTPONED else status["state"]
+        return Fixture(
+            match_id=str(event["id"]),
+            league=league,
+            kickoff=isoparse(event["date"]).astimezone(self.tz),
+            time_valid=bool(competition.get("timeValid", event.get("timeValid", True))),
+            state=state,
+            home=home["team"]["displayName"],
+            away=away["team"]["displayName"],
+        )
+
+    def _last_five(self, team: dict) -> list[FormResult]:
+        """lastFiveGames entry (oldest first) as results from that team's side, newest first."""
+        results = []
+        for game in team.get("events", []):
+            home, away = int(game["homeTeamScore"]), int(game["awayTeamScore"])
+            at_home = str(game["homeTeamId"]) == str(team["team"]["id"])
+            goals_for, goals_against = (home, away) if at_home else (away, home)
+            results.append(
+                FormResult(
+                    result={"W": "V", "D": "E", "L": "D"}[game["gameResult"]],
+                    opponent=game["opponent"]["displayName"],
+                    score=f"{goals_for}-{goals_against}",
+                    competition=_competition_name(game.get("competitionName", "")),
+                    date=isoparse(game["gameDate"]).astimezone(self.tz),
+                )
+            )
+        return results[::-1]
+
+    def _head_to_head(self, event: dict) -> FormResult:
+        ours = next(c for c in event["competitors"] if c["team"]["id"] == str(self.team_id))
+        theirs = next(c for c in event["competitors"] if c is not ours)
+        goals_for, goals_against = int(ours["score"]), int(theirs["score"])
+        result = "V" if goals_for > goals_against else "D" if goals_for < goals_against else "E"
+        return FormResult(
+            result=result,
+            opponent=theirs["team"]["displayName"],
+            score=f"{goals_for}-{goals_against}",
+            competition=_competition_name(event.get("competitionName", "")),
+            date=isoparse(event["date"]).astimezone(self.tz),
         )
 
     def _rankings(self, league: str) -> list[PlayerRanking]:
@@ -297,6 +391,11 @@ class ESPNStatsClient:
             goals_against=int(stats.get("pointsAgainst") or 0),
             is_flamengo=entry["team"]["id"] == self.team_id,
         )
+
+
+def _competition_name(name: str) -> str:
+    """ESPN's "2026 Brasileiro Serie A " without the season."""
+    return re.sub(r"^\d{4}(-\d{2,4})?\s+", "", name).strip()
 
 
 def standings_gap(standings: list[StandingRow]) -> str | None:

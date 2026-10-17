@@ -36,6 +36,9 @@ def espn() -> respx.MockRouter:
             router.get(schedule, params={"season": "2026"}).mock(
                 return_value=httpx.Response(200, json=load(f"schedule_{league}"))
             )
+        router.get(f"{ESPN_SITE_URL}/bra.1/summary", params={"event": "401841269"}).mock(
+            return_value=httpx.Response(200, json=load("summary_preview_401841269"))
+        )
         router.get(f"{ESPN_SITE_URL}/bra.1/summary", params={"event": "401841263"}).mock(
             return_value=httpx.Response(200, json=load("summary_401841263"))
         )
@@ -278,3 +281,61 @@ def test_standings_gap_for_leader_chaser_and_tie() -> None:
         "empatado em pontos com o Palmeiras"
     )
     assert standings_gap([standing(1, "Palmeiras", 65)]) is None
+
+
+def test_new_competitions_are_tracked() -> None:
+    assert LEAGUES["bra.camp.carioca"] == "Carioca"
+    assert LEAGUES["bra.supercopa_do_brazil"] == "Supercopa"
+    assert LEAGUES["fifa.cwc"] == "Mundial de Clubes"
+
+
+def test_get_fixtures_parses_state_time_valid_and_kickoff(espn: respx.MockRouter) -> None:
+    fixtures = make_client().get_fixtures(datetime(2026, 10, 14, 18, tzinfo=TZ))
+    by_id = {f.match_id: f for f in fixtures}
+
+    bahia = by_id["401841269"]
+    assert (bahia.league, bahia.state, bahia.time_valid) == ("bra.1", "pre", True)
+    assert (bahia.home, bahia.away) == ("Bahia", "Flamengo")
+    assert bahia.kickoff == datetime(2026, 10, 18, 18, 30, tzinfo=TZ)
+    assert by_id["401912523"].league == "conmebol.libertadores"
+    assert by_id["401841263"].state == "post"  # played 3 days before: its post-game may be due
+    assert not by_id["401841313"].time_valid
+    assert all(f.kickoff >= datetime(2026, 10, 7, 18, tzinfo=TZ) for f in fixtures)
+    assert len(by_id) == len(fixtures)
+
+
+def test_get_fixtures_marks_postponed_matches(espn: respx.MockRouter) -> None:
+    data = load("fixtures_bra.1")
+    data["events"][0]["competitions"][0]["status"]["type"]["name"] = "STATUS_POSTPONED"
+    schedule = f"{ESPN_SITE_URL}/bra.1/teams/{TEAM_ID}/schedule"
+    espn.get(schedule, params={"fixture": "true"}).mock(return_value=httpx.Response(200, json=data))
+
+    fixtures = make_client().get_fixtures(datetime(2026, 10, 14, 18, tzinfo=TZ))
+
+    assert next(f for f in fixtures if f.match_id == "401841269").state == "postponed"
+
+
+def test_get_preview_reads_last_five_and_head_to_head(espn: respx.MockRouter) -> None:
+    preview = make_client().get_preview("401841269", "bra.1")
+
+    assert preview.opponent == "Bahia"
+    assert [r.result for r in preview.flamengo_form] == ["E", "V", "E", "V", "E"]
+    assert preview.flamengo_form[0].opponent == "Estudiantes de La Plata"
+    assert [r.result for r in preview.opponent_form] == ["V", "D", "D", "V", "V"]
+    assert preview.opponent_form[-1].score == "3-2"  # Bahia's goals first, away at Bragantino
+    assert [(r.result, r.score) for r in preview.head_to_head] == [
+        ("V", "2-0"),
+        ("D", "0-1"),
+        ("V", "1-0"),
+        ("V", "2-0"),
+        ("V", "1-0"),
+    ]
+    assert preview.head_to_head[0].date.date().isoformat() == "2026-04-19"
+
+
+def test_get_preview_returns_none_on_error(espn: respx.MockRouter) -> None:
+    espn.get(f"{ESPN_SITE_URL}/bra.1/summary", params={"event": "9"}).mock(
+        return_value=httpx.Response(500)
+    )
+
+    assert make_client().get_preview("9", "bra.1") is None
