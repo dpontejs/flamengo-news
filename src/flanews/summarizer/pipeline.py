@@ -249,6 +249,9 @@ def write_preview(
     home, away = ("Flamengo", match.opponent) if match.is_home else (match.opponent, "Flamengo")
     match_name = f"{home} x {away}"
     unique = list({a.url: a for a in reversed(articles) if a.content}.values())[::-1]
+    # Broad searches also bring other games' previews: pieces naming both teams go first.
+    about_match = [a for a in unique if match.opponent.lower() in a.title.lower()]
+    unique = [*about_match, *(a for a in unique if a not in about_match)]
     excerpts = [
         (a, _match_excerpt(a.content or "", match_name, MAX_PREVIEW_CHARS))
         for a in unique[:MAX_PREVIEW_ARTICLES]
