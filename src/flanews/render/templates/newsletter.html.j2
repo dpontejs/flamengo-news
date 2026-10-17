@@ -194,12 +194,16 @@
           {% endfor %}
         </tr></table>
       </td></tr>
-      <tr><td class="match-info" align="center">{{ x.competition }}{% if x.venue %} · {{ x.venue }}{% endif %}{% if pv and (pv.flamengo_form or pv.opponent_form) %}<br><span style="font-size: 11px;">Momento dos times: últimos jogos, do mais recente ao mais antigo</span>{% endif %}</td></tr>
+      <tr><td class="match-info" align="center">{{ x.competition }}{% if x.venue %} · {{ x.venue }}{% endif %}{% if n.broadcast %}<br><span style="color: #ffffff; font-weight: 700;">Onde assistir:</span> {{ n.broadcast }}{% endif %}{% if pv and (pv.flamengo_form or pv.opponent_form) %}<br><span style="font-size: 11px;">Momento dos times: últimos jogos, do mais recente ao mais antigo</span>{% endif %}</td></tr>
     </table>
   </td></tr>
-  {% if (pv and pv.head_to_head) or n.lineups or n.tips %}
+  {% if (pv and pv.head_to_head) or n.lineups or n.tips or n.outlook %}
   <tr><td class="block font">
     <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      {% if n.outlook %}
+      <p class="card-title">O que esperar</p>
+      <p class="text" style="margin: 0 0 18px 0;">{{ n.outlook }}</p>
+      {% endif %}
       {% if pv and pv.head_to_head %}
       <p class="card-title">Últimos confrontos</p>
       <p class="muted" style="margin: 0 0 8px 0;">{{ pv | h2h }}</p>

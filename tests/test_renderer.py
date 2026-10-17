@@ -409,7 +409,9 @@ def test_render_without_note_has_no_box() -> None:
     assert "Novidades" not in html and "Novidades" not in text
 
 
-def pre_game(lineups: str = "", tips: list[str] | None = None) -> Newsletter:
+def pre_game(
+    lineups: str = "", tips: list[str] | None = None, outlook: str = "", broadcast: str = ""
+) -> Newsletter:
     from flanews.models import Edition, FormResult, MatchPreview, NextMatch
 
     def result(r: str, score: str, opponent: str) -> FormResult:
@@ -445,6 +447,8 @@ def pre_game(lineups: str = "", tips: list[str] | None = None) -> Newsletter:
         ),
         lineups=lineups,
         tips=tips or [],
+        outlook=outlook,
+        broadcast=broadcast,
         topics=[
             Topic(
                 title="Jorginho de volta",
@@ -487,3 +491,26 @@ def test_pre_game_hides_lineups_and_tips_when_absent() -> None:
     for output in (html, text):
         assert "Prováveis escalações" not in output and "Palpites" not in output
         assert "Últimos confrontos" in output
+
+
+def test_pre_game_shows_outlook_first_and_where_to_watch_on_the_board() -> None:
+    newsletter = pre_game(
+        lineups="Flamengo: Rossi",
+        outlook="Duelo de líder contra time em alta.",
+        broadcast="Globo e Premiere",
+    )
+
+    html, text = render(newsletter)
+
+    for output in (html, text):
+        assert output.index("O que esperar") < output.index("Últimos confrontos")
+        assert "Duelo de líder contra time em alta." in output
+        assert "Onde assistir" in output and "Globo e Premiere" in output
+    assert html.index("Globo e Premiere") < html.index("Últimos confrontos")  # on the board
+
+
+def test_pre_game_hides_outlook_and_where_to_watch_when_absent() -> None:
+    html, text = render(pre_game())
+
+    for output in (html, text):
+        assert "O que esperar" not in output and "Onde assistir" not in output

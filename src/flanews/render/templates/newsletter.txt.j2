@@ -34,6 +34,14 @@ URUBU NEWS
 
 {{ x.competition }} · {{ x.date | when }}{% if x.venue %} · {{ x.venue }}{% endif %}
 
+{% if n.broadcast %}
+Onde assistir: {{ n.broadcast }}
+{% endif %}
+{% if n.outlook %}
+
+O que esperar
+{{ n.outlook }}
+{% endif %}
 {% if pv and (pv.flamengo_form or pv.opponent_form) %}
 
 Momento dos times
