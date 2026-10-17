@@ -39,9 +39,11 @@ sem jogo, então a agenda é recalculada a partir da ESPN, sem dias fixos. Todos
 
 ## Conteúdo
 
-- **Pré-jogo:** jogo (adversário, competição, horário, estádio); últimos 5 de cada time e últimos 5
-  confrontos (`lastFiveGames`, `seasonseries` do `summary` da ESPN); prováveis escalações e palpites da
-  imprensa extraídos das notícias pelo LLM (seção some se não houver); até 4 tópicos de futebol; tabela.
+- **Pré-jogo:** placar com os dois escudos, horário, estádio, onde assistir e os últimos 5 de cada
+  time; "O que esperar"; últimos 5 confrontos (`lastFiveGames`, `seasonseries` do `summary` da ESPN);
+  prováveis escalações (Flamengo primeiro) e palpites (inclui a enquete do "Palpite ge"), extraídos
+  das matérias pelo LLM, cada seção some se não houver; até 4 tópicos, focados no jogo; tabela.
+  Buscas próprias do jogo no Google News ("palpite", "escalação", "onde assistir", "Palpite ge").
 - **Pós-jogo:** a edição atual sem "Saiba mais" e "Brasil afora".
 - **Notícias:** tópicos, "Saiba mais", "Brasil afora", próximo jogo e tabela.
 - Assunto: `Urubu News — <Pré-jogo|Pós-jogo|Notícias> — dd/mm/aaaa: <manchete>`; continua com no máximo
@@ -76,7 +78,7 @@ def due(slots: list[Slot], now: datetime, grace: timedelta = timedelta(hours=3))
 
 ## Critérios de aceite (como testes)
 
-- [ ] `test_plan_matches_the_real_october_calendar`: dados os jogos da ESPN em 17/10/2026 (abaixo),
+- [x] `test_plan_matches_the_real_october_calendar`: dados os jogos da ESPN em 17/10/2026 (abaixo),
   então os slots são exatamente estes:
 
   | Jogo (apito) | Pré-jogo | Pós-jogo | Notícias depois |
@@ -86,17 +88,17 @@ def due(slots: list[Slot], now: datetime, grace: timedelta = timedelta(hours=3))
   | Atlético-MG, seg 26/10 20:00 | 26/10 14:00 | 27/10 08:00 | — (≤ 72 h) |
   | Vasco, qui 29/10 20:00 | 29/10 14:00 | 30/10 08:00 | 02/11 08:00 |
   | Grêmio, qua 04/11 19:30 | 04/11 13:30 | 05/11 08:00 | 3 edições até o pré de 18/11 (horário a definir → 08:00) |
-- [ ] `test_pre_game_never_before_8am_and_morning_kickoff_goes_the_night_before`.
-- [ ] `test_tbd_kickoff_gets_pre_game_at_8am_on_match_day`.
-- [ ] `test_no_post_game_when_match_not_finished` (adiado ou em andamento).
-- [ ] `test_no_news_when_gap_is_72h_or_less` e `test_long_gap_spreads_news_evenly`.
-- [ ] `test_no_fixtures_means_weekly_monday_news`.
-- [ ] `test_due_returns_slot_only_inside_grace_window`.
-- [ ] `test_pre_game_renders_form_head_to_head_lineups_and_tips` e
+- [x] `test_pre_game_never_before_8am_and_morning_kickoff_goes_the_night_before`.
+- [x] `test_tbd_kickoff_gets_pre_game_at_8am_on_match_day`.
+- [x] `test_post_without_finished_match_sends_nothing` e `test_postponed_match_has_no_slots`.
+- [x] `test_no_news_when_gap_is_72h_or_less` e `test_long_gap_spreads_news_evenly`.
+- [x] `test_no_fixtures_means_weekly_monday_news`.
+- [x] `test_due_returns_slot_only_inside_grace_window`.
+- [x] `test_pre_game_renders_form_head_to_head_lineups_and_tips` e
   `test_pre_game_hides_lineups_and_tips_when_absent`.
-- [ ] `test_post_game_has_no_extras` e `test_news_has_extras`.
-- [ ] `test_run_auto_without_due_slot_exits_without_building`.
-- [ ] `test_skip_if_sent_uses_the_slot_label`.
+- [x] `test_post_game_has_no_extras` e `test_news_has_extras`.
+- [ ] `test_run_auto_without_due_slot_exits_without_building` (PR 2).
+- [x] `test_label_of_reads_the_label_from_a_subject` e `test_due_does_not_repeat_the_edition_just_sent`.
 
 ## Verificação ponta a ponta
 
