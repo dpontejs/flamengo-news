@@ -81,3 +81,58 @@ def test_due_does_not_repeat_the_edition_just_sent(calendar) -> None:
     result = CliRunner().invoke(cli.app, ["due"])
 
     assert result.stdout == ""
+
+
+def no_build(*args, **kwargs):
+    raise AssertionError("nothing is due: the edition must not be built")
+
+
+def test_run_auto_without_due_slot_exits_without_building(calendar) -> None:
+    from flanews import pipeline
+
+    calendar.setattr(cli, "_now", lambda: datetime(2026, 10, 18, 10, 0, tzinfo=TZ))
+    calendar.setattr(pipeline, "build_newsletter", no_build)
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "auto"])
+
+    assert result.exit_code == 0, result.output
+    assert "Nenhuma edição agendada agora" in result.output
+
+
+def test_run_auto_without_calendar_exits_without_building(calendar) -> None:
+    from flanews import pipeline
+
+    def down(settings, now):
+        raise StatsUnavailable("espn down")
+
+    calendar.setattr(cli, "_fixtures", down)
+    calendar.setattr(pipeline, "build_newsletter", no_build)
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "auto"])
+
+    assert result.exit_code == 0, result.output
+    assert "Agenda da ESPN indisponível" in result.output
+
+
+def test_run_auto_resolves_the_due_slot(calendar) -> None:
+    from flanews import pipeline
+
+    seen = {}
+
+    def fake_build(edition, settings, **kwargs):
+        seen["edition"] = edition
+        raise RuntimeError("stop after resolving")
+
+    calendar.setattr(cli, "_now", lambda: datetime(2026, 10, 18, 12, 45, tzinfo=TZ))
+    calendar.setattr(pipeline, "build_newsletter", fake_build)
+
+    CliRunner().invoke(cli.app, ["run", "--edition", "auto"])
+
+    assert seen["edition"].label == "Pré-jogo — 18/10/2026"
+    assert seen["edition"].match_id == "bahia"
+
+
+def test_old_fixed_editions_are_gone(calendar) -> None:
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday"])
+
+    assert result.exit_code == 2

@@ -20,10 +20,10 @@ from flanews.render.renderer import _stat_shares, render, source_label
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITION = Edition(
-    kind="monday",
+    kind="news",
     start=datetime(2026, 10, 9, 8, tzinfo=TZ),
     end=datetime(2026, 10, 12, 8, tzinfo=TZ),
-    label="Edição de Segunda — 12/10/2026",
+    label="Notícias — 12/10/2026",
 )
 
 
@@ -108,7 +108,7 @@ def test_source_label() -> None:
 def test_render_html_contains_all_sections() -> None:
     html, _ = render(full_newsletter(), unsubscribe_url="mailto:news@fla.com?subject=sair")
 
-    assert "Edição de Segunda — 12/10/2026" in html
+    assert "Notícias — 12/10/2026" in html
     assert "Flamengo vence o Fla-Flu e segue líder" in html
     assert re.search(r">\s*1\s*</td>\s*<td[^>]*>\s*x\s*</td>\s*<td[^>]*>\s*0\s*<", html)
     assert re.search(r"65(&#39;|')\s*<strong>Jorge Carrascal</strong>", html)
@@ -138,9 +138,11 @@ def test_render_hides_missing_sections() -> None:
     newsletter = Newsletter(edition=EDITION, intro="Semana sem jogos.")
     html, text = render(newsletter)
 
-    for missing in ("Última partida", "Próximo jogo", "Classificação", "Notícias"):
+    for missing in ("Última partida", "Próximo jogo", "Classificação"):
         assert missing not in html
         assert missing not in text
+    # The edition is named "Notícias — …"; the news section itself must not show.
+    assert ">Notícias<" not in html and "== Notícias ==" not in text
     assert "Semana sem jogos." in html
     assert "descadastr" not in html
 

@@ -97,7 +97,7 @@ def due(slots: list[Slot], now: datetime, grace: timedelta = timedelta(hours=3))
 - [x] `test_pre_game_renders_form_head_to_head_lineups_and_tips` e
   `test_pre_game_hides_lineups_and_tips_when_absent`.
 - [x] `test_post_game_has_no_extras` e `test_news_has_extras`.
-- [ ] `test_run_auto_without_due_slot_exits_without_building` (PR 2).
+- [x] `test_run_auto_without_due_slot_exits_without_building`.
 - [x] `test_label_of_reads_the_label_from_a_subject` e `test_due_does_not_repeat_the_edition_just_sent`.
 
 ## Verificação ponta a ponta

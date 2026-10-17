@@ -83,3 +83,12 @@ def test_edition_send_failure_raises_mail_error() -> None:
 
     with pytest.raises(MailError, match="bad"):
         mailer().send_edition("ana@example.com", "S", "h", "t", "https://n.test/u")
+
+
+def test_confirmation_email_describes_the_match_driven_editions() -> None:
+    from pathlib import Path
+
+    templates = Path(__file__).parent.parent / "src" / "flanews" / "web" / "templates" / "email"
+    for name in ("confirm.txt.j2", "confirm.html.j2"):
+        body = (templates / name).read_text(encoding="utf-8")
+        assert "antes e depois de cada jogo" in body and "segunda e sexta" not in body

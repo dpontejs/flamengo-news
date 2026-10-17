@@ -116,14 +116,14 @@ def test_publish_latest_edition_raises_on_error() -> None:
 
 @respx.mock
 def test_latest_edition_reads_subject_and_send_time_with_the_token() -> None:
-    body = {"subject": "Urubu News — Edição de Sexta", "published_at": "2026-10-16T19:11:00-03:00"}
+    body = {"subject": "Urubu News — Notícias", "published_at": "2026-10-16T19:11:00-03:00"}
     route = respx.get("https://news.test/api/latest-edition").mock(
         return_value=httpx.Response(200, json=body)
     )
 
     edition = latest_edition(settings(), client=httpx.Client())
 
-    assert edition.subject == "Urubu News — Edição de Sexta"
+    assert edition.subject == "Urubu News — Notícias"
     assert edition.published_at.isoformat() == "2026-10-16T19:11:00-03:00"
     assert route.calls.last.request.headers["Authorization"] == "Bearer api-token"
 

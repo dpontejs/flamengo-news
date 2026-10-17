@@ -1,6 +1,6 @@
 # Urubu News
 
-Newsletter automática sobre o Flamengo (feita por um torcedor, sem ligação oficial com o clube), enviada por e-mail **toda segunda e sexta às 08:00 (BRT)**:
+Newsletter automática sobre o Flamengo (feita por um torcedor, sem ligação oficial com o clube), enviada por e-mail **antes e depois de cada jogo** (pré-jogo, pós-jogo e, nos intervalos maiores, notícias), conforme a agenda da ESPN:
 
 - **Notícias** do período, coletadas de várias fontes e resumidas por IA (Gemini).
 - **Última partida** com placar, gols e estatísticas, e uma **Análise**: leitura do jogo por IA,
@@ -28,8 +28,10 @@ GitHub Actions (cron seg/sex 11:00 UTC)
                  └─ GET /api/subscribers ── VPS: página de inscrição (FastAPI + SQLite)
 ```
 
-As notícias não têm banco: cada execução olha só a janela da edição (seg 08:00 → sex 08:00 e
-sex 08:00 → seg 08:00). Só a página de inscrição guarda dados (os e-mails, num SQLite na VPS).
+As notícias não têm banco: cada edição olha a janela desde o envio anterior (pré-jogo 6 h antes
+do apito, pós-jogo às 08:00 do dia seguinte, notícias quando o intervalo passa de 72 h; ver
+`docs/features/edicoes-por-jogo.md`). Só a página de inscrição guarda dados (e-mails e a última
+edição, num SQLite na VPS).
 
 ## Setup local
 
@@ -89,13 +91,15 @@ printf 'Chave: ' && read -rs T && echo && printf 'GEMINI_API_KEY="%s"\n' "$T" >>
 ## Comandos
 
 ```bash
-uv run python -m flanews collect --edition monday           # lista as notícias coletadas
-uv run python -m flanews stats   --edition monday           # última partida, próximo jogo e tabela
-uv run python -m flanews preview --edition monday --open    # gera out/preview-<data>.html e .txt
-uv run python -m flanews run     --edition auto             # monta e envia (respeita DRY_RUN)
+uv run python -m flanews collect --edition pre --date 2026-10-18  # lista as notícias coletadas
+uv run python -m flanews stats   --edition pre --date 2026-10-18  # última partida, próximo jogo e tabela
+uv run python -m flanews preview --edition pre --date 2026-10-18 --open  # gera out/preview-<data>.html
+uv run python -m flanews run     --edition auto                  # monta e envia (respeita DRY_RUN)
 ```
 
-- `--edition`: `monday`, `friday` ou `auto` (escolhe pela data).
+- `--edition`: `pre`, `post`, `news` (com `--date`, a edição prevista naquele dia) ou `auto` (a que
+  a agenda manda agora; sem nada vencido, sai sem enviar). `uv run python -m flanews due` mostra a
+  edição vencida.
 - `--date AAAA-MM-DD`: gera a edição de outra data.
 - `run` sai com código 1 quando não há notícia nem partida (não envia newsletter vazia) e 2 quando
   o envio falha. Ao final, imprime um resumo da execução.
@@ -103,13 +107,14 @@ uv run python -m flanews run     --edition auto             # monta e envia (res
 Primeiro envio real, só para você:
 
 ```bash
-DRY_RUN=false NEWSLETTER_RECIPIENTS=voce@email.com uv run python -m flanews run --edition monday
+DRY_RUN=false NEWSLETTER_RECIPIENTS=voce@email.com uv run python -m flanews run --edition pre --date 2026-10-18
 ```
 
 ## Envio automático (GitHub Actions)
 
-O workflow [`newsletter.yml`](.github/workflows/newsletter.yml) roda segunda e sexta às 11:00 UTC
-(o GitHub pode atrasar alguns minutos) e envia de verdade.
+O timer `newsletter-trigger` da VPS (repositório `infra`) roda `flanews due` a cada 10 minutos e
+dispara o workflow [`newsletter.yml`](.github/workflows/newsletter.yml) uma vez por edição. O
+próprio workflow roda de hora em hora como reserva (`--edition auto --skip-if-sent`).
 
 1. Cadastre os segredos do repositório a partir do `.env`, sem exibir os valores:
 
@@ -125,7 +130,7 @@ O workflow [`newsletter.yml`](.github/workflows/newsletter.yml) roda segunda e s
    terminal:
 
    ```bash
-   gh workflow run newsletter.yml -f edition=monday -f dry_run=true
+   gh workflow run newsletter.yml -f edition=pre -f date=2026-10-18 -f dry_run=true
    ```
 
 4. Cada execução publica um **resumo** na página da execução (notícias por fonte, tópicos, tokens

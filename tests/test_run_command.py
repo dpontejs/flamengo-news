@@ -96,13 +96,11 @@ def test_run_builds_renders_saves_and_sends(env, tmp_path) -> None:
     use(env, [ARTICLE], MATCH)
     route = respx.post(RESEND_URL).mock(return_value=sent(["email_9"]))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     [body] = json.loads(route.calls.last.request.content)
-    assert (
-        body["subject"] == "Urubu News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
-    )
+    assert body["subject"] == "Urubu News — Notícias — 12/10/2026: Flamengo vence o Fla-Flu"
     assert body["to"] == ["a@x.com"]
     assert "O Flamengo venceu." in body["html"] and "Eficiência decidiu." in body["text"]
     assert body["headers"]["List-Unsubscribe"] == "<mailto:news@fla.com?subject=Descadastrar>"
@@ -120,7 +118,7 @@ def test_run_renders_match_stats_in_email(env, tmp_path) -> None:
     use(env, [ARTICLE], match_with_stats)
     route = respx.post(RESEND_URL).mock(return_value=sent(["email_stats"]))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     [body] = json.loads(route.calls.last.request.content)
@@ -134,7 +132,7 @@ def test_run_refuses_to_send_empty_newsletter(env, tmp_path) -> None:
     use(env, [], None)
     route = respx.post(RESEND_URL)
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 1
     assert not route.called
@@ -146,7 +144,7 @@ def test_run_sends_stats_only_edition(env) -> None:
     use(env, [], MATCH)
     route = respx.post(RESEND_URL).mock(return_value=sent(["e"]))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     assert route.called
@@ -159,7 +157,7 @@ def test_run_send_failure_exits_with_error(env) -> None:
         return_value=httpx.Response(403, json={"message": "Domain not verified"})
     )
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 2
     assert "Domain not verified" in result.output
@@ -172,7 +170,7 @@ def test_run_dry_run_saves_but_does_not_send(env, tmp_path) -> None:
     use(env, [ARTICLE], MATCH)
     route = respx.post(RESEND_URL)
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     assert not route.called
@@ -195,11 +193,11 @@ def test_run_writes_report_to_github_step_summary(env, tmp_path) -> None:
     env.setattr(pipeline, "ESPNStatsClient", lambda **kwargs: FakeStats(MATCH))
     respx.post(RESEND_URL).mock(return_value=sent(["email_9"]))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     report = summary.read_text(encoding="utf-8")
-    assert "## Urubu News — Edição de Segunda — 12/10/2026" in report
+    assert "## Urubu News — Notícias — 12/10/2026" in report
     assert "**Resultado:** enviada para 1 destinatário" in report
     assert "Destinatários: 1 (0 pela página de inscrição)" in report
     assert "| ge | 1 |" in report
@@ -214,7 +212,7 @@ def test_run_reports_empty_edition(env, tmp_path) -> None:
     env.setenv("GITHUB_STEP_SUMMARY", str(summary))
     use(env, [], None)
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 1
     assert "**Resultado:** nada para enviar" in summary.read_text(encoding="utf-8")
@@ -227,7 +225,7 @@ def test_run_reports_send_failure_and_prints_without_github(env) -> None:
         return_value=httpx.Response(403, json={"message": "Domain not verified"})
     )
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 2
     assert "**Resultado:** falha no envio" in result.output
@@ -253,7 +251,7 @@ def test_run_sends_to_api_subscribers_with_one_click_unsubscribe(env, tmp_path) 
     route = respx.post(RESEND_URL).mock(return_value=sent(["e1", "e2"]))
     respx.put("https://news.test/api/latest-edition").mock(return_value=httpx.Response(204))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     owner, ana = json.loads(route.calls.last.request.content)
@@ -280,7 +278,7 @@ def test_run_survives_subscribers_api_failure(env, tmp_path, monkeypatch) -> Non
     respx.put("https://news.test/api/latest-edition").mock(side_effect=httpx.ConnectError("down"))
     route = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     [owner] = json.loads(route.calls.last.request.content)
@@ -308,13 +306,13 @@ def test_run_publishes_the_edition_for_new_subscribers_after_a_real_send(env) ->
     respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     publish = respx.put(PUBLISH).mock(return_value=httpx.Response(204))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     request = publish.calls.last.request
     assert request.headers["Authorization"] == "Bearer api-token"
     body = json.loads(request.content)
-    assert body["subject"].startswith("Urubu News — Edição de Segunda")
+    assert body["subject"].startswith("Urubu News — Notícias — 12/10/2026")
     assert UNSUBSCRIBE_PLACEHOLDER in body["html"] and UNSUBSCRIBE_PLACEHOLDER in body["text"]
     assert "mailto:" not in body["html"]
 
@@ -326,7 +324,7 @@ def test_dry_run_does_not_publish_the_edition(env) -> None:
     use(env, [ARTICLE], MATCH)
     publish = respx.put(PUBLISH)
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     assert not publish.called
@@ -341,7 +339,7 @@ def test_publish_failure_keeps_the_sent_outcome(env, tmp_path) -> None:
     respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     respx.put(PUBLISH).mock(return_value=httpx.Response(500))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     report = summary.read_text(encoding="utf-8")
@@ -349,8 +347,8 @@ def test_publish_failure_keeps_the_sent_outcome(env, tmp_path) -> None:
     assert "latest edition" in report
 
 
-SENT_TODAY = "Urubu News — Edição de Segunda — 12/10/2026: Flamengo vence o Fla-Flu"
-RUN_SKIPPING = ["run", "--edition", "monday", "--date", "2026-10-14", "--skip-if-sent"]
+SENT_TODAY = "Urubu News — Notícias — 12/10/2026: Flamengo vence o Fla-Flu"
+RUN_SKIPPING = ["run", "--edition", "news", "--date", "2026-10-12", "--skip-if-sent"]
 
 
 @respx.mock
@@ -375,10 +373,10 @@ def test_skip_if_sent_stops_before_building_when_the_edition_went_out(env, monke
 def test_skip_if_sent_sends_when_the_last_edition_is_older(env) -> None:
     enable_subscriptions(env)
     use(env, [ARTICLE], MATCH)
-    older = "Urubu News — Edição de Sexta — 09/10/2026: Outra"
+    older = "Urubu News — Notícias — 08/10/2026: Outra"
     respx.get(PUBLISH).mock(
         return_value=httpx.Response(
-            200, json={"subject": older, "published_at": "2026-10-09T08:05:00-03:00"}
+            200, json={"subject": older, "published_at": "2026-10-08T08:05:00-03:00"}
         )
     )
     resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
@@ -416,7 +414,7 @@ def test_without_skip_if_sent_a_manual_run_resends(env) -> None:
     resend = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     respx.put(PUBLISH).mock(return_value=httpx.Response(204))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     # The page is read for the previous topics, but without the flag the edition still goes out.
@@ -429,16 +427,16 @@ def test_run_with_note_adds_the_box_and_prefixes_the_subject(env) -> None:
     use(env, [ARTICLE], MATCH)
     route = respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     publish = respx.put(PUBLISH).mock(return_value=httpx.Response(204))
-    args = ["run", "--edition", "monday", "--date", "2026-10-14", "--note", "Cara nova."]
+    args = ["run", "--edition", "news", "--date", "2026-10-12", "--note", "Cara nova."]
 
     result = CliRunner().invoke(cli.app, args)
 
     assert result.exit_code == 0, result.output
     [body] = json.loads(route.calls.last.request.content)
-    assert body["subject"].startswith("Novidades! Urubu News — Edição de Segunda")
+    assert body["subject"].startswith("Novidades! Urubu News — Notícias — 12/10/2026")
     assert "Cara nova." in body["html"] and "Cara nova." in body["text"]
     published = json.loads(publish.calls.last.request.content)
-    assert published["subject"].startswith("Urubu News — Edição de Segunda")
+    assert published["subject"].startswith("Urubu News — Notícias — 12/10/2026")
     assert "Cara nova." not in published["html"] and "Cara nova." not in published["text"]
     assert UNSUBSCRIBE_PLACEHOLDER in published["html"]
 
@@ -475,15 +473,15 @@ def test_run_tells_the_model_what_the_previous_edition_covered(env, monkeypatch)
     llm = FakeLLMClient(respond)
     monkeypatch.setattr(pipeline, "get_llm_client", lambda settings: llm)
     previous = {
-        "subject": "Urubu News — Edição de Sexta — 09/10/2026: x",
-        "published_at": "2026-10-09T08:05:00-03:00",
+        "subject": "Urubu News — Notícias — 08/10/2026: x",
+        "published_at": "2026-10-08T08:05:00-03:00",
         "text": "== Notícias ==\n\n* Velho assunto\nResumo.\n",
     }
     respx.get(PUBLISH).mock(return_value=httpx.Response(200, json=previous))
     respx.post(RESEND_URL).mock(return_value=sent(["e1"]))
     respx.put(PUBLISH).mock(return_value=httpx.Response(204))
 
-    result = CliRunner().invoke(cli.app, ["run", "--edition", "monday", "--date", "2026-10-14"])
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "news", "--date", "2026-10-12"])
 
     assert result.exit_code == 0, result.output
     assert "- Velho assunto" in llm.prompts[0]
