@@ -82,7 +82,8 @@ def test_landing_page_has_the_form(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert 'action="/subscribe"' in response.text
-    assert "segunda e sexta" in response.text
+    assert "antes e depois de cada jogo" in response.text.lower()
+    assert "segunda e sexta" not in response.text.lower()
 
 
 def test_subscribe_creates_pending_and_sends_confirmation(client, store, mailer) -> None:

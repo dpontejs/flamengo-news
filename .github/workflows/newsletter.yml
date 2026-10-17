@@ -1,16 +1,17 @@
 name: Newsletter
 
 on:
-  # The VPS (infra: newsletter-trigger timer) dispatches at 08:00 BRT; this cron is the backup.
-  # GitHub drops scheduled runs under load, mostly on the hour, hence the odd minute.
+  # The VPS (infra: newsletter-trigger timer) checks the match calendar every 10 minutes and
+  # dispatches each edition once; this hourly cron is the backup (`auto` + --skip-if-sent: it only
+  # sends an edition that is due and not sent yet). Odd minute: GitHub drops runs on the hour.
   schedule:
-    - cron: "23 11 * * 1,5" # segunda e sexta 08:23 BRT
+    - cron: "23 * * * *"
   workflow_dispatch:
     inputs:
       edition:
-        description: "Edição"
+        description: "Edição (auto = a que a agenda dos jogos manda agora)"
         type: choice
-        options: [auto, monday, friday]
+        options: [auto, pre, post, news]
         default: auto
       date:
         description: "Data de referência (AAAA-MM-DD, opcional)"

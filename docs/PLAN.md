@@ -11,7 +11,7 @@ Newsletter por e-mail, enviada **segunda** e **sexta** de manhã, com:
 
 ```mermaid
 flowchart LR
-    CRON["Timer na VPS dispara o Actions (seg/sex 08:00 BRT; cron do Actions às 08:23 de reserva)"] --> RUN["python -m flanews run"]
+    CRON["Timer na VPS (flanews due a cada 10 min) dispara o Actions; cron de hora em hora de reserva"] --> RUN["python -m flanews run"]
     RUN --> COL["Collectors (RSS + scraping)"]
     RUN --> STATS["Stats client (ESPN)"]
     COL --> NORM["Normalize + filtrar janela de datas + dedupe"]
@@ -29,8 +29,9 @@ Não há banco de dados na v1 (simplifica rodar no GitHub Actions).
 ### Janelas das edições
 | Edição | Envio | Janela de notícias | Cobre |
 |---|---|---|---|
-| Segunda | seg 08:00 BRT | sex 08:00 → seg 08:00 | jogo do fim de semana (Brasileirão) |
-| Sexta | sex 08:00 BRT | seg 08:00 → sex 08:00 | jogo do meio de semana (Libertadores / Copa do Brasil) |
+| Pré-jogo | apito − 6 h (nunca antes das 08:00; véspera 20:00 se o apito for antes das 11:00) | desde o envio anterior | o jogo do dia |
+| Pós-jogo | 08:00 do dia seguinte | desde o pré-jogo | a partida e a repercussão |
+| Notícias | 08:00, quando o intervalo passa de 72 h (semanal sem jogo à vista) | desde o envio anterior | noticiário, Saiba mais, Brasil afora |
 
 A "última partida" = partida finalizada mais recente do Flamengo **dentro da janela**. Se não houver, a seção mostra apenas o próximo jogo.
 
@@ -222,28 +223,31 @@ DRY_RUN=true
 ## 9. CLI
 
 ```
-uv run python -m flanews collect  [--edition monday|friday] [--date YYYY-MM-DD]   # lista artigos coletados
+uv run python -m flanews collect  [--edition auto|pre|post|news] [--date YYYY-MM-DD]   # lista artigos coletados
 uv run python -m flanews stats    [--date ...]                                    # imprime stats da última partida
 uv run python -m flanews preview  [--edition ...] [--out out/preview.html]        # pipeline completo sem enviar
 uv run python -m flanews run      [--edition auto]                                # pipeline completo + envio
 ```
-`--edition auto` deduz pelo dia da semana (seg → monday, sex → friday).
+`--edition auto` usa a edição que a agenda tem vencida agora (`flanews due`); `pre|post|news` com `--date` usa a edição prevista naquele dia.
 
 ---
 
 ## 10. Agendamento
 
-Disparo principal: timer do systemd na VPS (`infra`, `newsletter-trigger`) chama o
-`workflow_dispatch` às 08:00 BRT com `dry_run=false` e `skip_if_sent=true`.
-Reserva: cron do próprio Actions (em UTC; BRT = UTC-3), também com `--skip-if-sent`:
+Edições guiadas pelos jogos (`docs/features/edicoes-por-jogo.md`): `flanews.schedule` planeja
+pré-jogo, pós-jogo e notícias a partir da agenda da ESPN e do último envio real.
+Disparo principal: timer do systemd na VPS (`infra`, `newsletter-trigger`) roda `flanews due` a
+cada 10 minutos e chama o `workflow_dispatch` com o tipo e a data da edição vencida, uma vez por
+edição (`dry_run=false`, `skip_if_sent=true`).
+Reserva: cron do próprio Actions, de hora em hora, com `--edition auto --skip-if-sent`:
 ```yaml
 on:
   schedule:
-    - cron: "23 11 * * 1,5"   # seg e sex 08:23 BRT
+    - cron: "23 * * * *"
   workflow_dispatch:
 ```
 `--skip-if-sent` consulta `GET /api/latest-edition` e encerra sem gerar nem enviar se a edição
-do dia já está lá; se a página não responder, envia (melhor repetir do que faltar).
+já está lá; se a página não responder, envia (melhor repetir do que faltar).
 Upload do HTML gerado como artifact do workflow (auditoria).
 
 ---
@@ -277,3 +281,4 @@ Lista priorizada em `docs/TASKS.md` (backlog futuro). Em resumo:
 | 2026-10-15 | Inscrição própria: app FastAPI + SQLite na VPS (`infra`), envio continua no Actions e lê `/api/subscribers` | lista de inscritos sem mexer em segredo do GitHub; usa a VPS que já existe. Um e-mail por pessoa (API de lote da Resend) para ter descadastro em um clique; se a API falhar, envia só para `NEWSLETTER_RECIPIENTS`. Ver `docs/features/inscricao.md` |
 | 2026-10-15 | Marca Urubu News e página em `urubunews.diegoponte.dev` | desvincular da marca do clube. O host antigo `flamengo.diegoponte.dev` continua servindo `/unsubscribe`, `/confirm`, `/static` e `/api` (e-mails já enviados e one-click do Gmail, que nem sempre segue redirecionamento); só `/` redireciona. Ver `docs/features/urubu-news.md` |
 | 2026-10-16 | Disparo principal pela VPS, cron do Actions como reserva, trava `--skip-if-sent` | o `schedule` do Actions é "melhor esforço": a edição de 16/10 (primeiro cron, minuto 0) foi descartada sem nenhuma execução. `workflow_dispatch` pela API entra na fila na hora. A trava usa a última edição publicada na página, porque a Idempotency-Key da Resend é por execução e não evitaria dois envios |
+| 2026-10-17 | Edições guiadas pela agenda (pré-jogo, pós-jogo, notícias) no lugar de segunda e sexta; VPS roda `flanews due` a cada 10 min | datas dos jogos mudam e há semanas sem jogo; o pré-jogo precisa sair no dia do jogo. Ver `docs/features/edicoes-por-jogo.md` |
