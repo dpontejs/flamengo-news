@@ -217,6 +217,10 @@ def run(
         try:
             newsletter = pipeline.build_newsletter(resolved, settings, llm=llm, report=report)
             _fill_report(report, newsletter)
+            if resolved.kind == "post" and newsletter.last_match is None:
+                report.outcome = "não enviada: partida não encerrada"
+                typer.echo(f"{resolved.label}: partida não encerrada, nada a enviar.")
+                return
             if pipeline.is_empty(newsletter):
                 report.outcome = "nada para enviar (sem notícias e sem partida)"
                 typer.echo(f"Nada para enviar em {resolved.label}: sem notícias e sem partida.")

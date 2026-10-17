@@ -11,6 +11,8 @@ from flanews.config import Settings
 from flanews.models import (
     Article,
     Edition,
+    FormResult,
+    MatchPreview,
     MatchStats,
     Newsletter,
     NextMatch,
@@ -22,6 +24,7 @@ from flanews.summarizer.pipeline import (
     AnalysisResponse,
     GroupResponse,
     IntroResponse,
+    PreviewResponse,
     SummaryResponse,
 )
 
@@ -67,6 +70,14 @@ STANDINGS = [
 ]
 
 MOMENT = TeamMoment(gap="1 ponto à frente do Palmeiras")
+WIN = FormResult(
+    result="V",
+    opponent="Bahia",
+    score="2-0",
+    competition="Brasileiro Serie A",
+    date=datetime(2026, 4, 19, tzinfo=TZ),
+)
+PREVIEW = MatchPreview(opponent="Estudiantes", flamengo_form=[WIN], head_to_head=[WIN])
 
 
 class FakeStats:
@@ -87,6 +98,10 @@ class FakeStats:
     def get_moment(self, end: datetime, standings: list[StandingRow]) -> TeamMoment | None:
         self.calls["moment"] = (end, standings)
         return MOMENT
+
+    def get_preview(self, match_id: str, league: str):
+        self.calls["preview"] = (match_id, league)
+        return PREVIEW
 
 
 def good_llm() -> FakeLLMClient:
@@ -313,3 +328,119 @@ def test_preview_command_shows_the_note(monkeypatch, tmp_path) -> None:
     html = (tmp_path / "out" / "preview-2026-10-12.html").read_text(encoding="utf-8")
     text = (tmp_path / "out" / "preview-2026-10-12.txt").read_text(encoding="utf-8")
     assert "Cara nova." in html and "Cara nova." in text
+
+
+def edition(kind: str) -> Edition:
+    return Edition(
+        kind=kind,
+        start=datetime(2026, 10, 19, 8, tzinfo=TZ),
+        end=datetime(2026, 10, 22, 15, 30, tzinfo=TZ),
+        label=f"{kind} — 22/10/2026",
+        match_id="401912521" if kind != "news" else None,
+        league="conmebol.libertadores" if kind != "news" else None,
+    )
+
+
+def match_llm(topics: int = 1) -> FakeLLMClient:
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is GroupResponse:
+            return {
+                "topics": [
+                    {"title": f"Tópico {i}", "article_ids": [1], "importance": 3}
+                    for i in range(topics)
+                ]
+            }
+        if schema is SummaryResponse:
+            return {"summaries": [{"topic_id": 1, "summary": "Resumo."}]}
+        if schema is IntroResponse:
+            return {"headline": "Flamengo encara o Estudiantes", "intro": "Semifinal. Volta."}
+        if schema is PreviewResponse:
+            return {"lineups": "Flamengo: Rossi; Varela...", "tips": ["ge: Flamengo 2 x 0"]}
+        raise AssertionError(f"unexpected call: {schema.__name__}")
+
+    return FakeLLMClient(respond)
+
+
+def build_kind(kind: str, llm: FakeLLMClient, stats: FakeStats, used: list) -> Newsletter:
+    def candidates(edition, settings):
+        used.append(edition.kind)
+        return [], []
+
+    return pipeline.build_newsletter(
+        edition(kind),
+        SETTINGS,
+        collect=lambda edition, settings: [ARTICLE],
+        stats_client=stats,
+        llm=llm,
+        candidates=candidates,
+    )
+
+
+def test_pre_game_builds_preview_without_extras_or_analysis() -> None:
+    stats, llm, used = FakeStats(), match_llm(), []
+
+    newsletter = build_kind("pre", llm, stats, used)
+
+    assert newsletter.preview == PREVIEW
+    assert stats.calls["preview"] == ("401912521", "conmebol.libertadores")
+    assert newsletter.lineups == "Flamengo: Rossi; Varela..."
+    assert newsletter.tips == ["ge: Flamengo 2 x 0"]
+    assert newsletter.last_match is None and newsletter.analysis == ""
+    assert "last" not in stats.calls and used == []
+    assert newsletter.next_match == NEXT
+    assert len(llm.prompts) <= 4
+    assert "O Flamengo venceu." in llm.prompts[-1]  # the preview call reads the article text
+    intro = next(p for p in llm.prompts if "abertura" in p)
+    assert "Estudiantes" in intro
+
+
+def test_pre_game_caps_topics_at_four() -> None:
+    newsletter = build_kind("pre", match_llm(topics=6), FakeStats(), [])
+
+    assert len(newsletter.topics) == 4
+
+
+def test_pre_game_without_lineups_or_tips_keeps_the_rest() -> None:
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is PreviewResponse:
+            raise LLMError("quota")
+        return match_llm().responder(prompt, schema)
+
+    newsletter = build_kind("pre", FakeLLMClient(respond), FakeStats(), [])
+
+    assert (newsletter.lineups, newsletter.tips) == ("", [])
+    assert newsletter.preview == PREVIEW and newsletter.topics
+
+
+def test_post_game_has_no_extras() -> None:
+    stats, used = FakeStats(), []
+
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is AnalysisResponse:
+            return {"analysis": "Leitura."}
+        return match_llm().responder(prompt, schema)
+
+    newsletter = build_kind("post", FakeLLMClient(respond), stats, used)
+
+    assert used == [] and newsletter.last_match == MATCH and newsletter.analysis == "Leitura."
+    assert newsletter.preview is None
+
+
+def test_news_has_extras() -> None:
+    used = []
+
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is AnalysisResponse:
+            return {"analysis": "Leitura."}
+        return match_llm().responder(prompt, schema)
+
+    build_kind("news", FakeLLMClient(respond), FakeStats(), used)
+
+    assert used == ["news"]
+
+
+def test_pre_game_with_only_the_preview_is_not_empty() -> None:
+    newsletter = Newsletter(edition=edition("pre"), intro="", next_match=NEXT, preview=PREVIEW)
+
+    assert not pipeline.is_empty(newsletter)
+    assert pipeline.is_empty(Newsletter(edition=edition("news"), intro=""))

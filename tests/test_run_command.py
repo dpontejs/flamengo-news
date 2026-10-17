@@ -437,3 +437,28 @@ def test_run_with_note_adds_the_box_and_prefixes_the_subject(env) -> None:
     assert published["subject"].startswith("Urubu News — Edição de Segunda")
     assert "Cara nova." not in published["html"] and "Cara nova." not in published["text"]
     assert UNSUBSCRIBE_PLACEHOLDER in published["html"]
+
+
+@respx.mock
+def test_post_without_finished_match_sends_nothing(env, monkeypatch) -> None:
+    from flanews.schedule import Fixture
+
+    use(env, [ARTICLE], None)
+    game = Fixture(
+        match_id="m",
+        league="bra.1",
+        kickoff=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        time_valid=True,
+        state="in",
+        home="Bahia",
+        away="Flamengo",
+    )
+    monkeypatch.setattr(cli, "_fixtures", lambda settings, now: [game])
+    monkeypatch.setattr(cli, "_last_sent", lambda settings: None)
+    resend = respx.post(RESEND_URL)
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "post", "--date", "2026-10-19"])
+
+    assert result.exit_code == 0, result.output
+    assert not resend.called
+    assert "partida não encerrada" in result.output

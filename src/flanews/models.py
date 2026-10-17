@@ -165,3 +165,6 @@ class Newsletter(BaseModel):
     last_match: MatchStats | None = None
     next_match: NextMatch | None = None
     standings: list[StandingRow] = Field(default_factory=list)
+    preview: MatchPreview | None = None  # pre-game only
+    lineups: str = ""  # pre-game: probable line-ups, from the news
+    tips: list[str] = Field(default_factory=list)  # pre-game: the press's predictions
