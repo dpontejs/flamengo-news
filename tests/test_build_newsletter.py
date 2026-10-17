@@ -169,7 +169,7 @@ def test_preview_command_writes_html_and_text(monkeypatch, tmp_path) -> None:
     newsletter = Newsletter(edition=EDITION, headline="Flamengo vence", intro="Abertura.")
     seen = {}
 
-    def fake_build(edition: Edition, settings: Settings) -> Newsletter:
+    def fake_build(edition: Edition, settings: Settings, **kwargs) -> Newsletter:
         seen["edition"] = edition
         return newsletter
 
@@ -188,7 +188,7 @@ def test_preview_command_writes_html_and_text(monkeypatch, tmp_path) -> None:
 
 def test_preview_command_custom_out(monkeypatch, tmp_path) -> None:
     newsletter = Newsletter(edition=EDITION, intro="Abertura.")
-    monkeypatch.setattr(pipeline, "build_newsletter", lambda edition, settings: newsletter)
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
 
     target = tmp_path / "x" / "minha.html"
     result = CliRunner().invoke(cli.app, ["preview", "--out", str(target)])
@@ -210,7 +210,7 @@ def test_preview_command_renders_match_stats_bars(monkeypatch, tmp_path) -> None
         statistics={"Posse de bola": ("50%", "50%"), "Finalizações": ("10", "8")},
     )
     newsletter = Newsletter(edition=EDITION, intro="Abertura.", last_match=match)
-    monkeypatch.setattr(pipeline, "build_newsletter", lambda edition, settings: newsletter)
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
     monkeypatch.chdir(tmp_path)
 
     result = CliRunner().invoke(cli.app, ["preview", "--edition", "monday", "--date", "2026-10-14"])
@@ -318,7 +318,7 @@ def test_collect_candidates_survives_failing_collector(monkeypatch) -> None:
 
 def test_preview_command_shows_the_note(monkeypatch, tmp_path) -> None:
     newsletter = Newsletter(edition=EDITION, headline="Flamengo vence", intro="Abertura.")
-    monkeypatch.setattr(pipeline, "build_newsletter", lambda edition, settings: newsletter)
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda *args, **kwargs: newsletter)
     monkeypatch.chdir(tmp_path)
     args = ["preview", "--edition", "monday", "--date", "2026-10-14", "--note", "Cara nova."]
 

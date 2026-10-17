@@ -125,6 +125,18 @@ def publish_latest_edition(
 class LatestEdition(BaseModel):
     subject: str
     published_at: datetime
+    text: str = ""
+
+    @property
+    def topic_titles(self) -> list[str]:
+        """The "* title" lines of the plain-text "Notícias" section."""
+        titles, in_news = [], False
+        for line in self.text.splitlines():
+            if line.startswith("== "):
+                in_news = line.strip() == "== Notícias =="
+            elif in_news and line.startswith("* "):
+                titles.append(line[2:].strip())
+        return titles
 
 
 def latest_edition(settings: Settings, client: httpx.Client | None = None) -> LatestEdition | None:

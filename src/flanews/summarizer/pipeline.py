@@ -101,6 +101,8 @@ def group_articles(
     learn_more: list[Article] | None = None,
     brazil: list[Article] | None = None,
     max_topics: int = MAX_TOPICS,
+    published: list[str] | None = None,
+    focus: NextMatch | None = None,
 ) -> Selection:
     """Group articles into topics and pick candidates for the short sections (1 call).
 
@@ -115,6 +117,8 @@ def group_articles(
         learn_more=learn_more,
         brazil=brazil,
         max_topics=max_topics,
+        published=published or [],
+        focus=focus,
         learn_more_picks=LEARN_MORE_PICKS,
         brazil_picks=BRAZIL_PICKS,
         start=min(dates).strftime("%d/%m/%Y"),
@@ -239,6 +243,7 @@ def summarize_edition(
     extract: Callable[[list[Article]], list[Article]] | None = None,
     max_topics: int = MAX_TOPICS,
     next_match: NextMatch | None = None,
+    published: list[str] | None = None,
 ) -> EditionSummary:
     """Group, pick short items, summarize everything and write the opening (3 LLM calls).
 
@@ -248,7 +253,9 @@ def summarize_edition(
     """
     selection = Selection()
     if articles or learn_more or brazil:
-        selection = group_articles(articles, llm, learn_more, brazil, max_topics)
+        selection = group_articles(
+            articles, llm, learn_more, brazil, max_topics, published=published, focus=next_match
+        )
         picks = [*selection.learn_more, *selection.brazil]
         if picks and extract is not None:
             extracted = extract(picks)

@@ -118,6 +118,7 @@ def build_newsletter(
     candidates: Callable[[Edition, Settings], tuple[list[Article], list[Article]]] | None = None,
     extract: Callable[[list[Article]], list[Article]] | None = None,
     report: RunReport | None = None,
+    published_topics: list[str] | None = None,
 ) -> Newsletter:
     """Collect news and stats for the edition and summarize them into a Newsletter.
 
@@ -165,6 +166,7 @@ def build_newsletter(
             extract=extract or _extract_picks,
             max_topics=PRE_GAME_TOPICS if pre_game else MAX_TOPICS,
             next_match=next_match if pre_game else None,
+            published=published_topics,
         )
     except LLMError as e:
         logger.error("Summarization failed, sending stats only: %s", e)

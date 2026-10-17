@@ -459,4 +459,8 @@ def test_latest_edition_subject_after_publishing(client) -> None:
     response = client.get("/api/latest-edition", headers=AUTH)
 
     assert response.status_code == 200
-    assert response.json() == {"subject": EDITION["subject"], "published_at": NOW.isoformat()}
+    assert response.json() == {
+        "subject": EDITION["subject"],
+        "published_at": NOW.isoformat(),
+        "text": EDITION["text"],
+    }

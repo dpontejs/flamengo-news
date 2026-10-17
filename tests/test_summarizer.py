@@ -257,3 +257,39 @@ def test_group_prompt_requires_accented_titles() -> None:
 
     assert "acentuação" in llm.prompts[0]
     assert "nunca remova nem substitua acentos" in llm.prompts[0]
+
+
+def test_group_prompt_lists_topics_already_published() -> None:
+    llm = FakeLLMClient(responder(TWO_TOPICS))
+
+    summarize_edition(ARTICLES, llm, published=["Flamengo empata com o Estudiantes"])
+
+    group = llm.prompts[0]
+    assert "Já publicado na edição anterior" in group
+    assert "- Flamengo empata com o Estudiantes" in group
+
+
+def test_group_prompt_has_no_published_block_without_history() -> None:
+    llm = FakeLLMClient(responder(TWO_TOPICS))
+
+    summarize_edition(ARTICLES, llm)
+
+    assert "Já publicado" not in llm.prompts[0]
+
+
+def test_pre_game_group_prompt_focuses_on_the_next_match() -> None:
+    from flanews.models import NextMatch
+
+    bahia = NextMatch(
+        opponent="Bahia",
+        competition="Brasileirão",
+        date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        is_home=False,
+    )
+    llm = FakeLLMClient(responder(TWO_TOPICS))
+
+    summarize_edition(ARTICLES, llm, next_match=bahia)
+
+    group = llm.prompts[0]
+    assert "edição de pré-jogo de Bahia x Flamengo" in group
+    assert "O jogo anterior só entra com fato novo" in group

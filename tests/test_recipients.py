@@ -141,3 +141,16 @@ def test_latest_edition_subject_raises_on_error() -> None:
 
     with pytest.raises(httpx.HTTPStatusError):
         latest_edition(settings(), client=httpx.Client())
+
+
+def test_latest_edition_topic_titles_come_from_the_news_section() -> None:
+    from flanews.send.recipients import LatestEdition
+
+    text = (
+        "URUBU NEWS\n\n== Notícias ==\n\n* Empate em La Plata\nResumo.\n  - ge: https://x\n\n"
+        "* Jorginho volta\nResumo.\n\n== Saiba mais ==\n\n* [Basquete] Título\n"
+    )
+    edition = LatestEdition(subject="s", published_at="2026-10-16T19:11:00-03:00", text=text)
+
+    assert edition.topic_titles == ["Empate em La Plata", "Jorginho volta"]
+    assert LatestEdition(subject="s", published_at="2026-10-16T19:11:00-03:00").topic_titles == []

@@ -154,7 +154,9 @@ def preview(
     _setup_logging()
     resolved = _resolve(edition, date)
     settings = get_settings()
-    newsletter = pipeline.build_newsletter(resolved, settings)
+    newsletter = pipeline.build_newsletter(
+        resolved, settings, published_topics=_published_topics(settings)
+    )
     html_path = out or Path("out") / f"preview-{resolved.end:%Y-%m-%d}.html"
     html_path.parent.mkdir(parents=True, exist_ok=True)
     html, text = render(
@@ -220,7 +222,13 @@ def run(
 
     with ProblemCollector() as problems:
         try:
-            newsletter = pipeline.build_newsletter(resolved, settings, llm=llm, report=report)
+            newsletter = pipeline.build_newsletter(
+                resolved,
+                settings,
+                llm=llm,
+                report=report,
+                published_topics=_published_topics(settings),
+            )
             _fill_report(report, newsletter)
             if resolved.kind == "post" and newsletter.last_match is None:
                 report.outcome = "não enviada: partida não encerrada"
@@ -358,6 +366,12 @@ def _now() -> datetime:
 def _fixtures(settings, now: datetime) -> list[Fixture]:
     client = ESPNStatsClient(team_id=settings.FLAMENGO_TEAM_ID, tz_name=settings.TIMEZONE)
     return client.get_fixtures(now)
+
+
+def _published_topics(settings) -> list[str]:
+    """Topics of the edition already sent, so the model does not repeat them."""
+    latest = _latest(settings)
+    return latest.topic_titles if latest else []
 
 
 def _latest(settings) -> LatestEdition | None:
