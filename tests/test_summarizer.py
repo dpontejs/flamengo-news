@@ -347,3 +347,29 @@ def test_preview_reads_up_to_twelve_articles_and_accepts_pundit_polls() -> None:
 
     assert "Texto 12" in llm.prompts[0] and "Texto 13" not in llm.prompts[0]
     assert "enquete" in llm.prompts[0]
+
+
+def test_preview_puts_articles_about_this_match_first() -> None:
+    from flanews.models import NextMatch
+    from flanews.summarizer.pipeline import PreviewResponse, write_preview
+
+    other_games = [
+        make_article(i, f"Outro jogo {i}").model_copy(
+            update={"title": f"Palpites e dicas para Botafogo x Chapecoense {i}"}
+        )
+        for i in range(1, 15)
+    ]
+    ours = make_article(99, "Bahia: Ronaldo; Gilberto. Flamengo: Rossi; Varela").model_copy(
+        update={"title": "Bahia x Flamengo Palpite – Onde assistir e escalações (18/10)"}
+    )
+    bahia = NextMatch(
+        opponent="Bahia",
+        competition="Brasileirão",
+        date=datetime(2026, 10, 18, 18, 30, tzinfo=TZ),
+        is_home=False,
+    )
+    llm = FakeLLMClient(lambda prompt, schema: PreviewResponse())
+
+    write_preview([*other_games, ours], bahia, llm)
+
+    assert "Bahia: Ronaldo; Gilberto" in llm.prompts[0]
