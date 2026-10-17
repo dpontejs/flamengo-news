@@ -82,7 +82,7 @@ def collect_articles(
 
 
 MATCH_SEARCH_DAYS = 3  # pre-game pieces (tips, line-ups) appear up to two days ahead
-MATCH_QUERIES = ("palpite", "escalação")
+ROUND_TIPS_QUERY = '"Palpite ge"'  # ge's pundits' picks for every Brasileirão match of the round
 
 
 def collect_match_articles(
@@ -95,10 +95,14 @@ def collect_match_articles(
     window = edition.model_copy(
         update={"start": edition.end - timedelta(days=MATCH_SEARCH_DAYS), "end": edition.end}
     )
-    collectors = [
-        GoogleNewsCollector(rss_url=google_news_url(f'"{home} x {away}" {query}'))
-        for query in MATCH_QUERIES
+    queries = [
+        f"{home} {away} palpite",
+        f'"{home} x {away}" escalação',
+        f'"{home} x {away}" onde assistir',
     ]
+    if match.competition == "Brasileirão":
+        queries.append(ROUND_TIPS_QUERY)
+    collectors = [GoogleNewsCollector(rss_url=google_news_url(q)) for q in queries]
     return collect_articles(window, settings, collectors=collectors)
 
 
@@ -206,7 +210,7 @@ def build_newsletter(
     if pre_game and next_match is not None and llm is not None:
         match_articles = (match_collect or collect_match_articles)(edition, next_match, settings)
         try:
-            notes = write_preview([*match_articles, *articles], next_match, llm)
+            notes = write_preview([*match_articles, *articles], next_match, llm, preview)
         except LLMError as e:
             logger.error("Line-ups and tips failed, sending the preview without them: %s", e)
 
@@ -225,6 +229,8 @@ def build_newsletter(
         preview=preview,
         lineups=notes.lineups,
         tips=notes.tips,
+        outlook=notes.outlook,
+        broadcast=notes.broadcast,
     )
 
 

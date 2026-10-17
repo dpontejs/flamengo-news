@@ -21,7 +21,7 @@ from flanews.processing.dedupe import (
 
 logger = logging.getLogger(__name__)
 
-MAX_CONTENT_CHARS = 4000
+MAX_CONTENT_CHARS = 20000  # round-wide pieces ("Palpite ge") reach their match late; prompts cut
 MAX_WORKERS = 5
 DEFAULT_MIN_INTERVAL = 1.0
 TZ = ZoneInfo("America/Sao_Paulo")

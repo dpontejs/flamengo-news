@@ -168,3 +168,5 @@ class Newsletter(BaseModel):
     preview: MatchPreview | None = None  # pre-game only
     lineups: str = ""  # pre-game: probable line-ups, from the news
     tips: list[str] = Field(default_factory=list)  # pre-game: the press's predictions
+    outlook: str = ""  # pre-game: "O que esperar"
+    broadcast: str = ""  # pre-game: where to watch

@@ -5,7 +5,15 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pydantic import BaseModel, Field
 
-from flanews.models import Article, Brief, MatchStats, NextMatch, TeamMoment, Topic
+from flanews.models import (
+    Article,
+    Brief,
+    MatchPreview,
+    MatchStats,
+    NextMatch,
+    TeamMoment,
+    Topic,
+)
 from flanews.summarizer.client import LLMClient, LLMError
 
 logger = logging.getLogger(__name__)
@@ -62,6 +70,8 @@ class IntroResponse(BaseModel):
 class PreviewResponse(BaseModel):
     lineups: str = ""
     tips: list[str] = Field(default_factory=list)
+    outlook: str = ""
+    broadcast: str = ""
 
 
 class AnalysisResponse(BaseModel):
@@ -208,21 +218,50 @@ def write_intro(
     return llm.generate_json(prompt, IntroResponse)
 
 
-def write_preview(articles: list[Article], match: NextMatch, llm: LLMClient) -> PreviewResponse:
-    """Probable line-ups and the press's predictions, read from the pre-game articles' text.
+def _match_excerpt(content: str, match_name: str, max_chars: int) -> str:
+    """The part of a long text about this match (round-wide pieces list every game)."""
+    at = content.find(match_name)
+    if len(content) <= max_chars or at < max_chars // 2:
+        return content[:max_chars]
+    start = max(0, at - max_chars // 4)
+    return "…" + content[start : start + max_chars]
+
+
+def flamengo_first(lineups: str) -> str:
+    """Flamengo's line first, then the opponent's, then anything else (absences)."""
+    lines = [line.strip() for line in lineups.splitlines() if line.strip()]
+    ours = [line for line in lines if line.lower().startswith("flamengo")]
+    others = [line for line in lines if line not in ours]
+    teams = [line for line in others if not line.lower().startswith("desfalque")]
+    return "\n".join([*ours, *teams, *[line for line in others if line not in teams]])
+
+
+def write_preview(
+    articles: list[Article],
+    match: NextMatch,
+    llm: LLMClient,
+    preview: MatchPreview | None = None,
+) -> PreviewResponse:
+    """Outlook, where to watch, probable line-ups and the press's predictions for the match.
 
     Articles come in priority order (match searches first); repeated URLs are dropped.
     """
+    home, away = ("Flamengo", match.opponent) if match.is_home else (match.opponent, "Flamengo")
+    match_name = f"{home} x {away}"
     unique = list({a.url: a for a in reversed(articles) if a.content}.values())[::-1]
+    excerpts = [
+        (a, _match_excerpt(a.content or "", match_name, MAX_PREVIEW_CHARS))
+        for a in unique[:MAX_PREVIEW_ARTICLES]
+    ]
     prompt = render_prompt(
-        "preview",
-        match=match,
-        articles=unique[:MAX_PREVIEW_ARTICLES],
-        max_chars=MAX_PREVIEW_CHARS,
+        "preview", match=match, match_name=match_name, excerpts=excerpts, preview=preview
     )
     response = llm.generate_json(prompt, PreviewResponse)
     return PreviewResponse(
-        lineups=response.lineups.strip(), tips=[t.strip() for t in response.tips if t.strip()]
+        lineups=flamengo_first(response.lineups),
+        tips=[t.strip() for t in response.tips if t.strip()],
+        outlook=response.outlook.strip(),
+        broadcast=response.broadcast.strip(),
     )
 
 

@@ -94,7 +94,7 @@ def test_extract_content_truncates_long_text() -> None:
         f"<p>Parágrafo {i}: "
         + "O Flamengo treinou forte nesta manhã no Ninho do Urubu. " * 20
         + "</p>"
-        for i in range(10)
+        for i in range(40)  # ~46k chars, above MAX_CONTENT_CHARS
     )
     html = f"<html><body><article><h1>Título</h1>{paragraphs}</article></body></html>"
     respx.get(ARTICLE_URL).mock(return_value=httpx.Response(200, text=html))

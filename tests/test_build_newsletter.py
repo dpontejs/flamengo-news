@@ -490,5 +490,47 @@ def test_collect_match_articles_searches_the_match_in_the_last_three_days(monkey
     assert articles == [TIP]
     end = edition("pre").end
     assert seen["window"] == (end - timedelta(days=3), end)
-    assert any("Bahia+x+Flamengo%22+palpite" in u for u in seen["urls"])
+    assert any("q=Bahia+Flamengo+palpite&" in u for u in seen["urls"])
     assert any("Bahia+x+Flamengo%22+escala%C3%A7%C3%A3o" in u for u in seen["urls"])
+    assert any("Bahia+x+Flamengo%22+onde+assistir" in u for u in seen["urls"])
+    assert not any("Palpite+ge" in u for u in seen["urls"])  # NEXT is a Libertadores match
+
+
+def test_collect_match_articles_adds_the_round_tips_for_brasileirao(monkeypatch) -> None:
+    seen = {}
+
+    def fake_collect(edition, settings, collectors):
+        seen["urls"] = [c.rss_url for c in collectors]
+        return []
+
+    monkeypatch.setattr(pipeline, "collect_articles", fake_collect)
+    league = NEXT.model_copy(update={"opponent": "Bahia", "competition": "Brasileirão"})
+
+    pipeline.collect_match_articles(edition("pre"), league, SETTINGS)
+
+    assert any("q=%22Palpite+ge%22&" in u for u in seen["urls"])
+
+
+def test_pre_game_keeps_outlook_and_where_to_watch() -> None:
+    def respond(prompt: str, schema: type[BaseModel]) -> dict:
+        if schema is PreviewResponse:
+            return {
+                "lineups": "Bahia: Ronaldo; Gilberto\nFlamengo: Rossi; Varela\nDesfalques: Danilo",
+                "tips": [],
+                "outlook": "Jogo equilibrado na Fonte Nova.",
+                "broadcast": "Premiere (pay-per-view)",
+            }
+        return match_llm().responder(prompt, schema)
+
+    llm = FakeLLMClient(respond)
+    newsletter = build_kind("pre", llm, FakeStats(), [])
+
+    assert newsletter.outlook == "Jogo equilibrado na Fonte Nova."
+    assert newsletter.broadcast == "Premiere (pay-per-view)"
+    assert newsletter.lineups.splitlines() == [
+        "Flamengo: Rossi; Varela",
+        "Bahia: Ronaldo; Gilberto",
+        "Desfalques: Danilo",
+    ]
+    preview_prompt = llm.prompts[-1]
+    assert "Últimos confrontos" in preview_prompt and "2-0 Bahia" in preview_prompt
