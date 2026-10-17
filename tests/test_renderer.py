@@ -471,10 +471,13 @@ def test_pre_game_renders_form_head_to_head_lineups_and_tips() -> None:
             output.index("Jorginho de volta"),
         ]
         assert order == sorted(order)
-        assert "Bahia x Flamengo" in output and "Arena Fonte Nova" in output
+        assert "Arena Fonte Nova" in output
         assert "Flamengo: Rossi; Varela" in output and "ge, Fulano: Flamengo 2 x 1" in output
         assert "Estudiantes de La Plata" in output and "Mirassol" in output
     assert "Próximo jogo" not in html  # the match is already at the top
+    assert "Bahia x Flamengo" in text
+    board = html[html.index("O jogo") : html.index("Últimos confrontos")]
+    assert board.index(">Bahia<") < board.index("18:30") < board.index(">Flamengo<")  # home left
     assert "1 vitória do Flamengo, 0 empates e 1 do Bahia" in text
 
 

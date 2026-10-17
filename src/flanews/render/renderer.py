@@ -10,6 +10,7 @@ from flanews.models import MatchEvent, MatchPreview, Newsletter, StandingRow
 from flanews.stats.table import standings_window
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
+FLAMENGO_LOGO = "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
 DEFAULT_LOGO_URL = "https://urubunews.diegoponte.dev/static/logo-email.png"
 WEEKDAYS = ("segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo")
 SOURCE_LABELS = {
@@ -110,6 +111,7 @@ def render(
     context = {
         "n": newsletter,
         "note": note,
+        "flamengo_logo": FLAMENGO_LOGO,
         "logo_url": logo_url,
         "standings": standings_window(newsletter.standings),
         "unsubscribe_url": unsubscribe_url,
