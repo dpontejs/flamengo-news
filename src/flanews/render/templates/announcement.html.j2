@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ a.subject }}</title>
+<style>
+  body { margin: 0; padding: 0; background-color: #F4EFE6; }
+  .wrapper { background-color: #F4EFE6; }
+  .container { background-color: #ffffff; }
+  .font { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1C1C1C; }
+  .header { background-color: #F4EFE6; padding: 16px 24px 12px 24px; }
+  .stripe { background-color: #A51C24; height: 5px; line-height: 5px; font-size: 5px; }
+  .body { padding: 24px 24px 8px 24px; }
+  .headline { font-size: 24px; font-weight: 800; line-height: 1.25; margin: 0 0 16px 0; color: #141414; }
+  .text { font-size: 15px; line-height: 1.55; margin: 0 0 14px 0; color: #222222; }
+  .list { font-size: 15px; line-height: 1.55; margin: 0 0 14px 0; padding-left: 20px; color: #222222; }
+  .item { margin: 0 0 8px 0; }
+  .link { color: #A51C24; text-decoration: none; font-weight: 600; }
+  .footer { padding: 20px 24px 28px 24px; color: #777777; font-size: 12px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<table role="presentation" class="wrapper" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td align="center" style="padding: 16px 8px;">
+<table role="presentation" class="container font" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
+
+  <tr><td class="header font">
+    <img src="{{ logo_url }}" alt="Urubu News" width="320" height="127" style="display: block; border: 0; color: #141414; font-size: 26px; font-weight: 800;">
+  </td></tr>
+  <tr><td class="stripe">&nbsp;</td></tr>
+
+  <tr><td class="body font">
+    <h1 class="headline">{{ a.subject }}</h1>
+    {% for block in a.blocks %}
+    {% if block[0].startswith("- ") %}
+    <ul class="list">
+      {% for item in block %}<li class="item">{{ bold(item[2:]) }}</li>{% endfor %}
+    </ul>
+    {% else %}
+    <p class="text">{{ bold(block[0]) }}</p>
+    {% endif %}
+    {% endfor %}
+  </td></tr>
+
+  <tr><td class="footer font">
+    Feito por um torcedor, sem ligação oficial com o clube.
+    {% if subscribe_url %}<br>Recebeu de alguém? Inscreva-se em <a class="link" href="{{ subscribe_url }}">{{ subscribe_url | replace("https://", "") }}</a>.{% endif %}
+    {% if unsubscribe_url %}<br>Não quer mais receber? <a class="link" href="{{ unsubscribe_url }}">Clique para se descadastrar</a>.{% endif %}
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

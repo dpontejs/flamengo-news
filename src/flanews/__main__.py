@@ -14,6 +14,7 @@ from flanews import __version__, pipeline
 from flanews.config import get_settings
 from flanews.edition import edition_from_slot, resolve_match_edition
 from flanews.models import Edition, Newsletter
+from flanews.render.announcement import parse_announcement, render_announcement
 from flanews.render.renderer import render
 from flanews.report import ProblemCollector, RunReport
 from flanews.schedule import LABELS, TZ, Fixture, Slot, label_of, plan
@@ -294,6 +295,44 @@ def run(
                 report.output_tokens = usage.output_tokens
             report.problems = problems.messages
             _publish_report(report)
+
+
+@app.command()
+def announce(
+    source: Annotated[Path, typer.Argument(help="Markdown file: '# subject', then paragraphs")],
+) -> None:
+    """Send a one-off e-mail to every recipient (respects DRY_RUN); the page is left as is."""
+    _setup_logging()
+    settings = get_settings()
+    announcement = parse_announcement(source.read_text(encoding="utf-8"))
+    subscribe = settings.PUBLIC_URL.rstrip("/") if settings.SUBSCRIBERS_API_TOKEN else None
+    html, text = render_announcement(
+        announcement,
+        unsubscribe_url=UNSUBSCRIBE_PLACEHOLDER,
+        subscribe_url=subscribe,
+        logo_url=_logo(settings),
+    )
+    mailto = pipeline.unsubscribe_url(settings)
+    html_path = Path("out") / f"{source.stem}.html"
+    html_path.parent.mkdir(parents=True, exist_ok=True)
+    html_path.write_text(html.replace(UNSUBSCRIBE_PLACEHOLDER, mailto), encoding="utf-8")
+    html_path.with_suffix(".txt").write_text(
+        text.replace(UNSUBSCRIBE_PLACEHOLDER, mailto), encoding="utf-8"
+    )
+    recipients = resolve_recipients(settings).recipients
+    # Not published to the page: the schedule and new subscribers only see real editions.
+    try:
+        ids = ResendSender.from_settings(settings).send(
+            announcement.subject, html, text, recipients
+        )
+    except SendError as e:
+        typer.echo(f"Falha no envio: {e}")
+        raise typer.Exit(code=2) from e
+    noun = "destinatário" if len(ids) == 1 else "destinatários"
+    status = f"enviado para {len(ids)} {noun}" if ids else "não enviado (DRY_RUN)"
+    typer.echo(
+        f"{announcement.subject}: {status} ({len(recipients)} na lista); cópia em {html_path}"
+    )
 
 
 def _already_sent(settings, label: str) -> bool:
