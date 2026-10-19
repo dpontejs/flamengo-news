@@ -55,6 +55,7 @@ cp .env.example .env   # depois preencha as chaves (veja abaixo)
 | `PUBLIC_URL` | não | endereço da página de inscrição (padrão `https://urubunews.diegoponte.dev`) |
 | `SUBSCRIBE_SECRET` | só na VPS | assina os links de confirmação e descadastro |
 | `SUBSCRIBERS_DB` | só na VPS | caminho do SQLite (padrão `data/subscribers.db`) |
+| `NOTIFY_EMAIL` | só na VPS | recebe um e-mail a cada inscrição confirmada (opcional) |
 | `DRY_RUN` | não | padrão `true`: monta tudo mas não envia |
 | `FLAMENGO_TEAM_ID` | não | id do Flamengo na ESPN (`819`) |
 | `TIMEZONE` | não | padrão `America/Sao_Paulo` |

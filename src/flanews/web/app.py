@@ -177,10 +177,26 @@ def create_app(
         # Only the first click welcomes: reopening the link must not resend the edition.
         first_time = before is not None and before.status == "pending"
         welcomed = first_time and send_latest_edition(email)
+        if first_time:
+            notify_owner(email)
         text = "Pronto: você vai receber a Urubu News antes e depois de cada jogo do Flamengo."
         if welcomed:
             text += " Mandamos a última edição para o seu e-mail para você já ir lendo."
         return message(request, "Inscrição confirmada!", text + " Saudações rubro-negras!")
+
+    def notify_owner(email: str) -> None:
+        if not settings.NOTIFY_EMAIL:
+            return
+        active = len(store.active())
+        noun = "assinante ativo" if active == 1 else "assinantes ativos"
+        try:
+            mailer.send_notification(
+                settings.NOTIFY_EMAIL,
+                f"Novo assinante na Urubu News: {email}",
+                f"{email} confirmou a inscrição.\n\nAgora são {active} {noun}.\n",
+            )
+        except MailError as e:
+            logger.error("New subscriber notification failed: %s", e)
 
     def send_latest_edition(email: str) -> bool:
         edition = store.latest_edition()
