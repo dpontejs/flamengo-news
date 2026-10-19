@@ -21,8 +21,10 @@ class FakeMailer:
     def __init__(self) -> None:
         self.sent: list[tuple[str, str]] = []
         self.editions: list[tuple[str, str, str, str, str]] = []
+        self.notifications: list[tuple[str, str, str]] = []
         self.fail = False
         self.fail_editions = False
+        self.fail_notifications = False
 
     def send_confirmation(self, email: str, confirm_url: str) -> None:
         if self.fail:
@@ -35,6 +37,11 @@ class FakeMailer:
         if self.fail_editions:
             raise MailError("Resend is down")
         self.editions.append((email, subject, html, text, unsubscribe_url))
+
+    def send_notification(self, to: str, subject: str, text: str) -> None:
+        if self.fail_notifications:
+            raise MailError("Resend is down")
+        self.notifications.append((to, subject, text))
 
 
 class Clock:
@@ -66,6 +73,17 @@ def client(store, mailer, clock) -> TestClient:
         SUBSCRIBE_SECRET=SECRET,
         SUBSCRIBERS_API_TOKEN=API_TOKEN,
         PUBLIC_URL="https://news.test",
+    )
+    return TestClient(create_app(settings, store=store, mailer=mailer, now=clock))
+
+
+@pytest.fixture
+def notify_client(store, mailer, clock) -> TestClient:
+    settings = Settings(
+        SUBSCRIBE_SECRET=SECRET,
+        SUBSCRIBERS_API_TOKEN=API_TOKEN,
+        PUBLIC_URL="https://news.test",
+        NOTIFY_EMAIL="dono@example.com",
     )
     return TestClient(create_app(settings, store=store, mailer=mailer, now=clock))
 
@@ -469,3 +487,31 @@ def test_latest_edition_subject_after_publishing(client) -> None:
         "published_at": NOW.isoformat(),
         "text": EDITION["text"],
     }
+
+
+def test_new_confirmed_subscriber_notifies_the_owner_once(notify_client, mailer) -> None:
+    confirm_new_subscriber(notify_client, mailer, "bia@example.com")
+    url = f"/confirm?token={token_from(mailer.sent[-1][1])}"
+    notify_client.get(url)  # reopening the link is not a new subscriber
+    subscribe(notify_client, "caio@example.com")  # pending: not a subscriber yet
+
+    [(to, subject, text)] = mailer.notifications
+    assert to == "dono@example.com"
+    assert subject == "Novo assinante na Urubu News: bia@example.com"
+    assert "bia@example.com" in text and "1 assinante ativo" in text
+
+
+def test_no_notification_without_notify_email(client, mailer) -> None:
+    confirm_new_subscriber(client, mailer)
+
+    assert mailer.notifications == []
+
+
+def test_notification_failure_keeps_the_subscription(notify_client, store, mailer) -> None:
+    mailer.fail_notifications = True
+
+    response = confirm_new_subscriber(notify_client, mailer)
+
+    assert response.status_code == 200
+    assert "Inscrição confirmada" in response.text
+    assert store.active() == ["ana@example.com"]

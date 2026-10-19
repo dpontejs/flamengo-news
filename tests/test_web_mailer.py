@@ -92,3 +92,30 @@ def test_confirmation_email_describes_the_match_driven_editions() -> None:
     for name in ("confirm.txt.j2", "confirm.html.j2"):
         body = (templates / name).read_text(encoding="utf-8")
         assert "antes e depois de cada jogo" in body and "segunda e sexta" not in body
+
+
+@respx.mock
+def test_sends_the_owner_notification_as_plain_text() -> None:
+    route = respx.post("https://api.resend.com/emails").mock(
+        return_value=httpx.Response(200, json={"id": "e1"})
+    )
+
+    mailer().send_notification("dono@example.com", "Novo assinante", "bia@example.com confirmou.")
+
+    payload = json.loads(route.calls.last.request.content)
+    assert payload == {
+        "from": "Flamengo News <news@example.com>",
+        "to": ["dono@example.com"],
+        "subject": "Novo assinante",
+        "text": "bia@example.com confirmou.",
+    }
+
+
+@respx.mock
+def test_owner_notification_failure_raises_mail_error() -> None:
+    respx.post("https://api.resend.com/emails").mock(
+        return_value=httpx.Response(422, json={"message": "invalid"})
+    )
+
+    with pytest.raises(MailError, match="invalid"):
+        mailer().send_notification("dono@example.com", "Novo assinante", "x")

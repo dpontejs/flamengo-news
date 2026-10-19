@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     SUBSCRIBE_SECRET: str | None = None  # signs confirmation and unsubscribe links
     SUBSCRIBERS_API_TOKEN: str | None = None  # protects /api/subscribers (and enables it in run)
     SUBSCRIBERS_DB: str = "data/subscribers.db"
+    NOTIFY_EMAIL: str | None = None  # gets an e-mail whenever someone confirms a subscription
 
     @field_validator("NEWSLETTER_RECIPIENTS")
     @classmethod

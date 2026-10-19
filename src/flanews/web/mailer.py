@@ -29,6 +29,8 @@ class Mailer(Protocol):
         self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
     ) -> None: ...
 
+    def send_notification(self, to: str, subject: str, text: str) -> None: ...
+
 
 _env = Environment(
     loader=FileSystemLoader(TEMPLATES),
@@ -79,6 +81,19 @@ class ResendConfirmationMailer:
         except SendError as e:
             raise MailError(str(e)) from e
 
+    def send_notification(self, to: str, subject: str, text: str) -> None:
+        """Plain-text notice to the owner (new subscriber)."""
+        payload = {"from": self.sender, "to": [to], "subject": subject, "text": text}
+        try:
+            response = self._client.post(
+                RESEND_URL, json=payload, headers={"Authorization": f"Bearer {self.api_key}"}
+            )
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            raise MailError(f"Resend rejected the e-mail: {_message(e.response)}") from e
+        except httpx.TransportError as e:
+            raise MailError(f"Could not reach Resend: {e}") from e
+
 
 class LogMailer:
     """Local development without RESEND_API_KEY: the link goes to the log."""
@@ -90,6 +105,9 @@ class LogMailer:
         self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
     ) -> None:
         logger.warning("RESEND_API_KEY not set; would send %r to %s", subject, email)
+
+    def send_notification(self, to: str, subject: str, text: str) -> None:
+        logger.warning("RESEND_API_KEY not set; would notify %s: %s", to, subject)
 
 
 def mailer_from_settings(settings: Settings) -> Mailer:
