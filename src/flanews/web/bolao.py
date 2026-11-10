@@ -219,6 +219,6 @@ class BolaoStore:
             opp_goals=result[1],
             exact=[n for n, bet in match_bets if bet == result],
             top=ranking[:TOP],
-            king=_unique_best([((r.points, r.exact), r.nickname) for r in ranking]),
+            king=_unique_best([((r.points, r.exact), r.nickname) for r in ranking if r.points]),
             cold_foot=_unique_best(missed),
         )

@@ -27,6 +27,7 @@ UNSUBSCRIBE_PLACEHOLDER = "https://unsubscribe.invalid/recipient"
 # Same idea for the bolão links; without a token the <!--bolao--> card is dropped.
 BET_TOKEN_PLACEHOLDER = "BET-TOKEN-PLACEHOLDER"
 BOLAO_CARD = re.compile(r"<!--bolao-->.*?<!--/bolao-->", re.DOTALL)
+BOLAO_MARKER = re.compile(r"<!--/?bolao-->\n?")
 
 
 class SendError(Exception):
@@ -42,6 +43,7 @@ def personalize(content: str, bet_token: str | None) -> str:
     """Fill the recipient's bet token, or drop the bet card for who has none."""
     if bet_token is None:
         content = BOLAO_CARD.sub("", content)
+    content = BOLAO_MARKER.sub("", content)  # the plain-text part would show them literally
     return content.replace(BET_TOKEN_PLACEHOLDER, bet_token or "")
 
 

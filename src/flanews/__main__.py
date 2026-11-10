@@ -22,7 +22,10 @@ from flanews.schedule import due as due_slot
 from flanews.send.recipients import (
     LatestEdition,
     latest_edition,
+    preview_summary,
     publish_latest_edition,
+    register_match,
+    report_result,
     resolve_recipients,
 )
 from flanews.send.resend_sender import (
@@ -161,11 +164,13 @@ def preview(
     )
     html_path = out or Path("out") / f"preview-{resolved.end:%Y-%m-%d}.html"
     html_path.parent.mkdir(parents=True, exist_ok=True)
+    _bolao(newsletter, settings, write=False)
     html, text = render(
         newsletter,
         unsubscribe_url=pipeline.unsubscribe_url(settings),
         logo_url=_logo(settings),
         note=note,
+        page_url=settings.PUBLIC_URL,
     )
 
     html_path.write_text(html, encoding="utf-8")
@@ -243,6 +248,7 @@ def run(
 
             # The page link only shows up once subscriptions are live (API token configured).
             subscribe = settings.PUBLIC_URL.rstrip("/") if settings.SUBSCRIBERS_API_TOKEN else None
+            _bolao(newsletter, settings, write=not settings.DRY_RUN)
 
             def render_edition(note: str | None) -> tuple[str, str]:
                 return render(
@@ -251,6 +257,7 @@ def run(
                     subscribe_url=subscribe,
                     logo_url=_logo(settings),
                     note=note,
+                    page_url=subscribe,
                 )
 
             html, text = render_edition(note)
@@ -333,6 +340,35 @@ def announce(
     typer.echo(
         f"{announcement.subject}: {status} ({len(recipients)} na lista); cópia em {html_path}"
     )
+
+
+def _bolao(newsletter: Newsletter, settings, write: bool) -> None:
+    """Open the bolão on the pre-game and fetch its result for the post-game.
+
+    Only real sends write to the page; previews and dry runs read a summary that is not stored.
+    A page failure leaves the edition without the card or the board.
+    """
+    if not settings.SUBSCRIBERS_API_TOKEN:
+        return
+    edition, upcoming, played = newsletter.edition, newsletter.next_match, newsletter.last_match
+    try:
+        if edition.kind == "pre" and edition.match_id and upcoming:
+            if write:
+                register_match(
+                    settings, edition.match_id, upcoming.opponent, upcoming.is_home, upcoming.date
+                )
+            newsletter.bolao_open = True
+        elif edition.kind == "post" and played:
+            flamengo_home = played.home == "Flamengo"
+            score = (
+                (played.home_goals, played.away_goals)
+                if flamengo_home
+                else (played.away_goals, played.home_goals)
+            )
+            summarize = report_result if write else preview_summary
+            newsletter.bolao = summarize(settings, str(played.fixture_id), *score)
+    except (httpx.HTTPError, ValueError) as e:  # ValueError: a reply that isn't a summary
+        logger.warning("Bolão left out of the edition, the page failed: %s", e)
 
 
 def _already_sent(settings, label: str) -> bool:

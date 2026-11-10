@@ -106,9 +106,14 @@ def render(
     subscribe_url: str | None = None,
     logo_url: str = DEFAULT_LOGO_URL,
     note: str | None = None,
+    page_url: str | None = None,
 ) -> tuple[str, str]:
-    """Render the newsletter as (html with inlined CSS, plain text); `note` adds a box."""
+    """Render the newsletter as (html with inlined CSS, plain text); `note` adds a box.
+
+    `page_url` (the subscription page) enables the bolão card and board, which link to it.
+    """
     context = {
+        "page_url": page_url.rstrip("/") if page_url else None,
         "n": newsletter,
         "note": note,
         "flamengo_logo": FLAMENGO_LOGO,

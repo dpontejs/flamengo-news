@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import httpx
@@ -485,3 +486,153 @@ def test_run_tells_the_model_what_the_previous_edition_covered(env, monkeypatch)
 
     assert result.exit_code == 0, result.output
     assert "- Velho assunto" in llm.prompts[0]
+
+
+BOLAO = "https://news.test/api/bolao/matches/401"
+BOLAO_SUMMARY = {
+    "fla_goals": 2,
+    "opp_goals": 0,
+    "exact": ["Ana"],
+    "top": [{"nickname": "Ana", "points": 5, "exact": 1}],
+    "king": "Ana",
+    "cold_foot": None,
+}
+
+
+def bolao_newsletter(kind: str):
+    from flanews.models import Edition, Newsletter, NextMatch, Topic
+
+    edition = Edition(
+        kind=kind,
+        start=datetime(2026, 11, 13, 8, tzinfo=TZ),
+        end=datetime(2026, 11, 15, 12, 30, tzinfo=TZ),
+        label=f"{'Pré' if kind == 'pre' else 'Pós'}-jogo — 15/11/2026",
+        match_id="401",
+    )
+    topic = Topic(title="Fla", summary="Resumo.", importance=3, articles=[ARTICLE])
+    newsletter = Newsletter(edition=edition, intro="Intro.", headline="Manchete", topics=[topic])
+    if kind == "pre":
+        newsletter.next_match = NextMatch(
+            opponent="Bahia",
+            competition="Brasileirão",
+            date=datetime(2026, 11, 15, 18, 30, tzinfo=TZ),
+            is_home=False,
+        )
+    else:
+        newsletter.last_match = MATCH.model_copy(
+            update={
+                "fixture_id": 401,
+                "home": "Bahia",
+                "away": "Flamengo",
+                "home_goals": 0,
+                "away_goals": 2,
+            }
+        )
+    return newsletter
+
+
+def use_newsletter(monkeypatch, newsletter) -> None:
+    monkeypatch.setattr(pipeline, "build_newsletter", lambda *a, **k: newsletter.model_copy())
+    monkeypatch.setattr(cli, "_resolve", lambda edition, date: newsletter.edition)
+
+
+def subscribers_with_bet_token() -> None:
+    respx.get(API).mock(
+        return_value=httpx.Response(
+            200,
+            json=[
+                {
+                    "email": "ana@y.com",
+                    "unsubscribe_url": "https://news.test/u?A",
+                    "bet_token": "B1",
+                }
+            ],
+        )
+    )
+    respx.put(PUBLISH).mock(return_value=httpx.Response(204))
+
+
+@respx.mock
+def test_pre_game_card_links_are_per_recipient(env, monkeypatch) -> None:
+    enable_subscriptions(env)
+    subscribers_with_bet_token()
+    use_newsletter(monkeypatch, bolao_newsletter("pre"))
+    register = respx.put(BOLAO).mock(return_value=httpx.Response(204))
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e1", "e2"]))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "pre"])
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(register.calls.last.request.content)["flamengo_home"] is False
+    owner, ana = json.loads(route.calls.last.request.content)
+    assert "/palpite?t=B1&amp;m=401&amp;p=2-1" in ana["html"]
+    assert "/palpite" not in owner["html"] and "BET-TOKEN" not in owner["html"] + ana["html"]
+
+
+@respx.mock
+def test_pre_game_sends_without_card_when_page_is_down(env, monkeypatch) -> None:
+    enable_subscriptions(env)
+    subscribers_with_bet_token()
+    use_newsletter(monkeypatch, bolao_newsletter("pre"))
+    respx.put(BOLAO).mock(return_value=httpx.Response(500))
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e1", "e2"]))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "pre"])
+
+    assert result.exit_code == 0, result.output
+    _, ana = json.loads(route.calls.last.request.content)
+    assert "/palpite" not in ana["html"]
+
+
+@respx.mock
+def test_preview_and_dry_run_never_write_to_the_page(env, monkeypatch) -> None:
+    enable_subscriptions(env)
+    env.setenv("DRY_RUN", "true")
+    get_settings.cache_clear()
+    writes = respx.put(url__startswith="https://news.test/api/bolao")
+    summary = respx.get(f"{BOLAO}/summary").mock(
+        return_value=httpx.Response(200, json=BOLAO_SUMMARY)
+    )
+
+    use_newsletter(monkeypatch, bolao_newsletter("pre"))
+    dry = CliRunner().invoke(cli.app, ["run", "--edition", "pre"])
+    use_newsletter(monkeypatch, bolao_newsletter("post"))
+    preview = CliRunner().invoke(cli.app, ["preview", "--edition", "post", "--out", "out/p.html"])
+
+    assert dry.exit_code == 0 and preview.exit_code == 0, dry.output + preview.output
+    assert not writes.called
+    assert dict(summary.calls.last.request.url.params) == {"fla": "2", "opp": "0"}
+    assert "Cravaram" in Path("out/p.html").read_text(encoding="utf-8")
+
+
+@respx.mock
+def test_away_match_scores_from_flamengo_side(env, monkeypatch) -> None:
+    enable_subscriptions(env)
+    subscribers_with_bet_token()
+    use_newsletter(monkeypatch, bolao_newsletter("post"))
+    result_route = respx.put(f"{BOLAO}/result").mock(
+        return_value=httpx.Response(200, json=BOLAO_SUMMARY)
+    )
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e1", "e2"]))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "post"])
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result_route.calls.last.request.content) == {"fla_goals": 2, "opp_goals": 0}
+    owner, ana = json.loads(route.calls.last.request.content)
+    assert "Cravaram" in owner["html"] and "/bolao?t=B1" in ana["html"]
+
+
+@respx.mock
+def test_post_game_sends_without_board_when_page_returns_garbage(env, monkeypatch) -> None:
+    enable_subscriptions(env)
+    subscribers_with_bet_token()
+    use_newsletter(monkeypatch, bolao_newsletter("post"))
+    respx.put(f"{BOLAO}/result").mock(return_value=httpx.Response(200, text="<html>oops</html>"))
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e1", "e2"]))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "post"])
+
+    assert result.exit_code == 0, result.output
+    owner, _ = json.loads(route.calls.last.request.content)
+    assert "Cravaram" not in owner["html"]
