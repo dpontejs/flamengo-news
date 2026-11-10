@@ -170,3 +170,22 @@ class Newsletter(BaseModel):
     tips: list[str] = Field(default_factory=list)  # pre-game: the press's predictions
     outlook: str = ""  # pre-game: "O que esperar"
     broadcast: str = ""  # pre-game: where to watch
+
+
+class RankRow(BaseModel):
+    """One player in the bolão ranking (nickname only: never the e-mail)."""
+
+    nickname: str
+    points: int
+    exact: int
+
+
+class BolaoSummary(BaseModel):
+    """The bolão after a match: who nailed the score, the season top 5 and the titles."""
+
+    fla_goals: int
+    opp_goals: int
+    exact: list[str]
+    top: list[RankRow]
+    king: str | None = None
+    cold_foot: str | None = None
