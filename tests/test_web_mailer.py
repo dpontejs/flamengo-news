@@ -119,3 +119,24 @@ def test_owner_notification_failure_raises_mail_error() -> None:
 
     with pytest.raises(MailError, match="invalid"):
         mailer().send_notification("dono@example.com", "Novo assinante", "x")
+
+
+@respx.mock
+def test_welcome_edition_carries_the_bet_token() -> None:
+    from flanews.send.resend_sender import BET_TOKEN_PLACEHOLDER, RESEND_BATCH_URL
+
+    route = respx.post(RESEND_BATCH_URL).mock(
+        return_value=httpx.Response(200, json={"data": [{"id": "e1"}]})
+    )
+
+    mailer().send_edition(
+        "ana@example.com",
+        "Boas-vindas! Edição",
+        f"<!--bolao--><a href='/palpite?t={BET_TOKEN_PLACEHOLDER}'>1x0</a><!--/bolao-->",
+        "texto",
+        "https://news.test/unsubscribe?token=T",
+        bet_token="BET",
+    )
+
+    [email] = json.loads(route.calls.last.request.content)
+    assert "/palpite?t=BET" in email["html"]

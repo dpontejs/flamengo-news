@@ -22,6 +22,7 @@ class FakeMailer:
         self.sent: list[tuple[str, str]] = []
         self.editions: list[tuple[str, str, str, str, str]] = []
         self.notifications: list[tuple[str, str, str]] = []
+        self.bet_tokens: list[str | None] = []
         self.fail = False
         self.fail_editions = False
         self.fail_notifications = False
@@ -32,11 +33,18 @@ class FakeMailer:
         self.sent.append((email, confirm_url))
 
     def send_edition(
-        self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
+        self,
+        email: str,
+        subject: str,
+        html: str,
+        text: str,
+        unsubscribe_url: str,
+        bet_token: str | None = None,
     ) -> None:
         if self.fail_editions:
             raise MailError("Resend is down")
         self.editions.append((email, subject, html, text, unsubscribe_url))
+        self.bet_tokens.append(bet_token)
 
     def send_notification(self, to: str, subject: str, text: str) -> None:
         if self.fail_notifications:
@@ -515,3 +523,20 @@ def test_notification_failure_keeps_the_subscription(notify_client, store, maile
     assert response.status_code == 200
     assert "Inscrição confirmada" in response.text
     assert store.active() == ["ana@example.com"]
+
+
+def test_invalid_email_is_escaped_when_shown_back(client) -> None:
+    response = subscribe(client, '"><script>alert(1)</script>')
+
+    assert response.status_code == 400
+    assert "<script>alert(1)</script>" not in response.text
+    assert "&lt;script&gt;" in response.text
+
+
+def test_welcome_edition_fills_the_bet_token(client, mailer) -> None:
+    client.put("/api/latest-edition", json=EDITION, headers=AUTH)
+
+    confirm_new_subscriber(client, mailer)
+
+    [token] = mailer.bet_tokens
+    assert read_token(SECRET, "bet", token, NOW) == "ana@example.com"

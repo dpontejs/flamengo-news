@@ -18,10 +18,12 @@ from fastapi import FastAPI, Form, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from jinja2 import select_autoescape
+from pydantic import BaseModel, Field
 
 from flanews.config import Settings, get_settings
 from flanews.send.resend_sender import UNSUBSCRIBE_PLACEHOLDER
+from flanews.web.bolao import TZ, BolaoStore
 from flanews.web.mailer import Mailer, MailError, mailer_from_settings
 from flanews.web.store import RequestResult, SubscriberStore, normalize
 from flanews.web.tokens import make_token, read_token
@@ -40,8 +42,19 @@ CONFIRMATIONS_PER_DAY = 30  # global cap: protects the Resend quota and the doma
 MAX_EMAIL_LENGTH = 254
 
 WELCOME_PREFIX = "Boas-vindas! "
+MIN_NICKNAME, MAX_NICKNAME = 3, 20
+SCORE_RE = re.compile(r"^(\d)-(\d)$")
+
+
+def parse_score(text: str) -> tuple[int, int] | None:
+    """'2-1' -> (2, 1); each side 0-9, anything else is None."""
+    found = SCORE_RE.match(text.strip())
+    return (int(found[1]), int(found[2])) if found else None
+
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+# Jinja only autoescapes .html by default; ours end in .html.j2 and show user input.
+templates.env.autoescape = select_autoescape(["html.j2"])
 
 
 class RateLimiter:
@@ -68,6 +81,17 @@ class EditionIn(BaseModel):
     text: str
 
 
+class BolaoMatchIn(BaseModel):
+    opponent: str
+    flamengo_home: bool
+    kickoff: datetime
+
+
+class BolaoResultIn(BaseModel):
+    fla_goals: int = Field(ge=0)
+    opp_goals: int = Field(ge=0)
+
+
 def is_valid_email(email: str) -> bool:
     return len(email) <= MAX_EMAIL_LENGTH and EMAIL_RE.match(email) is not None
 
@@ -77,12 +101,14 @@ def create_app(
     store: SubscriberStore | None = None,
     mailer: Mailer | None = None,
     now: Callable[[], datetime] = lambda: datetime.now(UTC),
+    bolao: BolaoStore | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     secret = settings.SUBSCRIBE_SECRET
     if not secret:
         raise RuntimeError("SUBSCRIBE_SECRET is required to sign confirmation links")
     store = store or SubscriberStore(settings.SUBSCRIBERS_DB)
+    bolao = bolao or BolaoStore(settings.SUBSCRIBERS_DB)
     mailer = mailer or mailer_from_settings(settings)
     limiter = RateLimiter(SIGNUPS_PER_IP, SIGNUP_WINDOW)
     public_url = settings.PUBLIC_URL.rstrip("/")
@@ -210,6 +236,7 @@ def create_app(
                 html,
                 text,
                 link("/unsubscribe", "unsubscribe", email),
+                bet_token=make_token(secret, "bet", email, now()),
             )
         except MailError as e:
             logger.error("Welcome edition failed: %s", e)
@@ -252,6 +279,94 @@ def create_app(
             "Não vai mais receber o Urubu News. Se mudar de ideia, é só se inscrever de novo.",
         )
 
+    def bettor(request: Request, token: str, match_id: str):
+        """(email, match) behind a bet link, or the error page to return instead."""
+        email = read_token(secret, "bet", token, now())
+        if email is None:
+            return None, message(
+                request,
+                "Link inválido",
+                "Não reconhecemos esse link de palpite. Use a cartela de uma edição.",
+                status=400,
+            )
+        subscriber = store.get(email)
+        if subscriber is None or subscriber.status != "active":
+            return None, message(
+                request,
+                "Inscrição inativa",
+                "O bolão é para quem recebe a Urubu News. Inscreva-se de novo para palpitar.",
+                status=403,
+            )
+        match = bolao.match(match_id)
+        if match is None:
+            return None, message(
+                request, "Jogo não encontrado", "Esse jogo não está no bolão.", status=404
+            )
+        return (email, match), None
+
+    def bet_page(request: Request, status: int = 200, **context) -> HTMLResponse:
+        return page(request, "palpite.html.j2", status, **context)
+
+    @app.get("/palpite", response_class=HTMLResponse)
+    def bet_form(request: Request, t: str = "", m: str = "", p: str = ""):
+        # GET only asks: e-mail scanners open every link, and must not place bets.
+        found, error = bettor(request, t, m)
+        if error:
+            return error
+        email, match = found
+        context = {"match": match, "token": t, "nickname": bolao.nickname(email)}
+        if not bolao.is_open(match.match_id, now()):
+            return bet_page(request, mode="closed", bet=bolao.bet(email, m), **context)
+        if not p:
+            return bet_page(request, mode="other", **context)
+        score = parse_score(p)
+        if score is None:
+            return message(request, "Placar inválido", "Escolha um placar da cartela.", status=400)
+        return bet_page(request, mode="confirm", score=score, **context)
+
+    @app.post("/palpite", response_class=HTMLResponse)
+    def place_bet(
+        request: Request,
+        t: str = Form(""),
+        m: str = Form(""),
+        p: str = Form(""),
+        fla: str = Form(""),
+        opp: str = Form(""),
+        nickname: str = Form(""),
+    ):
+        found, error = bettor(request, t, m)
+        if error:
+            return error
+        email, match = found
+        score = parse_score(p or f"{fla}-{opp}")
+        if score is None:
+            return message(request, "Placar inválido", "Escolha um placar da cartela.", status=400)
+        context = {"match": match, "token": t, "score": score}
+        if not bolao.is_open(match.match_id, now()):
+            return bet_page(
+                request, 409, mode="closed", bet=bolao.bet(email, m), nickname=None, **context
+            )
+        if bolao.nickname(email) is None:
+            nickname = nickname.strip()
+            problem = None
+            if not MIN_NICKNAME <= len(nickname) <= MAX_NICKNAME:
+                problem = f"O apelido precisa ter de {MIN_NICKNAME} a {MAX_NICKNAME} caracteres."
+            elif not bolao.set_nickname(email, nickname):
+                problem = "Esse apelido já é de outra pessoa. Escolha outro."
+            if problem:
+                return bet_page(
+                    request, 409, mode="confirm", nickname=None, problem=problem, **context
+                )
+        bolao.place_bet(email, match.match_id, score, now())
+        return bet_page(request, mode="done", nickname=bolao.nickname(email), **context)
+
+    @app.get("/bolao", response_class=HTMLResponse)
+    def ranking(request: Request, t: str = ""):
+        email = read_token(secret, "bet", t, now()) if t else None
+        me = bolao.nickname(email) if email else None
+        season = now().astimezone(TZ).year
+        return page(request, "bolao.html.j2", rows=bolao.ranking(season), me=me, season=season)
+
     def authorized(request: Request) -> bool:
         expected = settings.SUBSCRIBERS_API_TOKEN
         given = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
@@ -265,7 +380,11 @@ def create_app(
         if not authorized(request):
             return unauthorized()
         return [
-            {"email": email, "unsubscribe_url": link("/unsubscribe", "unsubscribe", email)}
+            {
+                "email": email,
+                "unsubscribe_url": link("/unsubscribe", "unsubscribe", email),
+                "bet_token": make_token(secret, "bet", email, now()),
+            }
             for email in store.active()
         ]
 
@@ -294,6 +413,29 @@ def create_app(
             )
         store.set_latest_edition(edition.subject, edition.html, edition.text, now())
         return Response(status_code=204)
+
+    @app.put("/api/bolao/matches/{match_id}", status_code=204)
+    def register_match(request: Request, match_id: str, match: BolaoMatchIn):
+        if not authorized(request):
+            return unauthorized()
+        bolao.upsert_match(match_id, match.opponent, match.flamengo_home, match.kickoff)
+        return Response(status_code=204)
+
+    @app.get("/api/bolao/matches/{match_id}/summary")
+    def preview_summary(request: Request, match_id: str, fla: int, opp: int):
+        if not authorized(request):
+            return unauthorized()
+        if bolao.match(match_id) is None:
+            return JSONResponse({"detail": "unknown match"}, status_code=404)
+        return bolao.summary(match_id, (fla, opp), persist=False)
+
+    @app.put("/api/bolao/matches/{match_id}/result")
+    def report_result(request: Request, match_id: str, result: BolaoResultIn):
+        if not authorized(request):
+            return unauthorized()
+        if bolao.match(match_id) is None:
+            return JSONResponse({"detail": "unknown match"}, status_code=404)
+        return bolao.summary(match_id, (result.fla_goals, result.opp_goals), persist=True)
 
     @app.get("/version.json")
     def version():

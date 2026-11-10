@@ -1,0 +1,44 @@
+{% extends "base.html.j2" %}
+{% block title %}Bolão · Urubu News{% endblock %}
+{% block content %}
+<section class="card">
+  <p class="eyebrow">Bolão · Flamengo x {{ match.opponent }}</p>
+  {% if mode == "closed" %}
+  <h1>Bolão fechado</h1>
+  <p class="lead">A bola já rolou.
+    {% if bet %}Seu palpite: <strong>Flamengo {{ bet[0] }} x {{ bet[1] }} {{ match.opponent }}</strong>.
+    {% else %}Você não palpitou neste jogo.{% endif %}
+    O resultado do bolão chega no pós-jogo.</p>
+  <p><a href="/bolao?t={{ token | urlencode }}">Ver o ranking</a></p>
+  {% elif mode == "done" %}
+  <h1>Palpite registrado ✓</h1>
+  <p class="lead">Flamengo {{ score[0] }} x {{ score[1] }} {{ match.opponent }}, por <strong>{{ nickname }}</strong>.
+    Dá para trocar até o apito: é só clicar em outro placar no e-mail.</p>
+  <p><a href="/bolao?t={{ token | urlencode }}">Ver o ranking</a></p>
+  {% else %}
+  <form method="post" action="/palpite">
+    <input type="hidden" name="t" value="{{ token }}">
+    <input type="hidden" name="m" value="{{ match.match_id }}">
+    {% if mode == "other" %}
+    <h1>Qual placar você crava?</h1>
+    <p class="score-inputs">
+      <label>Flamengo <input type="number" name="fla" min="0" max="9" required></label>
+      <span>x</span>
+      <label><input type="number" name="opp" min="0" max="9" required> {{ match.opponent }}</label>
+    </p>
+    {% else %}
+    <input type="hidden" name="p" value="{{ score[0] }}-{{ score[1] }}">
+    <h1>Cravar Flamengo {{ score[0] }} x {{ score[1] }} {{ match.opponent }}?</h1>
+    {% endif %}
+    {% if not nickname %}
+    <p class="lead">Primeira vez no bolão? Escolha um apelido para o ranking (o seu e-mail nunca aparece).</p>
+    <label class="nickname">Apelido
+      <input type="text" name="nickname" minlength="3" maxlength="20" required autocomplete="nickname">
+    </label>
+    {% endif %}
+    {% if problem %}<p class="error" role="alert">{{ problem }}</p>{% endif %}
+    <button type="submit">Confirmar</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}
