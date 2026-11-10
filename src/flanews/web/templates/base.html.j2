@@ -86,6 +86,18 @@
   .match-info { color: #bbbbbb; font-size: 12px; margin-top: 10px; }
   .sample-caption { margin-top: 8px; }
   .footer-inner { color: #777777; font-size: 12px; padding-bottom: 32px; }
+  .eyebrow { color: var(--red); font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin: 0 0 8px; }
+  .score-inputs { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-weight: 700; margin: 16px 0; }
+  .score-inputs input, .nickname input {
+    font: inherit; font-size: 16px; padding: 10px 12px; border: 2px solid var(--black); border-radius: 0;
+  }
+  .score-inputs input { width: 64px; text-align: center; }
+  .nickname { display: block; font-weight: 700; margin: 0 0 16px; }
+  .nickname input { display: block; width: 100%; max-width: 320px; margin-top: 6px; }
+  .ranking { width: 100%; border-collapse: collapse; margin: 8px 0 14px; }
+  .ranking th { font-size: 11px; color: var(--muted); text-align: left; padding: 6px 4px; border-bottom: 2px solid var(--black); }
+  .ranking td { font-size: 15px; padding: 8px 4px; border-bottom: 1px solid #eeeeee; }
+  .ranking tr.me td { font-weight: 800; color: var(--red); background: #fdf3f3; }
   @media (max-width: 560px) {
     h1 { font-size: 28px; }
     .card { padding: 22px 16px; margin: 16px 0; }
