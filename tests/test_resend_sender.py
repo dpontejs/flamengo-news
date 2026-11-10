@@ -166,3 +166,35 @@ def test_failure_after_a_sent_batch_says_how_many_went_out() -> None:
 
     with pytest.raises(SendError, match="100 of 120"):
         make_sender().send("Assunto", HTML, TEXT, recipients)
+
+
+def test_personalize_fills_token_or_drops_card() -> None:
+    from flanews.send.resend_sender import BET_TOKEN_PLACEHOLDER, personalize
+
+    content = (
+        f"antes<!--bolao--><a href='/palpite?t={BET_TOKEN_PLACEHOLDER}&p=1-0'>1x0</a><!--/bolao-->"
+        f"<a href='/bolao?t={BET_TOKEN_PLACEHOLDER}'>ranking</a>depois"
+    )
+
+    with_token = personalize(content, "TOK")
+    without = personalize(content, None)
+
+    assert "/palpite?t=TOK&p=1-0" in with_token and "/bolao?t=TOK" in with_token
+    assert BET_TOKEN_PLACEHOLDER not in with_token + without
+    assert "palpite" not in without and "<!--bolao-->" not in without
+    assert "/bolao?t='" in without and without.startswith("antes") and without.endswith("depois")
+
+
+@respx.mock
+def test_each_recipient_gets_their_own_bet_token() -> None:
+    from flanews.send.resend_sender import BET_TOKEN_PLACEHOLDER
+
+    route = respx.post(RESEND_BATCH_URL).mock(return_value=ok(2))
+    html = f"<!--bolao--><a href='/palpite?t={BET_TOKEN_PLACEHOLDER}'>x</a><!--/bolao-->{HTML}"
+    ana = Recipient("ana@x.com", ANA.unsubscribe_url, bet_token="ANA-BET")
+
+    make_sender().send("Assunto", html, TEXT, [ana, BOB])
+
+    first, second = json.loads(route.calls.last.request.content)
+    assert "/palpite?t=ANA-BET" in first["html"]
+    assert "palpite" not in second["html"]

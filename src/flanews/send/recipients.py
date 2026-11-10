@@ -26,6 +26,7 @@ TIMEOUT = 15.0
 class Recipient:
     email: str
     unsubscribe_url: str
+    bet_token: str | None = None  # signs the bolão links; only page subscribers have one
 
 
 @dataclass(frozen=True)

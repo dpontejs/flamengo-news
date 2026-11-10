@@ -19,7 +19,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jinja2 import select_autoescape
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from flanews.config import Settings, get_settings
 from flanews.send.resend_sender import UNSUBSCRIBE_PLACEHOLDER
@@ -79,6 +79,17 @@ class EditionIn(BaseModel):
     subject: str
     html: str
     text: str
+
+
+class BolaoMatchIn(BaseModel):
+    opponent: str
+    flamengo_home: bool
+    kickoff: datetime
+
+
+class BolaoResultIn(BaseModel):
+    fla_goals: int = Field(ge=0)
+    opp_goals: int = Field(ge=0)
 
 
 def is_valid_email(email: str) -> bool:
@@ -225,6 +236,7 @@ def create_app(
                 html,
                 text,
                 link("/unsubscribe", "unsubscribe", email),
+                bet_token=make_token(secret, "bet", email, now()),
             )
         except MailError as e:
             logger.error("Welcome edition failed: %s", e)
@@ -368,7 +380,11 @@ def create_app(
         if not authorized(request):
             return unauthorized()
         return [
-            {"email": email, "unsubscribe_url": link("/unsubscribe", "unsubscribe", email)}
+            {
+                "email": email,
+                "unsubscribe_url": link("/unsubscribe", "unsubscribe", email),
+                "bet_token": make_token(secret, "bet", email, now()),
+            }
             for email in store.active()
         ]
 
@@ -397,6 +413,29 @@ def create_app(
             )
         store.set_latest_edition(edition.subject, edition.html, edition.text, now())
         return Response(status_code=204)
+
+    @app.put("/api/bolao/matches/{match_id}", status_code=204)
+    def register_match(request: Request, match_id: str, match: BolaoMatchIn):
+        if not authorized(request):
+            return unauthorized()
+        bolao.upsert_match(match_id, match.opponent, match.flamengo_home, match.kickoff)
+        return Response(status_code=204)
+
+    @app.get("/api/bolao/matches/{match_id}/summary")
+    def preview_summary(request: Request, match_id: str, fla: int, opp: int):
+        if not authorized(request):
+            return unauthorized()
+        if bolao.match(match_id) is None:
+            return JSONResponse({"detail": "unknown match"}, status_code=404)
+        return bolao.summary(match_id, (fla, opp), persist=False)
+
+    @app.put("/api/bolao/matches/{match_id}/result")
+    def report_result(request: Request, match_id: str, result: BolaoResultIn):
+        if not authorized(request):
+            return unauthorized()
+        if bolao.match(match_id) is None:
+            return JSONResponse({"detail": "unknown match"}, status_code=404)
+        return bolao.summary(match_id, (result.fla_goals, result.opp_goals), persist=True)
 
     @app.get("/version.json")
     def version():

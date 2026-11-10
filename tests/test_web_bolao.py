@@ -198,3 +198,63 @@ def test_ranking_highlights_the_reader(client, stores) -> None:
     assert page.text.index("Ana") < page.text.index("Bia")
     assert 'class="me"' in page.text and 'class="me"' not in anonymous.text
     assert "ana@x.com" not in page.text
+
+
+AUTH = {"Authorization": f"Bearer {API_TOKEN}"}
+MATCH = {"opponent": "Vasco", "flamengo_home": True, "kickoff": KICKOFF.isoformat()}
+
+
+def test_api_bolao_requires_token(client) -> None:
+    assert client.put("/api/bolao/matches/m2", json=MATCH).status_code == 401
+    assert client.get("/api/bolao/matches/m1/summary?fla=1&opp=0").status_code == 401
+    result = {"fla_goals": 1, "opp_goals": 0}
+    assert client.put("/api/bolao/matches/m1/result", json=result).status_code == 401
+
+
+def test_subscribers_carry_bet_token(client, stores) -> None:
+    from flanews.web.tokens import read_token
+
+    member(stores, "ana@x.com")
+
+    [row] = client.get("/api/subscribers", headers=AUTH).json()
+
+    assert read_token(SECRET, "bet", row["bet_token"], NOW) == "ana@x.com"
+
+
+def test_register_match_then_report_result(client, stores) -> None:
+    token = member(stores, "ana@x.com", "Ana")
+    assert client.put("/api/bolao/matches/m2", json=MATCH, headers=AUTH).status_code == 204
+    client.post("/palpite", data={"t": token, "m": "m2", "p": "2-0"})
+
+    response = client.put(
+        "/api/bolao/matches/m2/result", json={"fla_goals": 2, "opp_goals": 0}, headers=AUTH
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["exact"] == ["Ana"] and body["top"][0] == {
+        "nickname": "Ana",
+        "points": 5,
+        "exact": 1,
+    }
+    assert stores[1].match("m2").opponent == "Vasco"
+
+
+def test_result_for_unknown_match_is_404(client, stores) -> None:
+    result = {"fla_goals": 1, "opp_goals": 0}
+
+    response = client.put("/api/bolao/matches/nope/result", json=result, headers=AUTH)
+    summary = client.get("/api/bolao/matches/nope/summary?fla=1&opp=0", headers=AUTH)
+
+    assert response.status_code == summary.status_code == 404
+    assert stores[1].match("nope") is None
+
+
+def test_summary_preview_does_not_persist(client, stores) -> None:
+    token = member(stores, "ana@x.com", "Ana")
+    client.post("/palpite", data={"t": token, "m": "m1", "p": "1-0"})
+
+    response = client.get("/api/bolao/matches/m1/summary?fla=1&opp=0", headers=AUTH)
+
+    assert response.status_code == 200 and response.json()["exact"] == ["Ana"]
+    assert stores[1].match("m1").fla_goals is None

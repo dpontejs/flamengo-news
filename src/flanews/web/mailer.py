@@ -26,7 +26,13 @@ class Mailer(Protocol):
     def send_confirmation(self, email: str, confirm_url: str) -> None: ...
 
     def send_edition(
-        self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
+        self,
+        email: str,
+        subject: str,
+        html: str,
+        text: str,
+        unsubscribe_url: str,
+        bet_token: str | None = None,
     ) -> None: ...
 
     def send_notification(self, to: str, subject: str, text: str) -> None: ...
@@ -72,12 +78,18 @@ class ResendConfirmationMailer:
         logger.info("Confirmation sent (id=%s)", response.json().get("id"))
 
     def send_edition(
-        self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
+        self,
+        email: str,
+        subject: str,
+        html: str,
+        text: str,
+        unsubscribe_url: str,
+        bet_token: str | None = None,
     ) -> None:
         """Welcome a new subscriber with the latest edition, same path as the newsletter."""
         sender = ResendSender(self.api_key, self.sender, dry_run=False, client=self._client)
         try:
-            sender.send(subject, html, text, [Recipient(email, unsubscribe_url)])
+            sender.send(subject, html, text, [Recipient(email, unsubscribe_url, bet_token)])
         except SendError as e:
             raise MailError(str(e)) from e
 
@@ -102,7 +114,13 @@ class LogMailer:
         logger.warning("RESEND_API_KEY not set; confirmation link for %s: %s", email, confirm_url)
 
     def send_edition(
-        self, email: str, subject: str, html: str, text: str, unsubscribe_url: str
+        self,
+        email: str,
+        subject: str,
+        html: str,
+        text: str,
+        unsubscribe_url: str,
+        bet_token: str | None = None,
     ) -> None:
         logger.warning("RESEND_API_KEY not set; would send %r to %s", subject, email)
 
