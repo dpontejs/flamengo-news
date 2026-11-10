@@ -1,0 +1,19 @@
+{% extends "base.html.j2" %}
+{% block title %}Bolão {{ season }} · Urubu News{% endblock %}
+{% block content %}
+<section class="card">
+  <p class="eyebrow">Bolão {{ season }}</p>
+  <h1>Ranking da temporada</h1>
+  {% if rows %}
+  <table class="ranking">
+    <tr><th>#</th><th>Apelido</th><th>Pontos</th><th>Cravadas</th></tr>
+    {% for r in rows %}
+    <tr{% if r.nickname == me %} class="me"{% endif %}><td>{{ loop.index }}</td><td>{{ r.nickname }}{% if loop.first %} 👑{% endif %}</td><td>{{ r.points }}</td><td>{{ r.exact }}</td></tr>
+    {% endfor %}
+  </table>
+  <p class="muted">Placar exato vale 5; vencedor e saldo, 3; só o resultado, 2.</p>
+  {% else %}
+  <p class="lead">Ninguém palpitou ainda nesta temporada. O próximo pré-jogo traz a cartela.</p>
+  {% endif %}
+</section>
+{% endblock %}
