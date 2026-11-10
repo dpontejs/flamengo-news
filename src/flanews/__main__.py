@@ -367,7 +367,7 @@ def _bolao(newsletter: Newsletter, settings, write: bool) -> None:
             )
             summarize = report_result if write else preview_summary
             newsletter.bolao = summarize(settings, str(played.fixture_id), *score)
-    except httpx.HTTPError as e:
+    except (httpx.HTTPError, ValueError) as e:  # ValueError: a reply that isn't a summary
         logger.warning("Bolão left out of the edition, the page failed: %s", e)
 
 

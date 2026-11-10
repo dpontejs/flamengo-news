@@ -621,3 +621,18 @@ def test_away_match_scores_from_flamengo_side(env, monkeypatch) -> None:
     assert json.loads(result_route.calls.last.request.content) == {"fla_goals": 2, "opp_goals": 0}
     owner, ana = json.loads(route.calls.last.request.content)
     assert "Cravaram" in owner["html"] and "/bolao?t=B1" in ana["html"]
+
+
+@respx.mock
+def test_post_game_sends_without_board_when_page_returns_garbage(env, monkeypatch) -> None:
+    enable_subscriptions(env)
+    subscribers_with_bet_token()
+    use_newsletter(monkeypatch, bolao_newsletter("post"))
+    respx.put(f"{BOLAO}/result").mock(return_value=httpx.Response(200, text="<html>oops</html>"))
+    route = respx.post(RESEND_URL).mock(return_value=sent(["e1", "e2"]))
+
+    result = CliRunner().invoke(cli.app, ["run", "--edition", "post"])
+
+    assert result.exit_code == 0, result.output
+    owner, _ = json.loads(route.calls.last.request.content)
+    assert "Cravaram" not in owner["html"]

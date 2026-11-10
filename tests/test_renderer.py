@@ -597,3 +597,13 @@ def test_fixed_list_sees_post_game_board_without_token() -> None:
     html = personalize(render(n, page_url=PAGE)[0], None)
 
     assert "Ana" in html and f'{PAGE}/bolao?t="' in html
+
+
+def test_text_email_shows_no_bolao_markers() -> None:
+    from flanews.send.resend_sender import personalize
+
+    _, text = render(bolao_pre_game(), page_url=PAGE)
+
+    filled = personalize(text, "TOK")
+    assert "<!--" not in filled and "/palpite?t=TOK" in filled
+    assert "<!--" not in personalize(text, None)

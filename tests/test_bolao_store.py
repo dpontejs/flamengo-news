@@ -141,3 +141,13 @@ def test_set_nickname_is_unique_case_insensitive(subscribers, bolao) -> None:
     assert not bolao.set_nickname("bia@x.com", "ANA")
     assert bolao.set_nickname("ana@x.com", "Aninha")
     assert bolao.nickname("ana@x.com") == "Aninha"
+
+
+def test_nobody_is_king_with_zero_points(subscribers, bolao) -> None:
+    ana = player(subscribers, bolao, "ana@x.com", "Ana")
+    bolao.place_bet(ana, "m1", (0, 3), BEFORE)
+
+    summary = bolao.summary("m1", (2, 1), persist=True)
+
+    assert summary.king is None
+    assert summary.cold_foot == "Ana"
