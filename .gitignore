@@ -15,3 +15,6 @@ data/
 *.db
 # Local tool state
 .omc/
+
+# Brainstorm mockups (visual companion)
+.superpowers/
