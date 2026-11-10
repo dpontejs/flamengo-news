@@ -515,3 +515,11 @@ def test_notification_failure_keeps_the_subscription(notify_client, store, maile
     assert response.status_code == 200
     assert "Inscrição confirmada" in response.text
     assert store.active() == ["ana@example.com"]
+
+
+def test_invalid_email_is_escaped_when_shown_back(client) -> None:
+    response = subscribe(client, '"><script>alert(1)</script>')
+
+    assert response.status_code == 400
+    assert "<script>alert(1)</script>" not in response.text
+    assert "&lt;script&gt;" in response.text

@@ -18,6 +18,7 @@ from fastapi import FastAPI, Form, Request, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from jinja2 import select_autoescape
 from pydantic import BaseModel
 
 from flanews.config import Settings, get_settings
@@ -42,6 +43,8 @@ MAX_EMAIL_LENGTH = 254
 WELCOME_PREFIX = "Boas-vindas! "
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+# Jinja only autoescapes .html by default; ours end in .html.j2 and show user input.
+templates.env.autoescape = select_autoescape(["html.j2"])
 
 
 class RateLimiter:
