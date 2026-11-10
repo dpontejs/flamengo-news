@@ -15,6 +15,7 @@ from tenacity import Retrying, retry_if_exception, stop_after_attempt, wait_expo
 from tenacity.wait import wait_base
 
 from flanews.config import Settings
+from flanews.models import BolaoSummary
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ class ResolvedRecipients:
 class _Subscriber(BaseModel):
     email: str
     unsubscribe_url: str
+    bet_token: str | None = None
 
 
 _subscribers = TypeAdapter(list[_Subscriber])
@@ -102,7 +104,7 @@ def resolve_recipients(
             for s in subscribers:
                 email = s.email.strip().lower()
                 # A subscriber's signed link beats the fixed list's mailto.
-                merged[email] = Recipient(email, s.unsubscribe_url)
+                merged[email] = Recipient(email, s.unsubscribe_url, s.bet_token)
     return ResolvedRecipients(list(merged.values()), from_api)
 
 
@@ -150,3 +152,62 @@ def latest_edition(settings: Settings, client: httpx.Client | None = None) -> La
         return None
     response.raise_for_status()
     return LatestEdition.model_validate(response.json())
+
+
+def _bolao_url(settings: Settings, match_id: str, suffix: str = "") -> str:
+    return f"{settings.PUBLIC_URL.rstrip('/')}/api/bolao/matches/{match_id}{suffix}"
+
+
+def _auth(settings: Settings) -> dict[str, str]:
+    return {"Authorization": f"Bearer {settings.SUBSCRIBERS_API_TOKEN}"}
+
+
+def register_match(
+    settings: Settings,
+    match_id: str,
+    opponent: str,
+    flamengo_home: bool,
+    kickoff: datetime,
+    client: httpx.Client | None = None,
+) -> None:
+    """Open the bolão for this match until kickoff. Raises httpx.HTTPError."""
+    response = (client or httpx.Client(timeout=TIMEOUT)).put(
+        _bolao_url(settings, match_id),
+        json={"opponent": opponent, "flamengo_home": flamengo_home, "kickoff": kickoff.isoformat()},
+        headers=_auth(settings),
+    )
+    response.raise_for_status()
+
+
+def report_result(
+    settings: Settings,
+    match_id: str,
+    fla_goals: int,
+    opp_goals: int,
+    client: httpx.Client | None = None,
+) -> BolaoSummary:
+    """Store the final score (Flamengo's side) and get the bolão summary. Raises httpx.HTTPError."""
+    response = (client or httpx.Client(timeout=TIMEOUT)).put(
+        _bolao_url(settings, match_id, "/result"),
+        json={"fla_goals": fla_goals, "opp_goals": opp_goals},
+        headers=_auth(settings),
+    )
+    response.raise_for_status()
+    return BolaoSummary.model_validate(response.json())
+
+
+def preview_summary(
+    settings: Settings,
+    match_id: str,
+    fla_goals: int,
+    opp_goals: int,
+    client: httpx.Client | None = None,
+) -> BolaoSummary:
+    """The summary this score would give, without storing it (previews and dry runs)."""
+    response = (client or httpx.Client(timeout=TIMEOUT)).get(
+        _bolao_url(settings, match_id, "/summary"),
+        params={"fla": fla_goals, "opp": opp_goals},
+        headers=_auth(settings),
+    )
+    response.raise_for_status()
+    return BolaoSummary.model_validate(response.json())
