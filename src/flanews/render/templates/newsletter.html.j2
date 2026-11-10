@@ -54,6 +54,12 @@
   .brief { padding: 0 0 14px 0; }
   .brief-title { color: #141414; font-size: 15px; font-weight: 700; text-decoration: none; }
   .tag { background-color: #A51C24; color: #ffffff; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 2px 6px; margin-right: 6px; }
+  .bet th { font-size: 11px; color: #6B6B6B; font-weight: 700; padding: 3px; }
+  .bet td { padding: 3px; }
+  .bet-cell { display: block; padding: 8px 0; font-size: 14px; font-weight: 700; color: #1C1C1C; text-decoration: none; text-align: center; border: 1px solid #dddddd; }
+  .bet-V { background-color: #E8F5EC; border-color: #1E8E3E; }
+  .bet-E { background-color: #f0f0f0; }
+  .bet-D { background-color: #FBEAEA; border-color: #A51C24; }
   .footer { padding: 20px 24px 28px 24px; color: #777777; font-size: 12px; line-height: 1.5; }
 </style>
 </head>
@@ -166,6 +172,24 @@
   </td></tr>
   {% endif %}
 
+  {% if n.bolao and page_url %}{% set b = n.bolao %}
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      <p class="card-title">Bolão · resultado</p>
+      <p class="text" style="margin: 0 0 10px 0;">{% if b.exact %}Cravaram o {{ b.fla_goals }} x {{ b.opp_goals }}: <strong>{{ b.exact | join(", ") }}</strong>.{% else %}Ninguém cravou o {{ b.fla_goals }} x {{ b.opp_goals }}.{% endif %}</p>
+      {% if b.king %}<p class="text" style="margin: 0 0 4px 0;">👑 Rei do Maracanã: <strong>{{ b.king }}</strong></p>{% endif %}
+      {% if b.cold_foot %}<p class="text" style="margin: 0 0 10px 0;">🧊 Pé-frio da rodada: <strong>{{ b.cold_foot }}</strong></p>{% endif %}
+      {% if b.top %}
+      <p class="subhead">Top 5 da temporada</p>
+      <table role="presentation" class="table" width="100%" cellpadding="0" cellspacing="0" border="0">
+        {% for r in b.top %}<tr><td>{{ loop.index }}</td><td>{{ r.nickname }}</td><td align="right">{{ r.points }} pts</td></tr>{% endfor %}
+      </table>
+      {% endif %}
+      <p style="margin: 12px 0 0 0;"><a class="link" href="{{ page_url }}/bolao?t=BET-TOKEN-PLACEHOLDER">Ver ranking completo →</a></p>
+    </td></tr></table>
+  </td></tr>
+  {% endif %}
+
   {% if n.edition.kind == "pre" and n.next_match %}{% set x = n.next_match %}{% set pv = n.preview %}
   {% set fla = {"name": "Flamengo", "logo": flamengo_logo, "form": pv.flamengo_form if pv else []} %}
   {% set opp = {"name": x.opponent, "logo": x.opponent_logo, "form": pv.opponent_form if pv else []} %}
@@ -227,6 +251,23 @@
       {% endif %}
     </td></tr></table>
   </td></tr>
+  {% endif %}
+  {% if n.bolao_open and page_url and n.edition.match_id %}
+  <!--bolao-->
+  <tr><td class="block font">
+    <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="card-body">
+      <p class="card-title">Bolão · seu palpite</p>
+      <p class="muted" style="margin: 0 0 10px 0;">Clique no placar que você crava. Linha = gols do Flamengo, coluna = gols do {{ x.opponent }}. Vale até o apito.</p>
+      <table role="presentation" class="bet" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><th align="left">FLA \ {{ x.opponent }}</th>{% for o in range(4) %}<th>{{ o }}</th>{% endfor %}</tr>
+        {% for f in range(4) %}
+        <tr><th align="left">{{ f }}</th>{% for o in range(4) %}{% set kind = "V" if f > o else ("E" if f == o else "D") %}<td><a class="bet-cell bet-{{ kind }}" href="{{ page_url }}/palpite?t=BET-TOKEN-PLACEHOLDER&m={{ n.edition.match_id }}&p={{ f }}-{{ o }}">{{ f }}x{{ o }}</a></td>{% endfor %}</tr>
+        {% endfor %}
+      </table>
+      <p style="margin: 10px 0 0 0;"><a class="link" href="{{ page_url }}/palpite?t=BET-TOKEN-PLACEHOLDER&m={{ n.edition.match_id }}">Goleada? Outro placar →</a></p>
+    </td></tr></table>
+  </td></tr>
+  <!--/bolao-->
   {% endif %}
   {% endif %}
 

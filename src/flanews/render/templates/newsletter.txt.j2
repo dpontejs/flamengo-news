@@ -27,6 +27,22 @@ URUBU NEWS
 {% endfor %}
 {% endif %}
 {% endif %}
+{% if n.bolao and page_url %}{% set b = n.bolao %}
+
+== Bolão: resultado ==
+{% if b.exact %}Cravaram o {{ b.fla_goals }} x {{ b.opp_goals }}: {{ b.exact | join(", ") }}.{% else %}Ninguém cravou o {{ b.fla_goals }} x {{ b.opp_goals }}.{% endif %}
+
+{% if b.king %}Rei do Maracanã: {{ b.king }}
+{% endif %}
+{% if b.cold_foot %}Pé-frio da rodada: {{ b.cold_foot }}
+{% endif %}
+{% if b.top %}
+Top 5 da temporada:
+{% for r in b.top %}{{ loop.index }}. {{ r.nickname }} — {{ r.points }} pts
+{% endfor %}
+{% endif %}
+Ranking completo: {{ page_url }}/bolao?t=BET-TOKEN-PLACEHOLDER
+{% endif %}
 {% if n.edition.kind == "pre" and n.next_match %}{% set x = n.next_match %}{% set pv = n.preview %}
 
 == O jogo ==
@@ -66,6 +82,17 @@ Prováveis escalações
 Palpites
 {% for tip in n.tips %}- {{ tip }}
 {% endfor %}
+{% endif %}
+{% if n.bolao_open and page_url and n.edition.match_id %}
+<!--bolao-->
+
+== Bolão: seu palpite ==
+Crave o placar (Flamengo x {{ x.opponent }}), vale até o apito:
+{% for f, o in [(1, 0), (2, 0), (2, 1), (1, 1), (0, 0), (0, 1)] %}
+{{ f }}x{{ o }}: {{ page_url }}/palpite?t=BET-TOKEN-PLACEHOLDER&m={{ n.edition.match_id }}&p={{ f }}-{{ o }}
+{% endfor %}
+Outro placar: {{ page_url }}/palpite?t=BET-TOKEN-PLACEHOLDER&m={{ n.edition.match_id }}
+<!--/bolao-->
 {% endif %}
 {% endif %}
 {% set mo = n.moment %}
