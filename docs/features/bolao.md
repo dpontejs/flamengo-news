@@ -1,7 +1,7 @@
 # Bolão da Urubu News
 
 - **Data:** 2026-11-10
-- **Status:** proposta
+- **Status:** implementada (PRs pendentes de merge)
 - **ADRs:** —
 
 ## Objetivo
@@ -64,22 +64,22 @@ Tornar o e-mail uma brincadeira de ida e volta entre os assinantes. O pré-jogo 
 
 ## Critérios de aceite (como testes)
 
-- [ ] `test_bet_get_does_not_record`: dado um link válido, quando o GET é feito, então nenhum palpite é gravado e a página traz o botão Confirmar.
-- [ ] `test_bet_post_records_and_overwrites_before_kickoff`: dois POSTs antes do apito deixam só o último palpite.
-- [ ] `test_bet_after_kickoff_is_rejected`: um POST depois do `kickoff` responde 409 e o palpite anterior continua.
-- [ ] `test_bet_token_cannot_bet_for_someone_else`: o token de A só grava palpites de A, porque o e-mail vem do token e não do formulário.
-- [ ] `test_first_bet_requires_unique_nickname`: sem apelido → o formulário pede um; apelido repetido, com outra caixa → 409.
-- [ ] `test_points_exact_5_diff_3_outcome_2_miss_0`: num jogo 2x1, os palpites 2x1, 3x2, 1x0, 2x0 e 0x0 valem 5, 3, 3, 2 e 0. Num jogo 0x0, os palpites 0x0, 1x1 e 1x0 valem 5, 2 e 0.
-- [ ] `test_unsubscribed_cannot_bet_and_leaves_ranking`: depois do descadastro, o POST é recusado e a pessoa some do `/bolao`.
-- [ ] `test_welcome_edition_fills_the_bet_token`: a edição de boas-vindas sai com os links do novo assinante, sem placeholder literal.
-- [ ] `test_preview_and_dry_run_never_write_to_the_page`: a prévia e o dry-run não fazem PUT; usam o GET de resumo.
-- [ ] `test_fixed_list_sees_post_game_board_without_token`: a lista fixa vê o quadro do pós-jogo, com o link do ranking sem token.
-- [ ] `test_result_summary_is_idempotent`: o mesmo PUT de resultado feito duas vezes não duplica pontos e devolve o mesmo resumo.
-- [ ] `test_match_reschedule_moves_the_deadline`: um PUT com novo `kickoff` reabre o bolão até o novo horário.
-- [ ] `test_api_bolao_requires_token`: sem Bearer → 401.
-- [ ] `test_pre_game_card_links_are_per_recipient`: cada destinatário recebe links com o seu `bet_token`; quem não tem token recebe o e-mail sem a cartela.
-- [ ] `test_pre_game_sends_without_card_when_page_is_down`: com o PUT do jogo falhando, o e-mail é enviado sem a cartela.
-- [ ] `test_post_game_renders_exact_top5_and_titles`: o pós-jogo mostra quem cravou, o top 5, o Rei do Maracanã e o Pé-frio.
+- [x] `test_bet_get_does_not_record`: dado um link válido, quando o GET é feito, então nenhum palpite é gravado e a página traz o botão Confirmar.
+- [x] `test_bet_post_records_and_overwrites_before_kickoff`: dois POSTs antes do apito deixam só o último palpite.
+- [x] `test_bet_after_kickoff_is_rejected`: um POST depois do `kickoff` responde 409 e o palpite anterior continua.
+- [x] `test_bet_token_cannot_bet_for_someone_else`: o token de A só grava palpites de A, porque o e-mail vem do token e não do formulário.
+- [x] `test_first_bet_requires_unique_nickname`: sem apelido → o formulário pede um; apelido repetido, com outra caixa → 409.
+- [x] `test_points_exact_5_diff_3_outcome_2_miss_0`: num jogo 2x1, os palpites 2x1, 3x2, 1x0, 2x0 e 0x0 valem 5, 3, 3, 2 e 0. Num jogo 0x0, os palpites 0x0, 1x1 e 1x0 valem 5, 2 e 0.
+- [x] `test_unsubscribed_cannot_bet_and_leaves_ranking`: depois do descadastro, o POST é recusado e a pessoa some do `/bolao`.
+- [x] `test_welcome_edition_fills_the_bet_token`: a edição de boas-vindas sai com os links do novo assinante, sem placeholder literal.
+- [x] `test_preview_and_dry_run_never_write_to_the_page`: a prévia e o dry-run não fazem PUT; usam o GET de resumo.
+- [x] `test_fixed_list_sees_post_game_board_without_token`: a lista fixa vê o quadro do pós-jogo, com o link do ranking sem token.
+- [x] `test_result_summary_is_idempotent`: o mesmo PUT de resultado feito duas vezes não duplica pontos e devolve o mesmo resumo.
+- [x] `test_match_reschedule_moves_the_deadline`: um PUT com novo `kickoff` reabre o bolão até o novo horário.
+- [x] `test_api_bolao_requires_token`: sem Bearer → 401.
+- [x] `test_pre_game_card_links_are_per_recipient`: cada destinatário recebe links com o seu `bet_token`; quem não tem token recebe o e-mail sem a cartela.
+- [x] `test_pre_game_sends_without_card_when_page_is_down`: com o PUT do jogo falhando, o e-mail é enviado sem a cartela.
+- [x] `test_post_game_renders_exact_top5_and_titles`: o pós-jogo mostra quem cravou, o top 5, o Rei do Maracanã e o Pé-frio.
 
 ## Verificação ponta a ponta
 
