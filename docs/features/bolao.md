@@ -1,7 +1,7 @@
 # Bolão da Urubu News
 
 - **Data:** 2026-11-10
-- **Status:** implementada (PRs pendentes de merge)
+- **Status:** entregue (PRs #27 e #28)
 - **ADRs:** —
 
 ## Objetivo
