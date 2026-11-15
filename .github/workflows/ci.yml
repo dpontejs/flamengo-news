@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -51,7 +51,7 @@ jobs:
       IMAGE: ghcr.io/dpontejs/flamengo-news
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build image
         run: docker build --build-arg GIT_SHA=$GITHUB_SHA -t $IMAGE:sha-$GITHUB_SHA .
